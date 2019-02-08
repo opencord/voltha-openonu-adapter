@@ -1,0 +1,48 @@
+# Copyright 2016 the original author or authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+ARG TAG=latest
+ARG REGISTRY=
+ARG REPOSITORY=
+
+FROM ${REGISTRY}${REPOSITORY}voltha-protos:${TAG} as protos
+FROM ${REGISTRY}${REPOSITORY}voltha-openolt-protos:${TAG} as openolt_protos
+FROM ${REGISTRY}${REPOSITORY}voltha-base:${TAG}
+
+MAINTAINER Voltha Community <info@opennetworking.org>
+
+# Bundle app source
+RUN mkdir /voltha && touch /voltha/__init__.py
+RUN mkdir /voltha/voltha && touch /voltha/voltha/__init__.py
+RUN mkdir /voltha/voltha/adapters && touch /voltha/voltha/adapters/__init__.py
+ENV PYTHONPATH=/voltha
+COPY common /voltha/common/
+COPY core /voltha/voltha/core/
+COPY core/registry.py /voltha/voltha/
+COPY extensions /voltha/voltha/extensions/
+COPY kafka /voltha/kafka
+COPY adapters/*.py /voltha/voltha/adapters/
+COPY adapters/brcm_openomci_onu /voltha/voltha/adapters/brcm_openomci_onu
+
+# Copy in the generated GRPC proto code
+COPY --from=protos /protos/voltha /voltha/voltha/protos
+COPY --from=openolt_protos /protos/voltha /voltha/voltha/adapters/openolt/protos
+COPY --from=protos /protos/google/api /voltha/voltha/protos/third_party/google/api
+COPY protos/third_party/__init__.py /voltha/voltha/protos/third_party
+RUN touch /voltha/voltha/protos/__init__.py
+RUN touch /voltha/voltha/adapters/openolt/__init__.py
+RUN touch /voltha/voltha/adapters/openolt/protos/__init__.py
+RUN touch /voltha/voltha/protos/third_party/google/__init__.py
+
+# Exposing process and default entry point
+CMD ["python", "/voltha/python/adapters/openonu/main.py"]
