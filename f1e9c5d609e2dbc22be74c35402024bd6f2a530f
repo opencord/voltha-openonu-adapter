@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7e120e7a_79701084",
+        "filename": "python/adapters/brcm_openomci_onu/heartbeat.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1000182
+      },
+      "writtenOn": "2019-02-08T16:57:29Z",
+      "side": 1,
+      "message": "I found this bug in the Adtran code recently.  The self._defeered should be named   self._defer\n\nI do not think you are running the heartbeat yet on the BRCM adapter, but thought I would point it out before I forget it.  I\u0027ve started to run this for our ONU but it still needs some updating to be worthwhile.",
+      "revId": "f1e9c5d609e2dbc22be74c35402024bd6f2a530f",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    }
+  ]
+}
