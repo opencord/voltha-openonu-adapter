@@ -14,24 +14,12 @@
 # limitations under the License.
 #
 
-ifneq ($(VOLTHA_BUILD),docker)
-ifeq ($(VOLTHA_BASE)_set,_set)
-$(error To get started, please source the env.sh file)
-endif
-endif
-
 ifeq ($(TAG),)
 TAG := latest
 endif
 
 ifeq ($(TARGET_TAG),)
 TARGET_TAG := latest
-endif
-
-# If no DOCKER_HOST_IP is specified grab a v4 IP address associated with
-# the default gateway
-ifeq ($(DOCKER_HOST_IP),)
-DOCKER_HOST_IP := $(shell ifconfig $$(netstat -rn | grep -E '^(default|0.0.0.0)' | head -1 | awk '{print $$NF}') | grep inet | awk '{print $$2}' | sed -e 's/addr://g')
 endif
 
 ifneq ($(http_proxy)$(https_proxy),)
@@ -55,103 +43,52 @@ DOCKER_BUILD_ARGS = \
 	 --rm --force-rm \
 	$(DOCKER_BUILD_EXTRA_ARGS)
 
+DOCKER_IMAGE_LIST = \
+	voltha-openonu-adapter-base \
+	voltha-openonu-adapter
+
 VENVDIR := venv-$(shell uname -s | tr '[:upper:]' '[:lower:]')
 
-DOCKER_IMAGE_LIST = \
-	base \
-	adapter-openonu \
-
-# The following list was scavanged from the compose / stack files as well as
-# from the Dockerfiles. If nothing else it highlights that VOLTHA is not
-# using consistent versions for some of the containers.
-
-FETCH_BUILD_IMAGE_LIST = \
-       alpine:3.6 \
-       centos:7 \
-       centurylink/ca-certs:latest \
-       grpc/python:latest \
-       ubuntu:xenial
-
-FETCH_COMPOSE_IMAGE_LIST = \
-        wurstmeister/kafka:latest \
-        wurstmeister/zookeeper:latest
-
-# find k8s -type f | xargs grep image: | awk '{print $NF}' | sed -e 's/\"//g' | sed '/:.*$/!s/$/:latest/g' | sort -u | sed -e 's/^/       /g' -e 's/$/ \\/g'
-# Manually remove some image from this list as they don't reflect the new 
-# naming conventions for the VOLTHA build
-FETCH_K8S_IMAGE_LIST = \
-       wurstmeister/kafka:1.0.0 \
-       zookeeper:3.4.11
-
-FETCH_IMAGE_LIST = $(shell echo $(FETCH_BUILD_IMAGE_LIST) $(FETCH_COMPOSE_IMAGE_LIST) $(FETCH_K8S_IMAGE_LIST) | tr ' ' '\n' | sort -u)
-
-.PHONY: $(DIRS) $(DIRS_CLEAN) $(DIRS_FLAKE8) base protoc protos adapter_openonu
+.PHONY: $(DIRS) $(DIRS_CLEAN) base openonu_adapter
 
 # This should to be the first and default target in this Makefile
 help:
 	@echo "Usage: make [<target>]"
 	@echo "where available targets are:"
 	@echo
-	@echo "build        : Build the Adapters protos and docker images.\n\
-               If this is the first time you are building, choose \"make build\" option."
-	@echo "clean        : Remove files created by the build and tests"
-	@echo "distclean    : Remove venv directory"
-	@echo "fetch        : Pre-fetch artifacts for subsequent local builds"
-	@echo "help         : Print this help"
-	@echo "protoc       : Build a container with protoc installed"
-	@echo "protos       : Compile all grpc/protobuf files"
-	@echo "rebuild-venv : Rebuild local Python virtualenv from scratch"
-	@echo "venv         : Build local Python virtualenv if did not exist yet"
-	@echo "containers   : Build all the docker containers"
-	@echo "base         : Build the base docker container used by all other dockers"
-	@echo "adapter_openonu       : Build the openonu openomci adapter docker container"
-	@echo "tag          : Tag a set of images"
-	@echo "push         : Push the docker images to an external repository"
-	@echo "pull         : Pull the docker images from a repository"
+	@echo "build             : Build the adapter."
+	@echo "clean             : Remove files created by the build and tests"
+	@echo "distclean         : Remove venv directory"
+	@echo "help              : Print this help"
+	@echo "rebuild-venv      : Rebuild local Python virtualenv from scratch"
+	@echo "venv              : Build local Python virtualenv if did not exist yet"
+	@echo "containers        : Build all the docker containers"
+	@echo "base              : Build a base docker image with a modern version of pip and requirements.txt installed"
+	@echo "adapter_openonu   : Build the openonu openomci adapter docker container"
+	@echo "tag               : Tag a set of images"
+	@echo "push              : Push the docker images to an external repository"
+	@echo "pull              : Pull the docker images from a repository"
 	@echo
 
-## New directories can be added here
-#DIRS:=
+build: containers
 
-## If one directory depends on another directory that
-## dependency can be expressed here
-##
-## For example, if the Tibit directory depended on the eoam
-## directory being built first, then that can be expressed here.
-##  driver/tibit: eoam
-
-# Parallel Build
-$(DIRS):
-	@echo "    MK $@"
-	$(Q)$(MAKE) -C $@
-
-# Parallel Clean
-DIRS_CLEAN = $(addsuffix .clean,$(DIRS))
-$(DIRS_CLEAN):
-	@echo "    CLEAN $(basename $@)"
-	$(Q)$(MAKE) -C $(basename $@) clean
-
-# Parallel Flake8
-DIRS_FLAKE8 = $(addsuffix .flake8,$(DIRS))
-$(DIRS_FLAKE8):
-	@echo "    FLAKE8 $(basename $@)"
-	-$(Q)$(MAKE) -C $(basename $@) flake8
-
-build: protoc protos containers
-
-containers: base adapter_openonu
+containers: base openonu_adapter
 
 base:
-	docker build $(DOCKER_BUILD_ARGS) -t ${REGISTRY}${REPOSITORY}voltha-base:${TAG} -f docker/Dockerfile.base .
+ifdef LOCAL_PYVOLTHA
+	mkdir -p pyvoltha/dist
+	cp ../../pyvoltha/dist/*.tar.gz pyvoltha/dist/
+	docker build $(DOCKER_BUILD_ARGS) -t ${REGISTRY}${REPOSITORY}voltha-openonu-adapter-base:${TAG} -f docker/Dockerfile.base_local .
+else
+	docker build $(DOCKER_BUILD_ARGS) -t ${REGISTRY}${REPOSITORY}voltha-openonu-adapter-base:${TAG} -f docker/Dockerfile.base .
+endif
 
-adapter_openonu:
-	docker build $(DOCKER_BUILD_ARGS) -t ${REGISTRY}${REPOSITORY}voltha-adapter-openonu:${TAG} -f docker/Dockerfile.adapter_openonu .
-
-protoc:
-	docker build $(DOCKER_BUILD_ARGS) -t ${REGISTRY}${REPOSITORY}voltha-protoc:${TAG} -f docker/Dockerfile.protoc .
-
-protos:
-	docker build $(DOCKER_BUILD_ARGS) -t ${REGISTRY}${REPOSITORY}voltha-protos:${TAG} -f docker/Dockerfile.protos .
+openonu_adapter: base
+ifdef PYVOLTHA_BASE_IMAGE
+	docker build $(DOCKER_BUILD_ARGS) -t ${REGISTRY}${REPOSITORY}voltha-openonu-adapter:${TAG} -f docker/Dockerfile.openonu_adapter_pyvoltha .
+else
+	docker build $(DOCKER_BUILD_ARGS) -t ${REGISTRY}${REPOSITORY}voltha-openonu-adapter:${TAG} -f docker/Dockerfile.openonu_adapter .
+endif
 
 tag: $(patsubst  %,%.tag,$(DOCKER_IMAGE_LIST))
 
@@ -169,27 +106,18 @@ pull: $(patsubst  %,%.pull,$(DOCKER_IMAGE_LIST))
 	docker pull ${REGISTRY}${REPOSITORY}voltha-$(subst .pull,,$@):${TAG}
 
 clean:
+	rm -rf pyvoltha
 	find . -name '*.pyc' | xargs rm -f
 
 distclean: clean
 	rm -rf ${VENVDIR}
-
-fetch:
-	@bash -c ' \
-		for i in $(FETCH_IMAGE_LIST); do \
-			docker pull $$i; \
-		done'
 
 purge-venv:
 	rm -fr ${VENVDIR}
 
 rebuild-venv: purge-venv venv
 
-ifneq ($(VOLTHA_BUILD),docker)
 venv: ${VENVDIR}/.built
-else
-venv:
-endif
 
 ${VENVDIR}/.built:
 	@ virtualenv ${VENVDIR}
@@ -203,7 +131,11 @@ ${VENVDIR}/.built:
 	        uname -s > ${VENVDIR}/.built; \
 	    fi
 
-
-flake8: $(DIRS_FLAKE8)
+ifdef LOCAL_PYVOLTHA
+	mkdir -p pyvoltha/dist
+	cp ../../pyvoltha/dist/*.tar.gz pyvoltha/dist/
+	@ . ${VENVDIR}/bin/activate && \
+	    pip install pyvoltha/dist/*.tar.gz
+endif
 
 # end file

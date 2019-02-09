@@ -28,3 +28,7 @@ RUN python /tmp/get-pip.py
 COPY requirements.txt /tmp/requirements.txt
 RUN pip install -r /tmp/requirements.txt
 
+# Install local pyvoltha
+COPY pyvoltha/dist /pyvoltha/dist
+RUN pip install /pyvoltha/dist/*.tar.gz
+

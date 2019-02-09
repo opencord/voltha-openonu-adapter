@@ -11,20 +11,21 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+ARG TAG=latest
+ARG REGISTRY=
+ARG REPOSITORY=
 
-FROM ubuntu:xenial
+FROM ${REGISTRY}${REPOSITORY}voltha-openonu-adapter-base:${TAG}
 
 MAINTAINER Voltha Community <info@opennetworking.org>
 
-# Update to have latest images
-RUN apt-get update && \
-    apt-get install -y python openssl iproute2 libpcap-dev wget build-essential git binutils python-dev libffi-dev libssl-dev 
+# Bundle app source
+RUN mkdir /voltha && touch /voltha/__init__.py
+RUN mkdir /voltha/voltha && touch /voltha/voltha/__init__.py
+RUN mkdir /voltha/voltha/adapters && touch /voltha/voltha/adapters/__init__.py
+ENV PYTHONPATH=/voltha
+COPY adapters/brcm_openomci_onu /voltha/voltha/adapters/brcm_openomci_onu
 
-# Install current version of pip rather than outdated pip from apt
-RUN wget -O /tmp/get-pip.py https://bootstrap.pypa.io/get-pip.py
-RUN python /tmp/get-pip.py
-
-# Install adapter requirements. 
-COPY requirements.txt /tmp/requirements.txt
-RUN pip install -r /tmp/requirements.txt
+# Exposing process and default entry point
+CMD ["python", "/voltha/python/adapters/openonu/main.py"]
 

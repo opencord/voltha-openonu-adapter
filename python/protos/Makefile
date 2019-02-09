@@ -16,15 +16,20 @@
 
 # Makefile to build all protobuf and gRPC related artifacts
 
+ifeq ($(VOLTHA_BASE)_set,_set)
+  $(error To get started, please source the env.sh file from Voltha top level directory)
+endif
+
 default: third_party build
 
-PROTO_FILES := $(wildcard ../../protos/*.proto)
+PROTO_FILES := $(wildcard *.proto)
 PROTO_GOOGLE_API := $(wildcard third_party/google/api/*.proto)
 PROTO_ALL_FILES := $(PROTO_FILES) $(PROTO_GOOGLE_API)
 PROTO_PB2_FILES := $(foreach f,$(PROTO_FILES),$(subst .proto,_pb2.py,$(f)))
 PROTO_PB2_GOOGLE_API := $(foreach f,$(PROTO_GOOGLE_API),$(subst .proto,_pb2.py,$(f)))
-PROTO_PB2_GRPC_GOOGLE_API := $(foreach f,$(PROTO_GOOGLE_API),$(subst .proto,_pb2_grpc.py,$(f)))
-PROTO_DESC_GOOGLE_API := $(foreach f,$(PROTO_GOOGLE_API),$(subst .proto,.desc,$(f)))
+PROTO_All_PB2_C_FILES := $(foreach f,$(PROTO_ALL_FILES),$(subst .proto,_pb2.pyc,$(f)))
+PROTO_ALL_PB2_GPRC_FILES := $(foreach f,$(PROTO_ALL_FILES),$(subst .proto,_pb2_grpc.py,$(f)))
+PROTO_ALL_DESC_FILES := $(foreach f,$(PROTO_ALL_FILES),$(subst .proto,.desc,$(f)))
 
 PROTOC_PREFIX := /usr/local
 PROTOC_LIBDIR := $(PROTOC_PREFIX)/lib
@@ -58,20 +63,22 @@ build: $(PROTOC) $(PROTO_PB2_FILES)
 %_pb2.py: %.proto Makefile
 	@echo "Building protocol buffer artifacts from $<"
 	env LD_LIBRARY_PATH=$(PROTOC_LIBDIR) python -m grpc.tools.protoc \
-	    -I../../protos \
+	    -I. \
 	    -I./third_party \
 	    --python_out=. \
 	    --grpc_python_out=. \
-	    --descriptor_set_out=./$(basename $(notdir $<)).desc \
+	    --descriptor_set_out=$(basename $<).desc \
 	    --include_imports \
 	    --include_source_info \
 	    $<
 
 clean:
-	rm -f *.desc *_pb2* \
-		$(PROTO_PB2_GOOGLE_API) \
-		$(PROTO_PB2_GRPC_GOOGLE_API)\
-		$(PROTO_DESC_GOOGLE_API)
+	find . -name '*.pyc' | xargs rm -f
+	rm -f $(PROTO_PB2_FILES) \
+		$(PROTO_ALL_DESC_FILES) \
+		$(PROTO_ALL_PB2_GPRC_FILES) \
+		$(PROTO_All_PB2_C_FILES) \
+		$(PROTO_PB2_GOOGLE_API)
 
 $(PROTOC):
 	@echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
@@ -98,4 +105,3 @@ install-protoc: $(PROTOC)
 uninstall-protoc:
 	cd $(PROTOC_BUILD_TMP_DIR)/$(PROTOC_DIR); \
 	    sudo make uninstall
-

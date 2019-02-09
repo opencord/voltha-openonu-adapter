@@ -155,7 +155,7 @@ services:
 
 
   adapter_openonu:
-    image: "${REGISTRY}${REPOSITORY}voltha-adapter-openonu${TAG}"
+    image: "${REGISTRY}${REPOSITORY}voltha-openonu-adapter${TAG}"
     logging:
       driver: "json-file"
       options:

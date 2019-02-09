@@ -49,7 +49,7 @@ class HeartBeat(object):
         self._defer = reactor.callLater(delay, self.check_pulse)
 
     def _stop(self):
-        d, self._defeered = self._defeered, None
+        d, self._defer = self._defer, None
         if d is not None and not d.called():
             d.cancel()
 
