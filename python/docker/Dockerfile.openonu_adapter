@@ -21,11 +21,10 @@ MAINTAINER Voltha Community <info@opennetworking.org>
 
 # Bundle app source
 RUN mkdir /voltha && touch /voltha/__init__.py
-RUN mkdir /voltha/voltha && touch /voltha/voltha/__init__.py
-RUN mkdir /voltha/voltha/adapters && touch /voltha/voltha/adapters/__init__.py
+RUN mkdir /voltha/adapters && touch /voltha/adapters/__init__.py
 ENV PYTHONPATH=/voltha
-COPY adapters/brcm_openomci_onu /voltha/voltha/adapters/brcm_openomci_onu
+COPY adapters/brcm_openomci_onu /voltha/adapters/brcm_openomci_onu
 
 # Exposing process and default entry point
-CMD ["python", "/voltha/python/adapters/openonu/main.py"]
+CMD ["python", "/voltha/adapters/brcm_openomci_onu/main.py"]
 

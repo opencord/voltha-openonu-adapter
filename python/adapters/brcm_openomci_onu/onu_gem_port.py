@@ -15,8 +15,8 @@
 
 import structlog
 from twisted.internet.defer import inlineCallbacks, returnValue
-from voltha.extensions.omci.omci_me import *
-from voltha.extensions.omci.omci_defs import *
+from pyvoltha.adapters.extensions.omci.omci_me import *
+from pyvoltha.adapters.extensions.omci.omci_defs import *
 
 RC = ReasonCodes
 
