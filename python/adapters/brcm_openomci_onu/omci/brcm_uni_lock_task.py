@@ -13,12 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from voltha.extensions.omci.tasks.task import Task
+from pyvoltha.adapters.extensions.omci.tasks.task import Task
 from twisted.internet import reactor
 from twisted.internet.defer import inlineCallbacks, failure, returnValue
-from voltha.extensions.omci.omci_defs import ReasonCodes, EntityOperations
-from voltha.extensions.omci.omci_me import OntGFrame
-from voltha.extensions.omci.omci_me import PptpEthernetUniFrame, VeipUniFrame
+from pyvoltha.adapters.extensions.omci.omci_defs import ReasonCodes, EntityOperations
+from pyvoltha.adapters.extensions.omci.omci_me import OntGFrame
+from pyvoltha.adapters.extensions.omci.omci_me import PptpEthernetUniFrame, VeipUniFrame
 
 RC = ReasonCodes
 OP = EntityOperations

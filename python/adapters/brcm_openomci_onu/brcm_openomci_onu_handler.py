@@ -28,33 +28,30 @@ from twisted.internet import reactor, task
 from twisted.internet.defer import DeferredQueue, inlineCallbacks, returnValue, TimeoutError
 
 from heartbeat import HeartBeat
-from voltha.extensions.kpi.onu.onu_pm_metrics import OnuPmMetrics
-from voltha.extensions.kpi.onu.onu_omci_pm import OnuOmciPmMetrics
-from voltha.extensions.alarms.adapter_alarms import AdapterAlarms
+from pyvoltha.adapters.extensions.kpi.onu.onu_pm_metrics import OnuPmMetrics
+from pyvoltha.adapters.extensions.kpi.onu.onu_omci_pm import OnuOmciPmMetrics
+from pyvoltha.adapters.extensions.alarms.adapter_alarms import AdapterAlarms
 
-from common.utils.indexpool import IndexPool
-import voltha.core.flow_decomposer as fd
-from voltha.registry import registry
-from voltha.core.config.config_backend import ConsulStore
-from voltha.core.config.config_backend import EtcdStore
-from voltha.protos import third_party
-from voltha.protos.common_pb2 import OperStatus, ConnectStatus, AdminState
-from voltha.protos.openflow_13_pb2 import OFPXMC_OPENFLOW_BASIC, ofp_port
-from voltha.protos.bbf_fiber_tcont_body_pb2 import TcontsConfigData
-from voltha.protos.bbf_fiber_gemport_body_pb2 import GemportsConfigData
-from voltha.extensions.omci.onu_configuration import OMCCVersion
-from voltha.extensions.omci.onu_device_entry import OnuDeviceEvents, \
+import pyvoltha.common.openflow.utils as fd
+from pyvoltha.common.utils.registry import registry
+from pyvoltha.common.config.config_backend import ConsulStore
+from pyvoltha.common.config.config_backend import EtcdStore
+from pyvoltha.protos import third_party
+from pyvoltha.protos.common_pb2 import OperStatus, ConnectStatus, AdminState
+from pyvoltha.protos.openflow_13_pb2 import OFPXMC_OPENFLOW_BASIC, ofp_port
+from pyvoltha.adapters.extensions.omci.onu_configuration import OMCCVersion
+from pyvoltha.adapters.extensions.omci.onu_device_entry import OnuDeviceEvents, \
     OnuDeviceEntry, IN_SYNC_KEY
-from voltha.adapters.brcm_openomci_onu.omci.brcm_mib_download_task import BrcmMibDownloadTask
-from voltha.adapters.brcm_openomci_onu.omci.brcm_tp_service_specific_task import BrcmTpServiceSpecificTask
-from voltha.adapters.brcm_openomci_onu.omci.brcm_uni_lock_task import BrcmUniLockTask
-from voltha.adapters.brcm_openomci_onu.omci.brcm_vlan_filter_task import BrcmVlanFilterTask
-from voltha.adapters.brcm_openomci_onu.onu_gem_port import *
-from voltha.adapters.brcm_openomci_onu.onu_tcont import *
-from voltha.adapters.brcm_openomci_onu.pon_port import *
-from voltha.adapters.brcm_openomci_onu.uni_port import *
-from voltha.adapters.brcm_openomci_onu.onu_traffic_descriptor import *
-from common.tech_profile.tech_profile import TechProfile
+from omci.brcm_mib_download_task import BrcmMibDownloadTask
+from omci.brcm_tp_service_specific_task import BrcmTpServiceSpecificTask
+from omci.brcm_uni_lock_task import BrcmUniLockTask
+from omci.brcm_vlan_filter_task import BrcmVlanFilterTask
+from onu_gem_port import *
+from onu_tcont import *
+from pon_port import *
+from uni_port import *
+from onu_traffic_descriptor import *
+from pyvoltha.common.tech_profile.tech_profile import TechProfile
 
 OP = EntityOperations
 RC = ReasonCodes
@@ -701,8 +698,6 @@ class BrcmOpenomciOnuHandler(object):
     # Not currently called.  Would be called presumably from the olt handler
     def remove_gemport(self, data):
         self.log.debug('remove-gemport', data=data)
-        gem_port = GemportsConfigData()
-        gem_port.CopyFrom(data)
         device = self.adapter_agent.get_device(self.device_id)
         if device.connect_status != ConnectStatus.REACHABLE:
             self.log.error('device-unreachable')

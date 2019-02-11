@@ -14,14 +14,13 @@
 # limitations under the License.
 
 import structlog
-from common.frameio.frameio import hexify
 from twisted.internet import reactor
 from twisted.internet.defer import inlineCallbacks, returnValue, TimeoutError, failure
-from voltha.extensions.omci.omci_me import *
-from voltha.extensions.omci.tasks.task import Task
-from voltha.extensions.omci.omci_defs import *
-from voltha.adapters.brcm_openomci_onu.uni_port import *
-from voltha.adapters.brcm_openomci_onu.pon_port \
+from pyvoltha.adapters.extensions.omci.omci_me import *
+from pyvoltha.adapters.extensions.omci.tasks.task import Task
+from pyvoltha.adapters.extensions.omci.omci_defs import *
+from adapters.brcm_openomci_onu.uni_port import *
+from adapters.brcm_openomci_onu.pon_port \
     import BRDCM_DEFAULT_VLAN, TASK_PRIORITY, DEFAULT_TPID, DEFAULT_GEM_PAYLOAD
 
 OP = EntityOperations

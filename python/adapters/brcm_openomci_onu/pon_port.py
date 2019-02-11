@@ -15,9 +15,9 @@
 
 import structlog
 from twisted.internet.defer import inlineCallbacks, returnValue
-from voltha.protos.common_pb2 import AdminState, OperStatus
-from voltha.protos.device_pb2 import Port
-from voltha.extensions.omci.tasks.task import Task
+from pyvoltha.protos.common_pb2 import AdminState, OperStatus
+from pyvoltha.protos.device_pb2 import Port
+from pyvoltha.adapters.extensions.omci.tasks.task import Task
 
 BRDCM_DEFAULT_VLAN = 4091
 TASK_PRIORITY = Task.DEFAULT_PRIORITY + 10

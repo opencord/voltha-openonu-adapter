@@ -14,7 +14,7 @@
 # limitations under the License.
 
 import structlog
-from voltha.extensions.omci.tasks.get_mds_task import GetMdsTask
+from pyvoltha.adapters.extensions.omci.tasks.get_mds_task import GetMdsTask
 
 
 class BrcmGetMdsTask(GetMdsTask):

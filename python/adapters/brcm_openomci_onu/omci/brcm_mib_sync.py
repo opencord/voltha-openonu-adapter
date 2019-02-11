@@ -15,7 +15,7 @@
 
 import structlog
 from twisted.internet import reactor
-from voltha.extensions.omci.state_machines.mib_sync import MibSynchronizer
+from pyvoltha.adapters.extensions.omci.state_machines.mib_sync import MibSynchronizer
 
 log = structlog.get_logger()
 
