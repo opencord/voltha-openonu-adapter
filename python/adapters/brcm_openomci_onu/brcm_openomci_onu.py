@@ -23,21 +23,20 @@ This adapter does NOT support XPON
 from twisted.internet import reactor, task
 from zope.interface import implementer
 
-from voltha.adapters.brcm_openomci_onu.brcm_openomci_onu_handler import BrcmOpenomciOnuHandler
-from voltha.adapters.interface import IAdapterInterface
-from voltha.protos import third_party
-from voltha.protos.adapter_pb2 import Adapter
-from voltha.protos.adapter_pb2 import AdapterConfig
-from voltha.protos.common_pb2 import LogLevel
-from voltha.protos.device_pb2 import DeviceType, DeviceTypes, Port, Image
-from voltha.protos.health_pb2 import HealthStatus
+from pyvoltha.adapters.interface import IAdapterInterface
+from pyvoltha.protos import third_party
+from pyvoltha.protos.adapter_pb2 import Adapter
+from pyvoltha.protos.adapter_pb2 import AdapterConfig
+from pyvoltha.protos.common_pb2 import LogLevel
+from pyvoltha.protos.device_pb2 import DeviceType, DeviceTypes, Port, Image
+from pyvoltha.protos.health_pb2 import HealthStatus
 
-from common.frameio.frameio import hexify
-from voltha.extensions.omci.openomci_agent import OpenOMCIAgent, OpenOmciAgentDefaults
-from voltha.extensions.omci.omci_me import *
-from voltha.extensions.omci.database.mib_db_dict import MibDbVolatileDict
+from pyvoltha.adapters.common.frameio.frameio import hexify
+from pyvoltha.adapters.extensions.omci.openomci_agent import OpenOMCIAgent, OpenOmciAgentDefaults
+from pyvoltha.adapters.extensions.omci.omci_me import *
+
+from brcm_openomci_onu_handler import BrcmOpenomciOnuHandler
 from omci.brcm_capabilities_task import BrcmCapabilitiesTask
-from omci.brcm_get_mds_task import BrcmGetMdsTask
 from omci.brcm_mib_sync import BrcmMibSynchronizer
 from copy import deepcopy
 

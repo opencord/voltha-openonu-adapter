@@ -14,7 +14,7 @@
 # limitations under the License.
 
 import structlog
-from voltha.extensions.omci.tasks.onu_capabilities_task import OnuCapabilitiesTask
+from pyvoltha.adapters.extensions.omci.tasks.onu_capabilities_task import OnuCapabilitiesTask
 from twisted.internet.defer import failure
 
 
@@ -88,7 +88,7 @@ class BrcmCapabilitiesTask(OnuCapabilitiesTask):
             return super(BrcmCapabilitiesTask, self).supported_message_types
 
         # TODO: figure out why broadcom wont answer for ME 287 to get this.  otherwise manually fill in
-        from voltha.extensions.omci.omci_entities import EntityOperations
+        from pyvoltha.adapters.extensions.omci.omci_entities import EntityOperations
         op_11287800f1 = [
             EntityOperations.Create,
             EntityOperations.CreateComplete,

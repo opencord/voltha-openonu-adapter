@@ -14,8 +14,8 @@
 
 import structlog
 from twisted.internet import reactor
-from voltha.protos.common_pb2 import OperStatus, ConnectStatus
-from voltha.extensions.omci.omci_me import OntGFrame
+from pyvoltha.protos.common_pb2 import OperStatus, ConnectStatus
+from pyvoltha.adapters.extensions.omci.omci_me import OntGFrame
 
 
 class HeartBeat(object):
@@ -145,7 +145,7 @@ class HeartBeat(object):
         device = self._handler.adapter_agent.get_device(self._device_id)
 
         try:
-            from voltha.extensions.alarms.heartbeat_alarm import HeartbeatAlarm
+            from pyvoltha.adapters.extensions.alarms.heartbeat_alarm import HeartbeatAlarm
 
             if self._heartbeat_miss >= self.heartbeat_failed_limit:
                 if device.connect_status == ConnectStatus.REACHABLE:

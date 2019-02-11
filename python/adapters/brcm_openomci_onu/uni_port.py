@@ -15,13 +15,13 @@
 
 import structlog
 from enum import Enum
-from voltha.protos.common_pb2 import OperStatus, AdminState
-from voltha.protos.device_pb2 import Port
-from voltha.protos.openflow_13_pb2 import OFPPF_10GB_FD
-from voltha.core.logical_device_agent import mac_str_to_tuple
-from voltha.protos.logical_device_pb2 import LogicalPort
-from voltha.protos.openflow_13_pb2 import OFPPS_LIVE, OFPPF_FIBER, OFPPS_LINK_DOWN
-from voltha.protos.openflow_13_pb2 import ofp_port
+from pyvoltha.protos.common_pb2 import OperStatus, AdminState
+from pyvoltha.protos.device_pb2 import Port
+from pyvoltha.protos.openflow_13_pb2 import OFPPF_10GB_FD
+from pyvoltha.common.utils.nethelpers import mac_str_to_tuple
+from pyvoltha.protos.logical_device_pb2 import LogicalPort
+from pyvoltha.protos.openflow_13_pb2 import OFPPS_LIVE, OFPPF_FIBER, OFPPS_LINK_DOWN
+from pyvoltha.protos.openflow_13_pb2 import ofp_port
 
 class UniType(Enum):
     """
