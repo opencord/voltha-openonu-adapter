@@ -24,6 +24,7 @@ from twisted.internet import reactor, task
 from zope.interface import implementer
 
 from pyvoltha.adapters.interface import IAdapterInterface
+from pyvoltha.adapters.iadapter import OnuAdapter
 from pyvoltha.protos import third_party
 from pyvoltha.protos.adapter_pb2 import Adapter
 from pyvoltha.protos.adapter_pb2 import AdapterConfig
@@ -59,17 +60,19 @@ class BrcmOpenomciOnuAdapter(object):
         )
     ]
 
-    def __init__(self, adapter_agent, config):
+    def __init__(self, core_proxy, adapter_proxy, config):
         log.debug('function-entry', config=config)
-        self.adapter_agent = adapter_agent
+        self.core_proxy = core_proxy
+        self.adapter_agent = adapter_proxy
         self.config = config
         self.descriptor = Adapter(
             id=self.name,
             vendor='Voltha project',
-            version='0.50',
+            version='2.0',
             config=AdapterConfig(log_level=LogLevel.INFO)
         )
         self.devices_handlers = dict()
+        self.device_handler_class = BrcmOpenomciOnuHandler
 
         # Customize OpenOMCI for Broadcom ONUs
         self.broadcom_omci = deepcopy(OpenOmciAgentDefaults)
@@ -78,9 +81,6 @@ class BrcmOpenomciOnuAdapter(object):
         self.broadcom_omci['omci-capabilities']['tasks']['get-capabilities'] = BrcmCapabilitiesTask
 
         # Defer creation of omci agent to a lazy init that allows subclasses to override support classes
-
-        # register for adapter messages
-        self.adapter_agent.register_for_inter_adapter_messages()
 
     def custom_me_entities(self):
         return None
