@@ -62,8 +62,8 @@ class BrcmOpenomciOnuAdapter(object):
 
     def __init__(self, core_proxy, adapter_proxy, config):
         log.debug('function-entry', config=config)
-        self.core_proxy = core_proxy
-        self.adapter_agent = adapter_proxy
+        self.adapter_proxy = adapter_proxy
+        self.adapter_agent = core_proxy
         self.config = config
         self.descriptor = Adapter(
             id=self.name,
