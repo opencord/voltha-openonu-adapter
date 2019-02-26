@@ -89,7 +89,7 @@ class BrcmOpenomciOnuAdapter(object):
     def omci_agent(self):
         if not hasattr(self, '_omci_agent') or self._omci_agent is None:
             log.debug('creating-omci-agent')
-            self._omci_agent = OpenOMCIAgent(self.adapter_agent.core,
+            self._omci_agent = OpenOMCIAgent(self.adapter_agent,
                                              support_classes=self.broadcom_omci)
         return self._omci_agent
 

@@ -168,6 +168,7 @@ class BrcmOpenomciOnuHandler(object):
             self.omci_cc.receive_message(msg)
 
     # Called once when the adapter creates the device/onu instance
+    @inlineCallbacks
     def activate(self, device):
         self.log.debug('function-entry', device=device)
 
@@ -177,12 +178,12 @@ class BrcmOpenomciOnuHandler(object):
 
         # register for proxied messages right away
         self.proxy_address = device.proxy_address
-        self.adapter_agent.register_for_proxied_messages(device.proxy_address)
         self.parent_id = device.parent_id
-        parent_device = self.adapter_agent.get_device(self.parent_id)
-        if parent_device.type == 'openolt':
-            self.parent_adapter = registry('adapter_loader'). \
-                get_agent(parent_device.adapter).adapter
+        # TODO NEW CORE:  seems no reason for this now
+        #parent_device = yield self.adapter_agent.get_device(self.parent_id)
+        #if parent_device.type == 'openolt':
+        #    self.parent_adapter = registry('adapter_loader'). \
+        #       get_agent(parent_device.adapter).adapter
 
         if self.enabled is not True:
             self.log.info('activating-new-onu')
@@ -193,12 +194,13 @@ class BrcmOpenomciOnuHandler(object):
             device.oper_status = OperStatus.DISCOVERED
             device.reason = 'activating-onu'
 
+            # TODO NEW CORE:  Need to either get logical device id from core or use regular device id
             # pm_metrics requires a logical device id
-            parent_device = self.adapter_agent.get_device(device.parent_id)
-            self.logical_device_id = parent_device.parent_id
-            assert self.logical_device_id, 'Invalid logical device ID'
+            #parent_device = yield self.adapter_agent.get_device(device.parent_id)
+            #self.logical_device_id = parent_device.parent_id
+            #assert self.logical_device_id, 'Invalid logical device ID'
 
-            self.adapter_agent.update_device(device)
+            yield self.adapter_agent.device_update(device)
 
             self.log.debug('set-device-discovered')
 
@@ -218,7 +220,7 @@ class BrcmOpenomciOnuHandler(object):
             pm_config = self.pm_metrics.make_proto()
             self._onu_omci_device.set_pm_config(self.pm_metrics.omci_pm.openomci_interval_pm)
             self.log.info("initial-pm-config", pm_config=pm_config)
-            self.adapter_agent.update_device_pm_config(pm_config, init=True)
+            yield self.adapter_agent.device_pm_config_update(pm_config, init=True)
 
             ############################################################################
             # Setup Alarm handler
@@ -276,18 +278,20 @@ class BrcmOpenomciOnuHandler(object):
         # Handle next event
         reactor.callLater(0, self.handle_onu_events)
 
+    @inlineCallbacks
     def _init_pon_state(self, device):
         self.log.debug('function-entry', device=device)
 
         self._pon = PonPort.create(self, self._pon_port_number)
-        self.adapter_agent.add_port(device.id, self._pon.get_port())
+        yield self.adapter_agent.port_created(device.id, self._pon.get_port())
 
         self.log.debug('added-pon-port-to-agent', pon=self._pon)
 
-        parent_device = self.adapter_agent.get_device(device.parent_id)
-        self.logical_device_id = parent_device.parent_id
+        # TODO NEW CORE:  Need to either get logical device id from core or use regular device id
+        #parent_device = yield self.adapter_agent.get_device(device.parent_id)
+        #self.logical_device_id = parent_device.parent_id
 
-        self.adapter_agent.update_device(device)
+        #self.adapter_agent.update_device(device)
 
         # Create and start the OpenOMCI ONU Device Entry for this ONU
         self._onu_omci_device = self.omci_agent.add_device(self.device_id,
