@@ -41,6 +41,7 @@ class PonPort(object):
         self._deferred = None
         self._port = None
         self._port_number = port_no
+        self._peers = []
         self._next_entity_id = PonPort.MIN_GEM_ENTITY_ID
 
         self._admin_state = AdminState.ENABLED
@@ -151,14 +152,18 @@ class PonPort(object):
         """
         self.log.debug('function-entry')
 
-        if self._port is None:
-            self._port = Port(port_no=self.port_number,
-                              label='PON port',
-                              type=Port.PON_ONU,
-                              admin_state=self._admin_state,
-                              oper_status=self._oper_status,
-                              peers=[])
+        self._port = Port(port_no=self.port_number,
+                          label='PON port',
+                          type=Port.PON_ONU,
+                          admin_state=self._admin_state,
+                          oper_status=self._oper_status,
+                          peers=self._peers)
         return self._port
+
+    def add_peer(self, parent_device_id, parent_port_no):
+        self.log.debug('add-peer-port', parent_device_id=parent_device_id, parent_port_no=parent_port_no)
+        new_peer = Port.PeerPort(device_id=parent_device_id, port_no=parent_port_no)
+        self._peers.extend([new_peer])
 
     @inlineCallbacks
     def _update_adapter_agent(self):

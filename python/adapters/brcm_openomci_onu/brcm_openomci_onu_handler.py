@@ -172,23 +172,18 @@ class BrcmOpenomciOnuHandler(object):
     def activate(self, device):
         self.log.debug('function-entry', device=device)
 
-        # first we verify that we got parent reference and proxy info
         assert device.parent_id
+        assert device.parent_port_no
         assert device.proxy_address.device_id
 
-        # register for proxied messages right away
         self.proxy_address = device.proxy_address
         self.parent_id = device.parent_id
-        # TODO NEW CORE:  seems no reason for this now
-        #parent_device = yield self.adapter_agent.get_device(self.parent_id)
-        #if parent_device.type == 'openolt':
-        #    self.parent_adapter = registry('adapter_loader'). \
-        #       get_agent(parent_device.adapter).adapter
+        self._pon_port_number = device.parent_port_no
 
         if self.enabled is not True:
             self.log.info('activating-new-onu')
             # populate what we know.  rest comes later after mib sync
-            device.root = True
+            device.root = False
             device.vendor = 'Broadcom'
             device.connect_status = ConnectStatus.REACHABLE
             device.oper_status = OperStatus.DISCOVERED
@@ -283,15 +278,12 @@ class BrcmOpenomciOnuHandler(object):
         self.log.debug('function-entry', device=device)
 
         self._pon = PonPort.create(self, self._pon_port_number)
+        self._pon.add_peer(self.parent_id, self._pon_port_number)
+        self.log.debug('adding-pon-port-to-agent', pon=self._pon.get_port())
+
         yield self.adapter_agent.port_created(device.id, self._pon.get_port())
 
-        self.log.debug('added-pon-port-to-agent', pon=self._pon)
-
-        # TODO NEW CORE:  Need to either get logical device id from core or use regular device id
-        #parent_device = yield self.adapter_agent.get_device(device.parent_id)
-        #self.logical_device_id = parent_device.parent_id
-
-        #self.adapter_agent.update_device(device)
+        self.log.debug('added-pon-port-to-agent', pon=self._pon.get_port())
 
         # Create and start the OpenOMCI ONU Device Entry for this ONU
         self._onu_omci_device = self.omci_agent.add_device(self.device_id,
