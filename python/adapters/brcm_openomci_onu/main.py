@@ -351,7 +351,7 @@ class Main(object):
 
             self.core_proxy = CoreProxy(
                 kafka_proxy=None,
-                core_topic=self.core_topic,
+                default_core_topic=self.core_topic,
                 my_listening_topic=self.listening_topic)
 
             self.adapter_proxy = AdapterProxy(
@@ -362,8 +362,9 @@ class Main(object):
             self.adapter = BrcmOpenomciOnuAdapter(
                 core_proxy=self.core_proxy, adapter_proxy=self.adapter_proxy,
                 config=config)
-            openonu_request_handler = AdapterRequestFacade(
-                adapter=self.adapter)
+
+            openonu_request_handler = AdapterRequestFacade(adapter=self.adapter,
+                                                           core_proxy=self.core_proxy)
 
             yield registry.register(
                 'kafka_adapter_proxy',
