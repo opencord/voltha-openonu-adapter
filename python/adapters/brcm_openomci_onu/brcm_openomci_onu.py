@@ -25,12 +25,11 @@ from zope.interface import implementer
 
 from pyvoltha.adapters.interface import IAdapterInterface
 from pyvoltha.adapters.iadapter import OnuAdapter
-from pyvoltha.protos import third_party
-from pyvoltha.protos.adapter_pb2 import Adapter
-from pyvoltha.protos.adapter_pb2 import AdapterConfig
-from pyvoltha.protos.common_pb2 import LogLevel
-from pyvoltha.protos.device_pb2 import DeviceType, DeviceTypes, Port, Image
-from pyvoltha.protos.health_pb2 import HealthStatus
+from voltha_protos.adapter_pb2 import Adapter
+from voltha_protos.adapter_pb2 import AdapterConfig
+from voltha_protos.common_pb2 import LogLevel
+from voltha_protos.device_pb2 import DeviceType, DeviceTypes, Port, Image
+from voltha_protos.health_pb2 import HealthStatus
 
 from pyvoltha.adapters.common.frameio.frameio import hexify
 from pyvoltha.adapters.extensions.omci.openomci_agent import OpenOMCIAgent, OpenOmciAgentDefaults
@@ -41,8 +40,6 @@ from omci.brcm_capabilities_task import BrcmCapabilitiesTask
 from omci.brcm_mib_sync import BrcmMibSynchronizer
 from copy import deepcopy
 
-
-_ = third_party
 log = structlog.get_logger()
 
 
