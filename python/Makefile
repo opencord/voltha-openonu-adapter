@@ -64,7 +64,7 @@ help:
 	@echo "venv              : Build local Python virtualenv if did not exist yet"
 	@echo "containers        : Build all the docker containers"
 	@echo "base              : Build a base docker image with a modern version of pip and requirements.txt installed"
-	@echo "adapter_openonu   : Build the openonu openomci adapter docker container"
+	@echo "openonu_adapter   : Build the openonu openomci adapter docker container"
 	@echo "tag               : Tag a set of images"
 	@echo "push              : Push the docker images to an external repository"
 	@echo "pull              : Pull the docker images from a repository"
