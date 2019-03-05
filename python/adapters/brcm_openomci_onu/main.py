@@ -42,12 +42,9 @@ from pyvoltha.adapters.kafka.core_proxy import CoreProxy
 from pyvoltha.adapters.kafka.kafka_inter_container_library import IKafkaMessagingProxy, \
     get_messaging_proxy
 from pyvoltha.adapters.kafka.kafka_proxy import KafkaProxy, get_kafka_proxy
-from pyvoltha.protos import third_party
-from pyvoltha.protos.adapter_pb2 import AdapterConfig
+from voltha_protos.adapter_pb2 import AdapterConfig
 
 from brcm_openomci_onu import BrcmOpenomciOnuAdapter
-
-_ = third_party
 
 defs = dict(
     version_file='./VERSION',

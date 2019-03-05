@@ -36,9 +36,8 @@ import pyvoltha.common.openflow.utils as fd
 from pyvoltha.common.utils.registry import registry
 from pyvoltha.common.config.config_backend import ConsulStore
 from pyvoltha.common.config.config_backend import EtcdStore
-from pyvoltha.protos import third_party
-from pyvoltha.protos.common_pb2 import OperStatus, ConnectStatus, AdminState
-from pyvoltha.protos.openflow_13_pb2 import OFPXMC_OPENFLOW_BASIC, ofp_port
+from voltha_protos.common_pb2 import OperStatus, ConnectStatus, AdminState
+from voltha_protos.openflow_13_pb2 import OFPXMC_OPENFLOW_BASIC, ofp_port
 from pyvoltha.adapters.extensions.omci.onu_configuration import OMCCVersion
 from pyvoltha.adapters.extensions.omci.onu_device_entry import OnuDeviceEvents, \
     OnuDeviceEntry, IN_SYNC_KEY
@@ -56,7 +55,6 @@ from pyvoltha.common.tech_profile.tech_profile import TechProfile
 OP = EntityOperations
 RC = ReasonCodes
 
-_ = third_party
 log = structlog.get_logger()
 
 _STARTUP_RETRY_WAIT = 20

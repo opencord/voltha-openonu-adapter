@@ -14,7 +14,7 @@
 
 import structlog
 from twisted.internet import reactor
-from pyvoltha.protos.common_pb2 import OperStatus, ConnectStatus
+from voltha_protos.common_pb2 import OperStatus, ConnectStatus
 from pyvoltha.adapters.extensions.omci.omci_me import OntGFrame
 
 

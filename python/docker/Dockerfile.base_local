@@ -32,3 +32,6 @@ RUN pip install -r /tmp/requirements.txt
 COPY pyvoltha/dist /pyvoltha/dist
 RUN pip install /pyvoltha/dist/*.tar.gz
 
+COPY voltha-protos/dist /voltha-protos/dist
+RUN pip install /voltha-protos/dist/*.tar.gz
+
