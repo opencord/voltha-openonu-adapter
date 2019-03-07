@@ -59,8 +59,8 @@ class BrcmOpenomciOnuAdapter(object):
 
     def __init__(self, core_proxy, adapter_proxy, config):
         log.debug('function-entry', config=config)
+        self.core_proxy = core_proxy
         self.adapter_proxy = adapter_proxy
-        self.adapter_agent = core_proxy
         self.config = config
         self.descriptor = Adapter(
             id=self.name,
@@ -86,7 +86,8 @@ class BrcmOpenomciOnuAdapter(object):
     def omci_agent(self):
         if not hasattr(self, '_omci_agent') or self._omci_agent is None:
             log.debug('creating-omci-agent')
-            self._omci_agent = OpenOMCIAgent(self.adapter_agent,
+            self._omci_agent = OpenOMCIAgent(self.core_proxy,
+                                             self.adapter_proxy,
                                              support_classes=self.broadcom_omci)
         return self._omci_agent
 
@@ -237,6 +238,13 @@ class BrcmOpenomciOnuAdapter(object):
             handler.event_messages.put(msg)
         else:
             log.error("device-not-found")
+
+    def process_inter_adapter_message(self, msg):
+        log.debug('process-inter-adapter-message', msg=msg)
+        # Unpack the header to know which device needs to handle this message
+        if msg.header:
+            handler = self.devices_handlers[msg.header.to_device_id]
+            handler.process_inter_adapter_message(msg)
 
     def create_interface(self, device, data):
         log.debug('create-interface', device_id=device.id)

@@ -18,7 +18,6 @@
 Broadcom OpenOMCI OLT/ONU adapter handler.
 """
 
-import json
 import ast
 import structlog
 
@@ -38,6 +37,8 @@ from pyvoltha.common.config.config_backend import ConsulStore
 from pyvoltha.common.config.config_backend import EtcdStore
 from voltha_protos.common_pb2 import OperStatus, ConnectStatus, AdminState
 from voltha_protos.openflow_13_pb2 import OFPXMC_OPENFLOW_BASIC, ofp_port
+from voltha_protos.inter_container_pb2 import InterAdapterMessageType, InterAdapterOmciMessage
+from voltha_protos.openolt_pb2 import OnuIndication
 from pyvoltha.adapters.extensions.omci.onu_configuration import OMCCVersion
 from pyvoltha.adapters.extensions.omci.onu_device_entry import OnuDeviceEvents, \
     OnuDeviceEntry, IN_SYNC_KEY
@@ -66,7 +67,8 @@ class BrcmOpenomciOnuHandler(object):
         self.log = structlog.get_logger(device_id=device_id)
         self.log.debug('function-entry')
         self.adapter = adapter
-        self.adapter_agent = adapter.adapter_agent
+        self.core_proxy = adapter.core_proxy
+        self.adapter_proxy = adapter.adapter_proxy
         self.parent_adapter = None
         self.parent_id = None
         self.device_id = device_id
@@ -182,9 +184,7 @@ class BrcmOpenomciOnuHandler(object):
             self.log.info('activating-new-onu')
             # populate what we know.  rest comes later after mib sync
             device.root = False
-            device.vendor = 'Broadcom'
-            device.connect_status = ConnectStatus.REACHABLE
-            device.oper_status = OperStatus.DISCOVERED
+            device.vendor = 'OpenONU'
             device.reason = 'activating-onu'
 
             # TODO NEW CORE:  Need to either get logical device id from core or use regular device id
@@ -193,7 +193,11 @@ class BrcmOpenomciOnuHandler(object):
             #self.logical_device_id = parent_device.parent_id
             #assert self.logical_device_id, 'Invalid logical device ID'
 
-            yield self.adapter_agent.device_update(device)
+            yield self.core_proxy.device_update(device)
+
+            yield self.core_proxy.device_state_update(device.id, oper_status=OperStatus.DISCOVERED,
+                                                         connect_status=ConnectStatus.REACHABLE)
+
 
             self.log.debug('set-device-discovered')
 
@@ -207,17 +211,17 @@ class BrcmOpenomciOnuHandler(object):
                 'heartbeat': self.heartbeat,
                 OnuOmciPmMetrics.OMCI_DEV_KEY: self._onu_omci_device
             }
-            self.pm_metrics = OnuPmMetrics(self.adapter_agent, self.device_id,
+            self.pm_metrics = OnuPmMetrics(self.core_proxy, self.device_id,
                                            self.logical_device_id, grouped=True,
                                            freq_override=False, **kwargs)
             pm_config = self.pm_metrics.make_proto()
             self._onu_omci_device.set_pm_config(self.pm_metrics.omci_pm.openomci_interval_pm)
             self.log.info("initial-pm-config", pm_config=pm_config)
-            yield self.adapter_agent.device_pm_config_update(pm_config, init=True)
+            yield self.core_proxy.device_pm_config_update(pm_config, init=True)
 
             ############################################################################
             # Setup Alarm handler
-            self.alarms = AdapterAlarms(self.adapter_agent, device.id, self.logical_device_id)
+            self.alarms = AdapterAlarms(self.core_proxy, device.id, self.logical_device_id)
             # Note, ONU ID and UNI intf set in add_uni_port method
             self._onu_omci_device.alarm_synchronizer.set_alarm_params(mgr=self.alarms,
                                                                       ani_ports=[self._pon])
@@ -279,13 +283,14 @@ class BrcmOpenomciOnuHandler(object):
         self._pon.add_peer(self.parent_id, self._pon_port_number)
         self.log.debug('adding-pon-port-to-agent', pon=self._pon.get_port())
 
-        yield self.adapter_agent.port_created(device.id, self._pon.get_port())
+        yield self.core_proxy.port_created(device.id, self._pon.get_port())
 
         self.log.debug('added-pon-port-to-agent', pon=self._pon.get_port())
 
         # Create and start the OpenOMCI ONU Device Entry for this ONU
         self._onu_omci_device = self.omci_agent.add_device(self.device_id,
-                                                           self.adapter_agent,
+                                                           self.core_proxy,
+                                                           self.adapter_proxy,
                                                            support_classes=self.adapter.broadcom_omci,
                                                            custom_me_map=self.adapter.custom_me_entities())
         # Port startup
@@ -626,31 +631,58 @@ class BrcmOpenomciOnuHandler(object):
         self.tx_id += 1
         return self.tx_id
 
-    # TODO: Actually conform to or create a proper interface.
-    # this and the other functions called from the olt arent very clear.
-    # Called each time there is an onu "up" indication from the olt handler
-    def create_interface(self, data):
-        self.log.debug('function-entry', data=data)
-        self._onu_indication = data
+    def process_inter_adapter_message(self, request):
+        self.log.debug('process-inter-adapter-message', msg=request)
+        try:
+            if request.header.type == InterAdapterMessageType.OMCI_REQUEST:
+                omci_msg = InterAdapterOmciMessage()
+                request.body.Unpack(omci_msg)
+                self.log.debug('inter-adapter-recv-omci', omci_msg=omci_msg)
 
-        onu_device = self.adapter_agent.get_device(self.device_id)
+                self.receive_message(omci_msg.message)
+
+            elif request.header.type == InterAdapterMessageType.ONU_IND_REQUEST:
+                onu_indication = OnuIndication()
+                request.body.Unpack(onu_indication)
+                self.log.debug('inter-adapter-recv-onu-ind', onu_indication=onu_indication)
+
+                if onu_indication.oper_state == "up":
+                    self.create_interface(onu_indication)
+                elif onu_indication.oper_state == "down":
+                    self.update_interface(onu_indication)
+                else:
+                    self.log.error("unknown-onu-indication", onu_indication=onu_indication)
+
+            else:
+                self.log.error("inter-adapter-unhandled-type", request=request)
+
+        except Exception as e:
+            self.log.exception("error-processing-inter-adapter-message", e=e)
+
+    # Called each time there is an onu "up" indication from the olt handler
+    @inlineCallbacks
+    def create_interface(self, onu_indication):
+        self.log.debug('function-entry', onu_indication=onu_indication)
+        self._onu_indication = onu_indication
+
+        onu_device = yield self.core_proxy.get_device(self.device_id)
 
         self.log.debug('starting-openomci-statemachine')
         self._subscribe_to_events()
         reactor.callLater(1, self._onu_omci_device.start)
         onu_device.reason = "starting-openomci"
-        self.adapter_agent.update_device(onu_device)
+        yield self.core_proxy.device_update(onu_device)
         self._heartbeat.enabled = True
 
     # Currently called each time there is an onu "down" indication from the olt handler
     # TODO: possibly other reasons to "update" from the olt?
-    def update_interface(self, data):
-        self.log.debug('function-entry', data=data)
-        oper_state = data.get('oper_state', None)
+    @inlineCallbacks
+    def update_interface(self, onu_indication):
+        self.log.debug('function-entry', onu_indication=onu_indication)
 
-        onu_device = self.adapter_agent.get_device(self.device_id)
+        onu_device = yield self.core_proxy.get_device(self.device_id)
 
-        if oper_state == 'down':
+        if onu_indication.oper_state == 'down':
             self.log.debug('stopping-openomci-statemachine')
             reactor.callLater(0, self._onu_omci_device.stop)
 
