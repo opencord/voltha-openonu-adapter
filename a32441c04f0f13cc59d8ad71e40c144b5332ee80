@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "34cc47a8_44be9da4",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 644,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2019-03-11T15:30:24Z",
+      "side": 1,
+      "message": "see below, this whole block might now be needed.  Just not sure how the \"down\" case is handled.",
+      "range": {
+        "startLine": 644,
+        "startChar": 12,
+        "endLine": 644,
+        "endChar": 79
+      },
+      "revId": "a32441c04f0f13cc59d8ad71e40c144b5332ee80",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dd3159a4_402cb4d8",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 672,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2019-03-11T15:30:24Z",
+      "side": 1,
+      "message": "So the question brought up this morning is can start() be moved into activate() above and let it \"keep trying\" until the olt actually activates it.",
+      "range": {
+        "startLine": 672,
+        "startChar": 29,
+        "endLine": 672,
+        "endChar": 56
+      },
+      "revId": "a32441c04f0f13cc59d8ad71e40c144b5332ee80",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "111436b4_4090c648",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 687,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2019-03-11T15:30:24Z",
+      "side": 1,
+      "message": "...same here.  but im not sure how the onu adapter/handler would know when to call stop().  Is there a call from the core when a child device or PON_* port is set to down?  i.e the opposite of activate()",
+      "range": {
+        "startLine": 687,
+        "startChar": 33,
+        "endLine": 687,
+        "endChar": 59
+      },
+      "revId": "a32441c04f0f13cc59d8ad71e40c144b5332ee80",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    }
+  ]
+}
