@@ -72,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "2441536c_0a00f480",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 672,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2019-03-11T18:59:44Z",
+      "side": 1,
+      "message": "Agreed.  For now to keep the merging as simple as possible im trying to keep the refactoring to a minimum.  But it seems that for both the 1.x and 2.x core there isn\u0027t a clean way for the olt adapter to notice the onu went away and tell both the core and the onu child adapter about it, in a way that works for all onu adapters.  This way for any olt adapter sourced events (not just openolt) child adapters can clean up after themselves.\n\nOnce things settle we can revisit.",
+      "parentUuid": "bf3ace69_fb99881a",
+      "range": {
+        "startLine": 672,
+        "startChar": 29,
+        "endLine": 672,
+        "endChar": 56
+      },
+      "revId": "a32441c04f0f13cc59d8ad71e40c144b5332ee80",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "111436b4_4090c648",
         "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
         "patchSetId": 2
