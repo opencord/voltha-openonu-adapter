@@ -70,13 +70,11 @@ class UniPort(object):
         self._cancel_deferred()
         self._admin_state = AdminState.ENABLED
         self._oper_status = OperStatus.ACTIVE
-        self._update_adapter_agent()
 
     def _stop(self):
         self._cancel_deferred()
         self._admin_state = AdminState.DISABLED
         self._oper_status = OperStatus.UNKNOWN
-        self._update_adapter_agent()
 
     def delete(self):
         self.enabled = False
@@ -159,25 +157,6 @@ class UniPort(object):
         :return: (UniType) One of the enumerated types
         """
         return self._type
-
-    def _update_adapter_agent(self):
-        """
-        Update the port status and state in the core
-        """
-        self.log.debug('update-adapter-agent', admin_state=self._admin_state,
-                       oper_status=self._oper_status)
-
-        if self._port is not None:
-            self._port.admin_state = self._admin_state
-            self._port.oper_status = self._oper_status
-
-        try:
-            # adapter_agent add_port also does an update of existing port
-            self._handler.adapter_agent.add_port(self._handler.device_id,
-                                                 self.get_port())
-
-        except Exception as e:
-            self.log.exception('update-port', e=e)
 
     def get_port(self):
         """
