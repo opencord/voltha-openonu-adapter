@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "bf3ace69_fb99881a",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 672,
+      "author": {
+        "id": 1000182
+      },
+      "writtenOn": "2019-03-11T18:24:24Z",
+      "side": 1,
+      "message": "Note that the OLT Device Handler\u0027s \u0027send_proxy_message()\u0027 method will first need to check if it is okay to send.  We do this in the Adtran DA by checking.\n  1. Is the PON enabled\n  2. Is the ONU ID valid on the pon.\n\nFor #2, when I activate an ONU, I basically have an ONU object that is saved in a PON dictionary.  For the OpenOLT, this looks like it is also done in the openolt_data_model code.\n\nFor other non-OpenOLT derived OLTs (microsemi, CIG, Tibit) we may need to coordinate the change.\n\nI am fairly sure that the Tibit will be able to support this method in the near future (sometime after lockdown).",
+      "parentUuid": "dd3159a4_402cb4d8",
+      "range": {
+        "startLine": 672,
+        "startChar": 29,
+        "endLine": 672,
+        "endChar": 56
+      },
+      "revId": "a32441c04f0f13cc59d8ad71e40c144b5332ee80",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "111436b4_4090c648",
         "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
         "patchSetId": 2
@@ -59,6 +83,30 @@
       "writtenOn": "2019-03-11T15:30:24Z",
       "side": 1,
       "message": "...same here.  but im not sure how the onu adapter/handler would know when to call stop().  Is there a call from the core when a child device or PON_* port is set to down?  i.e the opposite of activate()",
+      "range": {
+        "startLine": 687,
+        "startChar": 33,
+        "endLine": 687,
+        "endChar": 59
+      },
+      "revId": "a32441c04f0f13cc59d8ad71e40c144b5332ee80",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6c2741b3_98fcbcb9",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 687,
+      "author": {
+        "id": 1000182
+      },
+      "writtenOn": "2019-03-11T18:24:24Z",
+      "side": 1,
+      "message": "In the old IAdapter, there was not an equivalent call if the OLT was disabled to let the child devices know that they are disabled.",
+      "parentUuid": "111436b4_4090c648",
       "range": {
         "startLine": 687,
         "startChar": 33,
