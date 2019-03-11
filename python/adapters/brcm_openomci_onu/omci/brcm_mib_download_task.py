@@ -177,11 +177,11 @@ class BrcmMibDownloadTask(Task):
             self.log.debug('function-entry')
             self.log.info('perform-download')
 
-            device = self._handler.adapter_agent.get_device(self.device_id)
+            device = yield self._handler.core_proxy.get_device(self.device_id)
 
             if self._handler.enabled and len(self._handler.uni_ports) > 0:
                 device.reason = 'performing-initial-mib-download'
-                self._handler.adapter_agent.update_device(device)
+                yield self._handler.core_proxy.update_device(device)
 
             try:
                 # Lock the UNI ports to prevent any alarms during initial configuration

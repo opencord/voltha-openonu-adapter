@@ -239,6 +239,15 @@ class BrcmOpenomciOnuAdapter(object):
         else:
             log.error("device-not-found")
 
+    def get_ofp_port_info(self, device, port_no):
+        log.debug('get_ofp_port_info_start', device_id=device.id,
+                  port_no=port_no)
+        ofp_port_info = self.devices_handlers[device.id].get_ofp_port_info(
+            device, port_no)
+        log.debug('get_ofp_port_info_ends', device_id=device.id,
+                  port_no=port_no)
+        return ofp_port_info
+
     def process_inter_adapter_message(self, msg):
         log.debug('process-inter-adapter-message', msg=msg)
         # Unpack the header to know which device needs to handle this message

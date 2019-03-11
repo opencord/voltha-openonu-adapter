@@ -36,8 +36,8 @@ from pyvoltha.common.utils.registry import registry
 from pyvoltha.common.config.config_backend import ConsulStore
 from pyvoltha.common.config.config_backend import EtcdStore
 from voltha_protos.common_pb2 import OperStatus, ConnectStatus, AdminState
-from voltha_protos.openflow_13_pb2 import OFPXMC_OPENFLOW_BASIC, ofp_port
-from voltha_protos.inter_container_pb2 import InterAdapterMessageType, InterAdapterOmciMessage
+from voltha_protos.openflow_13_pb2 import OFPXMC_OPENFLOW_BASIC, ofp_port, OFPPS_LIVE, OFPPF_FIBER, OFPPF_1GB_FD
+from voltha_protos.inter_container_pb2 import InterAdapterMessageType, InterAdapterOmciMessage, PortCapability
 from voltha_protos.openolt_pb2 import OnuIndication
 from pyvoltha.adapters.extensions.omci.onu_configuration import OMCCVersion
 from pyvoltha.adapters.extensions.omci.onu_device_entry import OnuDeviceEvents, \
@@ -166,6 +166,34 @@ class BrcmOpenomciOnuHandler(object):
     def receive_message(self, msg):
         if self.omci_cc is not None:
             self.omci_cc.receive_message(msg)
+
+    def get_ofp_port_info(self, device, port_no):
+        self.log.info('get_ofp_port_info', port_no=port_no, device_id=device.id)
+        cap = OFPPF_1GB_FD | OFPPF_FIBER
+
+        hw_addr=mac_str_to_tuple('08:%02x:%02x:%02x:%02x:%02x' %
+                                ((device.parent_port_no >> 8 & 0xff),
+                                  device.parent_port_no & 0xff,
+                                  (port_no >> 16) & 0xff,
+                                  (port_no >> 8) & 0xff,
+                                   port_no & 0xff))
+
+        return PortCapability(
+            port=LogicalPort(
+                ofp_port=ofp_port(
+                    hw_addr=hw_addr,
+                    config=0,
+                    state=OFPPS_LIVE,
+                    curr=cap,
+                    advertised=cap,
+                    peer=cap,
+                    curr_speed=OFPPF_1GB_FD,
+                    max_speed=OFPPF_1GB_FD
+                ),
+                device_id=device.id,
+                device_port_no=port_no
+            )
+        )
 
     # Called once when the adapter creates the device/onu instance
     @inlineCallbacks
@@ -665,6 +693,9 @@ class BrcmOpenomciOnuHandler(object):
         self.log.debug('function-entry', onu_indication=onu_indication)
         self._onu_indication = onu_indication
 
+        yield self.core_proxy.device_state_update(self.device_id, oper_status=OperStatus.ACTIVATING,
+                                                  connect_status=ConnectStatus.REACHABLE)
+
         onu_device = yield self.core_proxy.get_device(self.device_id)
 
         self.log.debug('starting-openomci-statemachine')
@@ -886,15 +917,16 @@ class BrcmOpenomciOnuHandler(object):
     # Mib is in sync, we can now query what we learned and actually start pushing ME (download) to the ONU.
     # Currently uses a basic mib download task that create a bridge with a single gem port and uni, only allowing EAP
     # Implement your own MibDownloadTask if you wish to setup something different by default
+    @inlineCallbacks
     def _mib_in_sync(self):
         self.log.debug('function-entry')
 
         omci = self._onu_omci_device
         in_sync = omci.mib_db_in_sync
 
-        device = self.adapter_agent.get_device(self.device_id)
+        device = yield self.core_proxy.get_device(self.device_id)
         device.reason = 'discovery-mibsync-complete'
-        self.adapter_agent.update_device(device)
+        yield self.core_proxy.device_update(device)
 
         if not self._dev_info_loaded:
             self.log.info('loading-device-data-from-mib', in_sync=in_sync, already_loaded=self._dev_info_loaded)
@@ -916,7 +948,7 @@ class BrcmOpenomciOnuHandler(object):
                 if ani_list is None or (pptp_list is None and veip_list is None):
                     device.reason = 'onu-missing-required-elements'
                     self.log.warn("no-ani-or-unis")
-                    self.adapter_agent.update_device(device)
+                    yield self.core_proxy.device_update(device)
                     raise Exception("onu-missing-required-elements")
 
                 # Currently logging the ani, pptp, veip, and uni for information purposes.
@@ -947,16 +979,10 @@ class BrcmOpenomciOnuHandler(object):
                 uni_id = 0
                 for entity_id, uni_type in uni_entities.iteritems():
                     try:
-                        self._add_uni_port(entity_id, uni_id, uni_type)
+                        yield self._add_uni_port(device, entity_id, uni_id, uni_type)
                         uni_id += 1
                     except AssertionError as e:
                         self.log.warn("could not add UNI", entity_id=entity_id, uni_type=uni_type, e=e)
-
-                multi_uni = len(self._unis) > 1
-                for uni_port in self._unis.itervalues():
-                    uni_port.add_logical_port(uni_port.port_number, multi_uni)
-
-                self.adapter_agent.update_device(device)
 
                 self._qos_flexibility = config.qos_configuration_flexibility or 0
                 self._omcc_version = config.omcc_version or OMCCVersion.Unknown
@@ -965,7 +991,7 @@ class BrcmOpenomciOnuHandler(object):
                     self._dev_info_loaded = True
                 else:
                     device.reason = 'no-usable-unis'
-                    self.adapter_agent.update_device(device)
+                    yield self.core_proxy.device_update(device)
                     self.log.warn("no-usable-unis")
                     raise Exception("no-usable-unis")
 
@@ -978,20 +1004,22 @@ class BrcmOpenomciOnuHandler(object):
 
         if self._dev_info_loaded:
             if device.admin_state == AdminState.ENABLED:
+
+                @inlineCallbacks
                 def success(_results):
                     self.log.info('mib-download-success', _results=_results)
-                    device = self.adapter_agent.get_device(self.device_id)
+                    device = yield self.core_proxy.get_device(self.device_id)
                     device.reason = 'initial-mib-downloaded'
-                    device.oper_status = OperStatus.ACTIVE
-                    device.connect_status = ConnectStatus.REACHABLE
-                    self.enable_ports(device)
-                    self.adapter_agent.update_device(device)
+                    yield self.core_proxy.device_state_update(device.id,
+                                            oper_status=OperStatus.ACTIVE, connect_status=ConnectStatus.REACHABLE)
+                    yield self.core_proxy.device_update(device)
                     self._mib_download_task = None
 
+                @inlineCallbacks
                 def failure(_reason):
                     self.log.warn('mib-download-failure-retrying', _reason=_reason)
                     device.reason = 'initial-mib-download-failure-retrying'
-                    self.adapter_agent.update_device(device)
+                    yield self.core_proxy.device_update(device)
                     self._deferred = reactor.callLater(_STARTUP_RETRY_WAIT, self._mib_in_sync)
 
                 # Download an initial mib that creates simple bridge that can pass EAP.  On success (above) finally set
@@ -1006,22 +1034,11 @@ class BrcmOpenomciOnuHandler(object):
         else:
             self.log.info('device-info-not-loaded-skipping-mib-download')
 
-
-    def _add_uni_port(self, entity_id, uni_id, uni_type=UniType.PPTP):
+    @inlineCallbacks
+    def _add_uni_port(self, device, entity_id, uni_id, uni_type=UniType.PPTP):
         self.log.debug('function-entry')
 
-        device = self.adapter_agent.get_device(self.device_id)
-        parent_device = self.adapter_agent.get_device(device.parent_id)
-
-        parent_adapter_agent = registry('adapter_loader').get_agent(parent_device.adapter)
-        if parent_adapter_agent is None:
-            self.log.error('parent-adapter-could-not-be-retrieved')
-
-        # TODO: This knowledge is locked away in openolt.  and it assumes one onu equals one uni...
-        parent_device = self.adapter_agent.get_device(device.parent_id)
-        parent_adapter = parent_adapter_agent.adapter.devices[parent_device.id]
-        uni_no = parent_adapter.platform.mk_uni_port_num(
-            self._onu_indication.intf_id, self._onu_indication.onu_id, uni_id)
+        uni_no = self.mk_uni_port_num(self._onu_indication.intf_id, self._onu_indication.onu_id, uni_id)
 
         # TODO: Some or parts of this likely need to move to UniPort. especially the format stuff
         uni_name = "uni-{}".format(uni_no)
@@ -1038,28 +1055,20 @@ class BrcmOpenomciOnuHandler(object):
 
         self.log.debug("created-uni-port", uni=uni_port)
 
-        self.adapter_agent.add_port(device.id, uni_port.get_port())
-        parent_adapter_agent.add_port(device.parent_id, uni_port.get_port())
+        yield self.core_proxy.port_created(device.id, uni_port.get_port())
 
         self._unis[uni_port.port_number] = uni_port
 
         self._onu_omci_device.alarm_synchronizer.set_alarm_params(onu_id=self._onu_indication.onu_id,
                                                                   uni_ports=self._unis.values())
-        # TODO: this should be in the PonPortclass
-        pon_port = self._pon.get_port()
 
-        # Delete reference to my own UNI as peer from parent.
-        # TODO why is this here, add_port_reference_to_parent already prunes duplicates
-        me_as_peer = Port.PeerPort(device_id=device.parent_id, port_no=uni_port.port_number)
-        partial_pon_port = Port(port_no=pon_port.port_no, label=pon_port.label,
-                                type=pon_port.type, admin_state=pon_port.admin_state,
-                                oper_status=pon_port.oper_status,
-                                peers=[me_as_peer]) # only list myself as a peer to avoid deleting all other UNIs from parent
-        self.adapter_agent.delete_port_reference_from_parent(self.device_id, partial_pon_port)
+    # TODO NEW CORE: Figure out how to gain this knowledge from the olt.  for now cheat terribly.
+    def mk_uni_port_num(self, intf_id, onu_id, uni_id):
+        MAX_PONS_PER_OLT = 16
+        MAX_ONUS_PER_PON = 32
+        MAX_UNIS_PER_ONU = 16
 
-        pon_port.peers.extend([me_as_peer])
-
-        self._pon._port = pon_port
-
-        self.adapter_agent.add_port_reference_to_parent(self.device_id,
-                                                        pon_port)
+        assert intf_id < MAX_PONS_PER_OLT
+        assert onu_id < MAX_ONUS_PER_PON
+        assert uni_id < MAX_UNIS_PER_ONU
+        return intf_id << 11 | onu_id << 4 | uni_id
