@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "afe08063_1009c695",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 248,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2019-03-15T20:03:46Z",
+      "side": 1,
+      "message": "I can change it.  This block was copied from ponsim as-is.",
+      "parentUuid": "d3ce875d_cc2573fe",
+      "revId": "561d629bc9dedcdb52cc19b1e7ca9fb614d4f329",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "82bbf96d_98c186fd",
         "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2019-03-15T19:11:54Z",
       "side": 1,
       "message": "Would this call for an Interface update? the Core could let the ONU adapter know more information about the OLT onto which the ONU is connected. We might want to create a JIRA to track this.",
+      "revId": "561d629bc9dedcdb52cc19b1e7ca9fb614d4f329",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9941f8ff_99f8ae1d",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 1065,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2019-03-15T20:03:46Z",
+      "side": 1,
+      "message": "Yes this needs a story.  I was considering some interadapter message from the olt.",
+      "parentUuid": "82bbf96d_98c186fd",
       "revId": "561d629bc9dedcdb52cc19b1e7ca9fb614d4f329",
       "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
       "unresolved": false
