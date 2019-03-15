@@ -69,6 +69,24 @@
       "revId": "561d629bc9dedcdb52cc19b1e7ca9fb614d4f329",
       "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3ba12048_7e7ca652",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 1065,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2019-03-15T20:06:14Z",
+      "side": 1,
+      "message": "Another idea could be this info is delivered from the core via the olt handler on adopt_device to the onu.  implying interface update to the core as you said",
+      "parentUuid": "9941f8ff_99f8ae1d",
+      "revId": "561d629bc9dedcdb52cc19b1e7ca9fb614d4f329",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
     }
   ]
 }
