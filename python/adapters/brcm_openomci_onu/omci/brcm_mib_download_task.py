@@ -370,9 +370,9 @@ class BrcmMibDownloadTask(Task):
 
             # default to PPTP
             tp_type = None
-            if uni_port.type is UniType.VEIP:
+            if uni_port.type.value == UniType.VEIP.value:
                 tp_type = 11
-            elif uni_port.type is UniType.PPTP:
+            elif uni_port.type.value == UniType.PPTP.value:
                 tp_type = 1
             else:
                 tp_type = 1
@@ -422,10 +422,10 @@ class BrcmMibDownloadTask(Task):
         try:
             state = 1 if force_lock or not uni_port.enabled else 0
             msg = None
-            if uni_port.type is UniType.PPTP:
+            if uni_port.type.value == UniType.PPTP.value:
                 msg = PptpEthernetUniFrame(uni_port.entity_id,
                                            attributes=dict(administrative_state=state))
-            elif uni_port.type is UniType.VEIP:
+            elif uni_port.type.value == UniType.VEIP.value:
                 msg = VeipUniFrame(uni_port.entity_id,
                                    attributes=dict(administrative_state=state))
             else:

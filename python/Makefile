@@ -150,6 +150,6 @@ ifdef LOCAL_PROTOS
 	mkdir -p local_imports/voltha-protos/dist
 	cp ../../voltha-protos/dist/*.tar.gz local_imports/voltha-protos/dist/
 	. ${VENVDIR}/bin/activate && \
-	    pip install local_protos/voltha-protos/dist/*.tar.gz
+	    pip install local_imports/voltha-protos/dist/*.tar.gz
 endif
 # end file
