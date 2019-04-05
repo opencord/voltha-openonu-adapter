@@ -382,9 +382,9 @@ class BrcmTpServiceSpecificTask(Task):
             # TODO: magic.  static variable for assoc_type
 
             # default to PPTP
-            if self._uni_port.type is UniType.VEIP:
+            if self._uni_port.type.value == UniType.VEIP.value:
                 association_type = 10
-            elif self._uni_port.type is UniType.PPTP:
+            elif self._uni_port.type.value == UniType.PPTP.value:
                 association_type = 2
             else:
                 association_type = 2
