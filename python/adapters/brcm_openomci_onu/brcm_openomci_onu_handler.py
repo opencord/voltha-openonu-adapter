@@ -37,7 +37,8 @@ from pyvoltha.common.config.config_backend import ConsulStore
 from pyvoltha.common.config.config_backend import EtcdStore
 from voltha_protos.common_pb2 import OperStatus, ConnectStatus, AdminState
 from voltha_protos.openflow_13_pb2 import OFPXMC_OPENFLOW_BASIC, ofp_port, OFPPS_LIVE, OFPPF_FIBER, OFPPF_1GB_FD
-from voltha_protos.inter_container_pb2 import InterAdapterMessageType, InterAdapterOmciMessage, PortCapability
+from voltha_protos.inter_container_pb2 import InterAdapterMessageType, \
+    InterAdapterOmciMessage, PortCapability, InterAdapterTechProfileDownloadMessage
 from voltha_protos.openolt_pb2 import OnuIndication
 from pyvoltha.adapters.extensions.omci.onu_configuration import OMCCVersion
 from pyvoltha.adapters.extensions.omci.onu_device_entry import OnuDeviceEvents, \
@@ -122,9 +123,6 @@ class BrcmOpenomciOnuHandler(object):
             self.log.error('Invalid-backend')
             raise Exception("Invalid-backend-for-kv-store")
 
-        # Handle received ONU event messages
-        reactor.callLater(0, self.handle_onu_events)
-
     @property
     def enabled(self):
         return self._enabled
@@ -157,7 +155,7 @@ class BrcmOpenomciOnuHandler(object):
 
         assert isinstance(port_no_or_name, int), 'Invalid parameter type'
         return next((uni for uni in self.uni_ports
-                    if uni.logical_port_number == port_no_or_name), None)
+                    if uni.port_number == port_no_or_name), None)
 
     @property
     def pon_port(self):
@@ -287,21 +285,6 @@ class BrcmOpenomciOnuHandler(object):
             self.enabled = True
         else:
             self.log.info('onu-already-activated')
-
-    @inlineCallbacks
-    def handle_onu_events(self):
-        event_msg = yield self.event_messages.get()
-        try:
-            if event_msg['event'] == 'download_tech_profile':
-                tp_path = event_msg['event_data']
-                uni_id = event_msg['uni_id']
-                self.load_and_configure_tech_profile(uni_id, tp_path)
-
-        except Exception as e:
-            self.log.error("exception-handling-onu-event", e=e)
-
-        # Handle next event
-        reactor.callLater(0, self.handle_onu_events)
 
     @inlineCallbacks
     def _init_pon_state(self, device):
@@ -680,6 +663,13 @@ class BrcmOpenomciOnuHandler(object):
                     self.update_interface(onu_indication)
                 else:
                     self.log.error("unknown-onu-indication", onu_indication=onu_indication)
+
+            elif request.header.type == InterAdapterMessageType.TECH_PROFILE_DOWNLOAD_REQUEST:
+                tech_msg = InterAdapterTechProfileDownloadMessage()
+                request.body.Unpack(tech_msg)
+                self.log.debug('inter-adapter-recv-tech-profile', tech_msg=tech_msg)
+
+                self.load_and_configure_tech_profile(tech_msg.uni_id, tech_msg.path)
 
             else:
                 self.log.error("inter-adapter-unhandled-type", request=request)

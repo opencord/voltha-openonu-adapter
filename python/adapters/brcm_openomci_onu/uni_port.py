@@ -45,7 +45,6 @@ class UniPort(object):
         self._port = None
         self._port_number = port_no
         self._ofp_port_no = ofp_port_no
-        self._logical_port_number = None
         self._entity_id = None
         self._mac_bridge_port_num = 0
         self._type = type
@@ -143,14 +142,6 @@ class UniPort(object):
         self._entity_id = value
 
     @property
-    def logical_port_number(self):
-        """
-        Logical device port number (used as OpenFlow port for UNI)
-        :return: (int) port number
-        """
-        return self._logical_port_number
-
-    @property
     def type(self):
         """
         UNI Type used in OMCI messaging
@@ -173,55 +164,3 @@ class UniPort(object):
     def port_id_name(self):
         return 'uni-{}'.format(self._port_number)
 
-    def add_logical_port(self, openflow_port_no, multi_uni_naming,
-                         capabilities=OFPPF_10GB_FD | OFPPF_FIBER,
-                         speed=OFPPF_10GB_FD):
-
-        self.log.debug('function-entry')
-
-        if self._logical_port_number is not None:
-            # delete old logical port if it exists
-            try:
-                port = self._handler.adapter_agent.get_logical_port(self._handler.logical_device_id,
-                                                           self.port_id_name())
-                self._handler.adapter_agent.delete_logical_port(self._handler.logical_device_id, port)
-
-            except Exception as e:
-                # assume this exception was because logical port does not already exist
-                pass
-
-            self._logical_port_number = None
-
-        port_no = openflow_port_no or self._ofp_port_no
-
-        if self._logical_port_number is None and port_no is not None:
-            self._logical_port_number = port_no
-
-            device = self._handler.adapter_agent.get_device(self._handler.device_id)
-
-            # leave the ports down until omci mib download has finished.  otherwise flows push before time
-            openflow_port = ofp_port(
-                port_no=port_no,
-                hw_addr=mac_str_to_tuple('08:%02x:%02x:%02x:%02x:%02x' %
-                                         ((device.parent_port_no >> 8 & 0xff),
-                                          device.parent_port_no & 0xff,
-                                          (port_no >> 16) & 0xff,
-                                          (port_no >> 8) & 0xff,
-                                          port_no & 0xff)),
-                name=device.serial_number + ['', '-' + str(self._mac_bridge_port_num)][multi_uni_naming],
-                config=0,
-                state=OFPPS_LINK_DOWN,
-                curr=capabilities,
-                advertised=capabilities,
-                peer=capabilities,
-                curr_speed=speed,
-                max_speed=speed
-            )
-            self._handler.adapter_agent.add_logical_port(self._handler.logical_device_id,
-                                                         LogicalPort(
-                                                             id=self.port_id_name(),
-                                                             ofp_port=openflow_port,
-                                                             device_id=device.id,
-                                                             device_port_no=self._port_number))
-
-            self.log.debug('logical-port', id=self.port_id_name(), device_port_no=self._port_number, openflow_port=openflow_port)
