@@ -157,7 +157,7 @@ class BrcmTpServiceSpecificTask(Task):
         failed_mask = omci_msg.get('failed_attributes_mask', 'n/a')
         unsupported_mask = omci_msg.get('unsupported_attributes_mask', 'n/a')
 
-        self.log.debug("OMCI Result: %s", operation, omci_msg=omci_msg, status=status, error_mask=error_mask,
+        self.log.debug("OMCI Result", operation=operation, omci_msg=omci_msg, status=status, error_mask=error_mask,
                        failed_mask=failed_mask, unsupported_mask=unsupported_mask)
 
         if status == RC.Success:
