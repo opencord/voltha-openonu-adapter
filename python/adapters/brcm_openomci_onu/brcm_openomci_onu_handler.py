@@ -1029,6 +1029,7 @@ class BrcmOpenomciOnuHandler(object):
         self.log.debug('function-entry')
 
         uni_no = self.mk_uni_port_num(self._onu_indication.intf_id, self._onu_indication.onu_id, uni_id)
+        intf_id = self._onu_indication.intf_id
 
         # TODO: Some or parts of this likely need to move to UniPort. especially the format stuff
         uni_name = "uni-{}".format(uni_no)
@@ -1046,6 +1047,20 @@ class BrcmOpenomciOnuHandler(object):
         self.log.debug("created-uni-port", uni=uni_port)
 
         yield self.core_proxy.port_created(device.id, uni_port.get_port())
+
+        uni_port_parent = uni_port.get_port()
+        my_peer = Port.PeerPort(device_id=device.id, port_no=self._pon_port_number)
+        uni_port_parent.peers.extend([my_peer])
+        yield self.core_proxy.port_created(device.parent_id, uni_port_parent)
+
+        pon_port = self._pon.get_port()
+        self.core_proxy.delete_peer_port_reference(self.device_id, pon_port)
+        d = [i for i, e in enumerate(pon_port.peers) if
+            e.port_no == intf_id and e.device_id == device.parent_id]
+        if len(d) > 0:
+            pon_port.peers[d[0]].port_no = uni_port.port_number
+            yield self.core_proxy.add_peer_port_reference(device.id, pon_port)
+            self._pon._port = pon_port
 
         self._unis[uni_port.port_number] = uni_port
 

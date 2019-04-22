@@ -49,6 +49,7 @@ class UniPort(object):
         self._mac_bridge_port_num = 0
         self._type = type
         self._uni_id = uni_id
+        self._peers = []
 
         self._admin_state = AdminState.ENABLED
         self._oper_status = OperStatus.ACTIVE
@@ -158,7 +159,8 @@ class UniPort(object):
                           label=self.port_id_name(),
                           type=Port.ETHERNET_UNI,
                           admin_state=self._admin_state,
-                          oper_status=self._oper_status)
+                          oper_status=self._oper_status,
+                          peers=self._peers)
         return self._port
 
     def port_id_name(self):
