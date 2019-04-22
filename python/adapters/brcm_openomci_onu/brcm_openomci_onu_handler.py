@@ -176,9 +176,14 @@ class BrcmOpenomciOnuHandler(object):
                                   (port_no >> 8) & 0xff,
                                    port_no & 0xff))
 
+        uni_port = self.uni_port(int(port_no))
+        name = device.serial_number + '-' + str(uni_port.mac_bridge_port_num)
+        self.log.debug('ofp_port_name', port_no=port_no, name=name)
+
         return PortCapability(
             port=LogicalPort(
                 ofp_port=ofp_port(
+                    name=name,
                     hw_addr=hw_addr,
                     config=0,
                     state=OFPPS_LIVE,
@@ -214,10 +219,8 @@ class BrcmOpenomciOnuHandler(object):
             device.reason = 'activating-onu'
 
             # TODO NEW CORE:  Need to either get logical device id from core or use regular device id
-            # pm_metrics requires a logical device id
-            #parent_device = yield self.adapter_agent.get_device(device.parent_id)
-            #self.logical_device_id = parent_device.parent_id
-            #assert self.logical_device_id, 'Invalid logical device ID'
+            # pm_metrics requires a logical device id.  For now set to just device_id
+            self.logical_device_id = self.device_id
 
             yield self.core_proxy.device_update(device)
 
