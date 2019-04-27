@@ -484,6 +484,8 @@ class BrcmOpenomciOnuHandler(object):
             _push_tpid = None
             _field = None
             _set_vlan_vid = None
+            _tunnel_id = None
+
             self.log.debug('bulk-flow-update', device_id=device.id, flow=flow)
             try:
                 _in_port = fd.get_in_port(flow)
@@ -552,6 +554,11 @@ class BrcmOpenomciOnuHandler(object):
                         _metadata = field.table_metadata
                         self.log.debug('field-type-metadata',
                                        metadata=_metadata)
+
+                    elif field.type == fd.TUNNEL_ID:
+                        _tunnel_id = field.tunnel_id
+                        self.log.debug('field-type-tunnel-id',
+                                       tunnel_id=_tunnel_id)
 
                     else:
                         raise NotImplementedError('field.type={}'.format(
