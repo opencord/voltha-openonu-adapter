@@ -215,7 +215,7 @@ class BrcmOpenomciOnuAdapter(object):
                  device_id=proxy_address.device_id, msg=hexify(msg))
         # Device_id from the proxy_address is the olt device id. We need to
         # get the onu device id using the port number in the proxy_address
-        device = self.adapter_agent. \
+        device = self.core_proxy. \
             get_child_device_with_proxy_address(proxy_address)
         if device:
             handler = self.devices_handlers[device.id]
@@ -231,7 +231,7 @@ class BrcmOpenomciOnuAdapter(object):
         assert proxy_address is not None
         # Device_id from the proxy_address is the olt device id. We need to
         # get the onu device id using the port number in the proxy_address
-        device = self.adapter_agent. \
+        device = self.core_proxy. \
             get_child_device_with_proxy_address(proxy_address)
         if device:
             handler = self.devices_handlers[device.id]
