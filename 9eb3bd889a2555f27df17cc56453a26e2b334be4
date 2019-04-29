@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "358b8efb_6f23e55e",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 218,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2019-04-29T15:39:43Z",
+      "side": 1,
+      "message": "going to need an @inlineCallbacks",
+      "range": {
+        "startLine": 218,
+        "startChar": 17,
+        "endLine": 218,
+        "endChar": 32
+      },
+      "revId": "9eb3bd889a2555f27df17cc56453a26e2b334be4",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "23b15e44_0200523c",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 234,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2019-04-29T15:39:43Z",
+      "side": 1,
+      "message": "same as above",
+      "range": {
+        "startLine": 234,
+        "startChar": 17,
+        "endLine": 234,
+        "endChar": 32
+      },
+      "revId": "9eb3bd889a2555f27df17cc56453a26e2b334be4",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    }
+  ]
+}
