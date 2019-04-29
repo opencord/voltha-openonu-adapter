@@ -21,6 +21,8 @@ This adapter does NOT support XPON
 """
 
 from twisted.internet import reactor, task
+from twisted.internet.defer import inlineCallbacks
+
 from zope.interface import implementer
 
 from pyvoltha.adapters.interface import IAdapterInterface
@@ -210,12 +212,13 @@ class BrcmOpenomciOnuAdapter(object):
     def send_proxied_message(self, proxy_address, msg):
         log.debug('send-proxied-message', proxy_address=proxy_address, msg=msg)
 
+    @inlineCallbacks
     def receive_proxied_message(self, proxy_address, msg):
         log.debug('receive-proxied-message', proxy_address=proxy_address,
                  device_id=proxy_address.device_id, msg=hexify(msg))
         # Device_id from the proxy_address is the olt device id. We need to
         # get the onu device id using the port number in the proxy_address
-        device = self.adapter_agent. \
+        device = self.core_proxy. \
             get_child_device_with_proxy_address(proxy_address)
         if device:
             handler = self.devices_handlers[device.id]
@@ -225,13 +228,14 @@ class BrcmOpenomciOnuAdapter(object):
         log.info('packet-out', logical_device_id=logical_device_id,
                  egress_port_no=egress_port_no, msg_len=len(msg))
 
+    @inlineCallbacks
     def receive_inter_adapter_message(self, msg):
         log.debug('receive_inter_adapter_message', msg=msg)
         proxy_address = msg['proxy_address']
         assert proxy_address is not None
         # Device_id from the proxy_address is the olt device id. We need to
         # get the onu device id using the port number in the proxy_address
-        device = self.adapter_agent. \
+        device = self.core_proxy. \
             get_child_device_with_proxy_address(proxy_address)
         if device:
             handler = self.devices_handlers[device.id]
