@@ -73,7 +73,7 @@ class HeartBeat(object):
 
     @property
     def check_value(self):
-        # device = self._handler.adapter_agent.get_device(self._device_id)
+        # device = self._handler.core_proxy.get_device(self._device_id)
         # return device.serial_number
         return 'ADTN'
 
@@ -142,7 +142,7 @@ class HeartBeat(object):
         """
         Check the number of heartbeat failures against the limit and emit an alarm if needed
         """
-        device = self._handler.adapter_agent.get_device(self._device_id)
+        device = self._handler.core_proxy.get_device(self._device_id)
 
         try:
             from pyvoltha.adapters.extensions.alarms.heartbeat_alarm import HeartbeatAlarm
@@ -153,7 +153,7 @@ class HeartBeat(object):
                     device.connect_status = ConnectStatus.UNREACHABLE
                     device.oper_status = OperStatus.FAILED
                     device.reason = self.heartbeat_last_reason
-                    self._handler.adapter_agent.update_device(device)
+                    self._handler.core_proxy.update_device(device)
                     HeartbeatAlarm(self._handler.alarms, 'onu', self._heartbeat_miss).raise_alarm()
                     self._alarm_active = True
                     self.on_heartbeat_alarm(True)
@@ -163,7 +163,7 @@ class HeartBeat(object):
                     device.connect_status = ConnectStatus.REACHABLE
                     device.oper_status = OperStatus.ACTIVE
                     device.reason = ''
-                    self._handler.adapter_agent.update_device(device)
+                    self._handler.core_proxy.update_device(device)
                     HeartbeatAlarm(self._handler.alarms, 'onu').clear_alarm()
 
                     self._alarm_active = False

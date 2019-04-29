@@ -210,7 +210,6 @@ class BrcmOpenomciOnuHandler(object):
         self.proxy_address = device.proxy_address
         self.parent_id = device.parent_id
         self._pon_port_number = device.parent_port_no
-
         if self.enabled is not True:
             self.log.info('activating-new-onu')
             # populate what we know.  rest comes later after mib sync
@@ -259,16 +258,13 @@ class BrcmOpenomciOnuHandler(object):
             self.log.info('onu-already-activated')
 
     # Called once when the adapter needs to re-create device.  usually on vcore restart
+    @inlineCallbacks
     def reconcile(self, device):
         self.log.debug('function-entry', device=device)
 
         # first we verify that we got parent reference and proxy info
         assert device.parent_id
         assert device.proxy_address.device_id
-
-        # register for proxied messages right away
-        self.proxy_address = device.proxy_address
-        self.adapter_agent.register_for_proxied_messages(device.proxy_address)
 
         if self.enabled is not True:
             self.log.info('reconciling-broadcom-onu-device')
@@ -278,7 +274,7 @@ class BrcmOpenomciOnuHandler(object):
             # need to restart state machines on vcore restart.  there is no indication to do it for us.
             self._onu_omci_device.start()
             device.reason = "restarting-openomci"
-            self.adapter_agent.update_device(device)
+            yield self.core_proxy.update_device(device)
 
             # TODO: this is probably a bit heavy handed
             # Force a reboot for now.  We need indications to reflow to reassign tconts and gems given vcore went away
@@ -310,19 +306,6 @@ class BrcmOpenomciOnuHandler(object):
         # Port startup
         if self._pon is not None:
             self._pon.enabled = True
-
-    # TODO: move to UniPort
-    def update_logical_port(self, logical_device_id, port_id, state):
-        try:
-            self.log.info('updating-logical-port', logical_port_id=port_id,
-                          logical_device_id=logical_device_id, state=state)
-            logical_port = self.adapter_agent.get_logical_port(logical_device_id,
-                                                               port_id)
-            logical_port.ofp_port.state = state
-            self.adapter_agent.update_logical_port(logical_device_id,
-                                                   logical_port)
-        except Exception as e:
-            self.log.exception("exception-updating-port", e=e)
 
     def delete(self, device):
         self.log.info('delete-onu', device=device)
@@ -424,22 +407,24 @@ class BrcmOpenomciOnuHandler(object):
                 tp = ast.literal_eval(tp)
                 self.log.debug("tp-instance", tp=tp)
                 self._do_tech_profile_configuration(uni_id, tp)
-
+                
+                @inlineCallbacks
                 def success(_results):
                     self.log.info("tech-profile-config-done-successfully")
-                    device = self.adapter_agent.get_device(self.device_id)
+                    device = yield self.core_proxy.get_device(self.device_id)
                     device.reason = 'tech-profile-config-download-success'
-                    self.adapter_agent.update_device(device)
+                    yield self.core_proxy.update_device(device)
                     if tp_path in self._tp_service_specific_task[uni_id]:
                         del self._tp_service_specific_task[uni_id][tp_path]
                     self._tech_profile_download_done[uni_id][tp_path] = True
 
+                @inlineCallbacks
                 def failure(_reason):
                     self.log.warn('tech-profile-config-failure-retrying',
                                    _reason=_reason)
-                    device = self.adapter_agent.get_device(self.device_id)
+                    device = yield self.core_proxy.get_device(self.device_id)
                     device.reason = 'tech-profile-config-download-failure-retrying'
-                    self.adapter_agent.update_device(device)
+                    yield self.core_proxy.update_device(device)
                     if tp_path in self._tp_service_specific_task[uni_id]:
                         del self._tp_service_specific_task[uni_id][tp_path]
                     self._deferred = reactor.callLater(_STARTUP_RETRY_WAIT, self.load_and_configure_tech_profile,
@@ -720,15 +705,16 @@ class BrcmOpenomciOnuHandler(object):
             onu_device.reason = "stopping-openomci"
             onu_device.connect_status = ConnectStatus.UNREACHABLE
             onu_device.oper_status = OperStatus.DISCOVERED
-            self.adapter_agent.update_device(onu_device)
+            yield self.core_proxy.update_device(onu_device)
         else:
             self.log.debug('not-changing-openomci-statemachine')
 
     # Not currently called by olt or anything else
+    @inlineCallbacks
     def remove_interface(self, data):
         self.log.debug('function-entry', data=data)
 
-        onu_device = self.adapter_agent.get_device(self.device_id)
+        onu_device = yield self.core_proxy.get_device(self.device_id)
 
         self.log.debug('stopping-openomci-statemachine')
         reactor.callLater(0, self._onu_omci_device.stop)
@@ -741,22 +727,24 @@ class BrcmOpenomciOnuHandler(object):
 
         self.disable_ports(onu_device)
         onu_device.reason = "stopping-openomci"
-        self.adapter_agent.update_device(onu_device)
+        yield self.core_proxy.update_device(onu_device)
 
         # TODO: im sure there is more to do here
 
     # Not currently called.  Would be called presumably from the olt handler
+    @inlineCallbacks
     def remove_gemport(self, data):
         self.log.debug('remove-gemport', data=data)
-        device = self.adapter_agent.get_device(self.device_id)
+        device = yield self.core_proxy.get_device(self.device_id)
         if device.connect_status != ConnectStatus.REACHABLE:
             self.log.error('device-unreachable')
             return
 
     # Not currently called.  Would be called presumably from the olt handler
+    @inlineCallbacks
     def remove_tcont(self, tcont_data, traffic_descriptor_data):
         self.log.debug('remove-tcont', tcont_data=tcont_data, traffic_descriptor_data=traffic_descriptor_data)
-        device = self.adapter_agent.get_device(self.device_id)
+        device = yield self.core_proxy.get_device(self.device_id)
         if device.connect_status != ConnectStatus.REACHABLE:
             self.log.error('device-unreachable')
             return
@@ -769,6 +757,7 @@ class BrcmOpenomciOnuHandler(object):
 
         # TODO: create objects and populate for later omci calls
 
+    @inlineCallbacks
     def disable(self, device):
         self.log.debug('function-entry', device=device)
         try:
@@ -788,7 +777,7 @@ class BrcmOpenomciOnuHandler(object):
                 self.disable_ports(device)
                 device.oper_status = OperStatus.UNKNOWN
                 device.reason = "omci-admin-lock"
-                self.adapter_agent.update_device(device)
+                yield self.core_proxy.update_device(device)
 
             # lock all the unis
             task = BrcmUniLockTask(self.omci_agent, self.device_id, lock=True)
@@ -797,6 +786,7 @@ class BrcmOpenomciOnuHandler(object):
         except Exception as e:
             log.exception('exception-in-onu-disable', exception=e)
 
+    @inlineCallbacks
     def reenable(self, device):
         self.log.debug('function-entry', device=device)
         try:
@@ -805,26 +795,28 @@ class BrcmOpenomciOnuHandler(object):
             self.log.debug('restarting-openomci-statemachine')
             self._subscribe_to_events()
             device.reason = "restarting-openomci"
-            self.adapter_agent.update_device(device)
+            yield self.core_proxy.update_device(device)
             reactor.callLater(1, self._onu_omci_device.start)
             self._heartbeat.enabled = True
         except Exception as e:
             log.exception('exception-in-onu-reenable', exception=e)
 
+    @inlineCallbacks
     def reboot(self):
         self.log.info('reboot-device')
-        device = self.adapter_agent.get_device(self.device_id)
+        device = yield self.core_proxy.get_device(self.device_id)
         if device.connect_status != ConnectStatus.REACHABLE:
             self.log.error("device-unreachable")
             return
 
+        @inlineCallbacks
         def success(_results):
             self.log.info('reboot-success', _results=_results)
             self.disable_ports(device)
             device.connect_status = ConnectStatus.UNREACHABLE
             device.oper_status = OperStatus.DISCOVERED
             device.reason = "rebooting"
-            self.adapter_agent.update_device(device)
+            yield self.core_proxy.update_device(device)
 
         def failure(_reason):
             self.log.info('reboot-failure', _reason=_reason)
@@ -832,38 +824,40 @@ class BrcmOpenomciOnuHandler(object):
         self._deferred = self._onu_omci_device.reboot()
         self._deferred.addCallbacks(success, failure)
 
+    @inlineCallbacks
     def disable_ports(self, onu_device):
         self.log.info('disable-ports', device_id=self.device_id,
                       onu_device=onu_device)
 
         # Disable all ports on that device
-        self.adapter_agent.disable_all_ports(self.device_id)
+        yield self.core_proxy.disable_all_ports(self.device_id)
 
-        parent_device = self.adapter_agent.get_device(onu_device.parent_id)
+        parent_device = yield self.core_proxy.get_device(onu_device.parent_id)
         assert parent_device
         logical_device_id = parent_device.parent_id
         assert logical_device_id
-        ports = self.adapter_agent.get_ports(onu_device.id, Port.ETHERNET_UNI)
-        for port in ports:
-            port_id = 'uni-{}'.format(port.port_no)
-            # TODO: move to UniPort
-            self.update_logical_port(logical_device_id, port_id, OFPPS_LINK_DOWN)
+        ports = yield self.core_proxy.get_ports(onu_device.id, Port.ETHERNET_UNI)
+        #TODO this should all be handled by the core
+        #for port in ports:
+        #    port_id = 'uni-{}'.format(port.port_no)
+        #    self.update_logical_port(logical_device_id, port_id, OFPPS_LINK_DOWN)
 
+    @inlineCallbacks
     def enable_ports(self, onu_device):
         self.log.info('enable-ports', device_id=self.device_id, onu_device=onu_device)
 
         # Disable all ports on that device
-        self.adapter_agent.enable_all_ports(self.device_id)
+        self.core_proxy.enable_all_ports(self.device_id)
 
-        parent_device = self.adapter_agent.get_device(onu_device.parent_id)
+        parent_device = yield self.core_proxy.get_device(onu_device.parent_id)
         assert parent_device
         logical_device_id = parent_device.parent_id
         assert logical_device_id
-        ports = self.adapter_agent.get_ports(onu_device.id, Port.ETHERNET_UNI)
-        for port in ports:
-            port_id = 'uni-{}'.format(port.port_no)
-            # TODO: move to UniPort
-            self.update_logical_port(logical_device_id, port_id, OFPPS_LIVE)
+        ports = yield self.core_proxy.get_ports(onu_device.id, Port.ETHERNET_UNI)
+        #TODO this should be handled by the core
+        #for port in ports:
+        #    port_id = 'uni-{}'.format(port.port_no)
+        #    self.update_logical_port(logical_device_id, port_id, OFPPS_LIVE)
 
     # Called just before openomci state machine is started.  These listen for events from selected state machines,
     # most importantly, mib in sync.  Which ultimately leads to downloading the mib
