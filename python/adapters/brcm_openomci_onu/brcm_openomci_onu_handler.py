@@ -274,7 +274,7 @@ class BrcmOpenomciOnuHandler(object):
             # need to restart state machines on vcore restart.  there is no indication to do it for us.
             self._onu_omci_device.start()
             device.reason = "restarting-openomci"
-            yield self.core_proxy.update_device(device)
+            yield self.core_proxy.device_update(device)
 
             # TODO: this is probably a bit heavy handed
             # Force a reboot for now.  We need indications to reflow to reassign tconts and gems given vcore went away
@@ -413,7 +413,7 @@ class BrcmOpenomciOnuHandler(object):
                     self.log.info("tech-profile-config-done-successfully")
                     device = yield self.core_proxy.get_device(self.device_id)
                     device.reason = 'tech-profile-config-download-success'
-                    yield self.core_proxy.update_device(device)
+                    yield self.core_proxy.device_update(device)
                     if tp_path in self._tp_service_specific_task[uni_id]:
                         del self._tp_service_specific_task[uni_id][tp_path]
                     self._tech_profile_download_done[uni_id][tp_path] = True
@@ -424,7 +424,7 @@ class BrcmOpenomciOnuHandler(object):
                                    _reason=_reason)
                     device = yield self.core_proxy.get_device(self.device_id)
                     device.reason = 'tech-profile-config-download-failure-retrying'
-                    yield self.core_proxy.update_device(device)
+                    yield self.core_proxy.device_update(device)
                     if tp_path in self._tp_service_specific_task[uni_id]:
                         del self._tp_service_specific_task[uni_id][tp_path]
                     self._deferred = reactor.callLater(_STARTUP_RETRY_WAIT, self.load_and_configure_tech_profile,
@@ -609,14 +609,18 @@ class BrcmOpenomciOnuHandler(object):
     def _add_vlan_filter_task(self, device, uni_port, _set_vlan_vid):
         assert uni_port is not None
 
+        @inlineCallbacks
         def success(_results):
             self.log.info('vlan-tagging-success', uni_port=uni_port, vlan=_set_vlan_vid)
             device.reason = 'omci-flows-pushed'
+            yield self.core_proxy.device_update(device)
             self._vlan_filter_task = None
 
+        @inlineCallbacks
         def failure(_reason):
             self.log.warn('vlan-tagging-failure', uni_port=uni_port, vlan=_set_vlan_vid)
             device.reason = 'omci-flows-failed-retrying'
+            yield self.core_proxy.device_update(device)
             self._vlan_filter_task = reactor.callLater(_STARTUP_RETRY_WAIT,
                                                        self._add_vlan_filter_task, device, uni_port, _set_vlan_vid)
 
@@ -705,7 +709,7 @@ class BrcmOpenomciOnuHandler(object):
             onu_device.reason = "stopping-openomci"
             onu_device.connect_status = ConnectStatus.UNREACHABLE
             onu_device.oper_status = OperStatus.DISCOVERED
-            yield self.core_proxy.update_device(onu_device)
+            yield self.core_proxy.device_update(onu_device)
         else:
             self.log.debug('not-changing-openomci-statemachine')
 
@@ -727,7 +731,7 @@ class BrcmOpenomciOnuHandler(object):
 
         self.disable_ports(onu_device)
         onu_device.reason = "stopping-openomci"
-        yield self.core_proxy.update_device(onu_device)
+        yield self.core_proxy.device_update(onu_device)
 
         # TODO: im sure there is more to do here
 
@@ -777,7 +781,7 @@ class BrcmOpenomciOnuHandler(object):
                 self.disable_ports(device)
                 device.oper_status = OperStatus.UNKNOWN
                 device.reason = "omci-admin-lock"
-                yield self.core_proxy.update_device(device)
+                yield self.core_proxy.device_update(device)
 
             # lock all the unis
             task = BrcmUniLockTask(self.omci_agent, self.device_id, lock=True)
@@ -795,7 +799,7 @@ class BrcmOpenomciOnuHandler(object):
             self.log.debug('restarting-openomci-statemachine')
             self._subscribe_to_events()
             device.reason = "restarting-openomci"
-            yield self.core_proxy.update_device(device)
+            yield self.core_proxy.device_update(device)
             reactor.callLater(1, self._onu_omci_device.start)
             self._heartbeat.enabled = True
         except Exception as e:
@@ -816,7 +820,7 @@ class BrcmOpenomciOnuHandler(object):
             device.connect_status = ConnectStatus.UNREACHABLE
             device.oper_status = OperStatus.DISCOVERED
             device.reason = "rebooting"
-            yield self.core_proxy.update_device(device)
+            yield self.core_proxy.device_update(device)
 
         def failure(_reason):
             self.log.info('reboot-failure', _reason=_reason)
