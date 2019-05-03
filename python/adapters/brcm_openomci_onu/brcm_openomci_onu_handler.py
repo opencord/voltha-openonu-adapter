@@ -768,12 +768,12 @@ class BrcmOpenomciOnuHandler(object):
 
         # TODO: create objects and populate for later omci calls
 
-    @inlineCallbacks
     def disable(self, device):
         self.log.debug('function-entry', device=device)
         try:
             self.log.info('sending-uni-lock-towards-device', device=device)
 
+            @inlineCallbacks
             def stop_anyway(reason):
                 # proceed with disable regardless if we could reach the onu. for example onu is unplugged
                 self.log.debug('stopping-openomci-statemachine')
@@ -837,38 +837,17 @@ class BrcmOpenomciOnuHandler(object):
 
     @inlineCallbacks
     def disable_ports(self, onu_device):
-        self.log.info('disable-ports', device_id=self.device_id,
-                      onu_device=onu_device)
+        self.log.info('disable-ports', device_id=self.device_id, onu_device=onu_device)
 
         # Disable all ports on that device
-        yield self.core_proxy.disable_all_ports(self.device_id)
-
-        parent_device = yield self.core_proxy.get_device(onu_device.parent_id)
-        assert parent_device
-        logical_device_id = parent_device.parent_id
-        assert logical_device_id
-        ports = yield self.core_proxy.get_ports(onu_device.id, Port.ETHERNET_UNI)
-        #TODO this should all be handled by the core
-        #for port in ports:
-        #    port_id = 'uni-{}'.format(port.port_no)
-        #    self.update_logical_port(logical_device_id, port_id, OFPPS_LINK_DOWN)
+        yield self.core_proxy.ports_state_update(self.device_id, OperStatus.UNKNOWN)
 
     @inlineCallbacks
     def enable_ports(self, onu_device):
         self.log.info('enable-ports', device_id=self.device_id, onu_device=onu_device)
 
-        # Disable all ports on that device
-        self.core_proxy.enable_all_ports(self.device_id)
-
-        parent_device = yield self.core_proxy.get_device(onu_device.parent_id)
-        assert parent_device
-        logical_device_id = parent_device.parent_id
-        assert logical_device_id
-        ports = yield self.core_proxy.get_ports(onu_device.id, Port.ETHERNET_UNI)
-        #TODO this should be handled by the core
-        #for port in ports:
-        #    port_id = 'uni-{}'.format(port.port_no)
-        #    self.update_logical_port(logical_device_id, port_id, OFPPS_LIVE)
+        # Enable all ports on that device
+        yield self.core_proxy.ports_state_update(self.device_id, OperStatus.ACTIVE)
 
     # Called just before openomci state machine is started.  These listen for events from selected state machines,
     # most importantly, mib in sync.  Which ultimately leads to downloading the mib
