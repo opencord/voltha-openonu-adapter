@@ -27,6 +27,7 @@ from twisted.internet import reactor, task
 from twisted.internet.defer import DeferredQueue, inlineCallbacks, returnValue, TimeoutError
 
 from heartbeat import HeartBeat
+from pyvoltha.adapters.extensions.alarms.onu.onu_active_alarm import OnuActiveAlarm
 from pyvoltha.adapters.extensions.kpi.onu.onu_pm_metrics import OnuPmMetrics
 from pyvoltha.adapters.extensions.kpi.onu.onu_omci_pm import OnuOmciPmMetrics
 from pyvoltha.adapters.extensions.alarms.adapter_alarms import AdapterAlarms
@@ -206,6 +207,7 @@ class BrcmOpenomciOnuHandler(object):
         assert device.parent_id
         assert device.parent_port_no
         assert device.proxy_address.device_id
+        assert device.serial_number
 
         self.proxy_address = device.proxy_address
         self.parent_id = device.parent_id
@@ -229,7 +231,7 @@ class BrcmOpenomciOnuHandler(object):
 
             self.log.debug('set-device-discovered')
 
-            self._init_pon_state(device)
+            yield self._init_pon_state(device)
 
             ############################################################################
             # Setup PM configuration for this device
@@ -240,7 +242,8 @@ class BrcmOpenomciOnuHandler(object):
                 OnuOmciPmMetrics.OMCI_DEV_KEY: self._onu_omci_device
             }
             self.pm_metrics = OnuPmMetrics(self.core_proxy, self.device_id,
-                                           self.logical_device_id, grouped=True,
+                                           self.logical_device_id, device.serial_number,
+                                           grouped=True,
                                            freq_override=False, **kwargs)
             pm_config = self.pm_metrics.make_proto()
             self._onu_omci_device.set_pm_config(self.pm_metrics.omci_pm.openomci_interval_pm)
@@ -249,7 +252,7 @@ class BrcmOpenomciOnuHandler(object):
 
             ############################################################################
             # Setup Alarm handler
-            self.alarms = AdapterAlarms(self.core_proxy, device.id, self.logical_device_id)
+            self.alarms = AdapterAlarms(self.core_proxy, device.id, self.logical_device_id, device.serial_number)
             # Note, ONU ID and UNI intf set in add_uni_port method
             self._onu_omci_device.alarm_synchronizer.set_alarm_params(mgr=self.alarms,
                                                                       ani_ports=[self._pon])
@@ -991,6 +994,7 @@ class BrcmOpenomciOnuHandler(object):
                                             oper_status=OperStatus.ACTIVE, connect_status=ConnectStatus.REACHABLE)
                     yield self.core_proxy.device_update(device)
                     self._mib_download_task = None
+                    yield self.onu_active_alarm()
 
                 @inlineCallbacks
                 def failure(_reason):
@@ -1049,3 +1053,29 @@ class BrcmOpenomciOnuHandler(object):
         assert onu_id < MAX_ONUS_PER_PON
         assert uni_id < MAX_UNIS_PER_ONU
         return intf_id << 11 | onu_id << 4 | uni_id
+
+    @inlineCallbacks
+    def onu_active_alarm(self):
+        self.log.debug('function-entry')
+        try:
+            device = yield self.core_proxy.get_device(self.device_id)
+            parent_device = yield self.core_proxy.get_device(self.parent_id)
+            olt_serial_number = parent_device.serial_number
+
+            self.log.debug("onu-indication-context-data",
+                       pon_id=self._onu_indication.intf_id,
+                       registration_id=self.device_id,
+                       device_id=self.device_id,
+                       onu_serial_number=device.serial_number,
+                       olt_serial_number=olt_serial_number)
+
+            self.log.debug("Trying to raise alarm")
+            OnuActiveAlarm(self.alarms, self.device_id,
+                           self._onu_indication.intf_id,
+                           device.serial_number,
+                           str(self.device_id),
+                           olt_serial_number).raise_alarm()
+        except Exception as active_alarm_error:
+            self.log.exception('onu-activated-alarm-error',
+                               errmsg=active_alarm_error.message)
+
