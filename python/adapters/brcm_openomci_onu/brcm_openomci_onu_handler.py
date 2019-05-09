@@ -980,7 +980,7 @@ class BrcmOpenomciOnuHandler(object):
             self.log.info('device-info-already-loaded', in_sync=in_sync, already_loaded=self._dev_info_loaded)
 
         if self._dev_info_loaded:
-            if device.admin_state == AdminState.ENABLED:
+            if device.admin_state == AdminState.PREPROVISIONED or device.admin_state == AdminState.ENABLED:
 
                 @inlineCallbacks
                 def success(_results):
