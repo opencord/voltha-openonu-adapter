@@ -58,7 +58,10 @@ help:
 
 build: docker-build
 
-local-protos: 
+# only test is that the docker container builds
+test: docker-build
+
+local-protos:
 	mkdir -p local_imports
 ifdef LOCAL_PROTOS
 	mkdir -p local_imports/voltha-protos/dist
