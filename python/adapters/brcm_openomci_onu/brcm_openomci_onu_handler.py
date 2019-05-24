@@ -719,9 +719,10 @@ class BrcmOpenomciOnuHandler(object):
 
             self.disable_ports(onu_device)
             onu_device.reason = "stopping-openomci"
+            yield self.core_proxy.device_update(onu_device)
             onu_device.connect_status = ConnectStatus.UNREACHABLE
             onu_device.oper_status = OperStatus.DISCOVERED
-            yield self.core_proxy.device_update(onu_device)
+            yield self.core_proxy.device_state_update(self.device_id, onu_device.oper_status,onu_device.connect_status)
         else:
             self.log.debug('not-changing-openomci-statemachine')
 
@@ -992,6 +993,7 @@ class BrcmOpenomciOnuHandler(object):
                     self.log.info('mib-download-success', _results=_results)
                     device = yield self.core_proxy.get_device(self.device_id)
                     device.reason = 'initial-mib-downloaded'
+                    yield self.enable_ports(device)
                     yield self.core_proxy.device_state_update(device.id,
                                             oper_status=OperStatus.ACTIVE, connect_status=ConnectStatus.REACHABLE)
                     yield self.core_proxy.device_update(device)
