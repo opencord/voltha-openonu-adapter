@@ -223,15 +223,17 @@ class BrcmOpenomciOnuHandler(object):
             self.logical_device_id = self.device_id
 
             yield self.core_proxy.device_update(device)
+	    #We commented out the line below because it is now being done in openolt-adapter,
+	    #in onuDiscovery step. Line can be removed after tests.
+            #yield self.core_proxy.device_state_update(device.id, oper_status=OperStatus.DISCOVERED,
+            #                                             connect_status=ConnectStatus.REACHABLE)
 
-            yield self.core_proxy.device_state_update(device.id, oper_status=OperStatus.DISCOVERED,
-                                                         connect_status=ConnectStatus.REACHABLE)
 
-
-            self.log.debug('set-device-discovered')
+            self.log.debug('device updated', device=device)
 
             yield self._init_pon_state(device)
 
+            self.log.debug('pon state initialized', device=device)
             ############################################################################
             # Setup PM configuration for this device
             # Pass in ONU specific options
@@ -1052,7 +1054,7 @@ class BrcmOpenomciOnuHandler(object):
     # TODO NEW CORE: Figure out how to gain this knowledge from the olt.  for now cheat terribly.
     def mk_uni_port_num(self, intf_id, onu_id, uni_id):
         MAX_PONS_PER_OLT = 16
-        MAX_ONUS_PER_PON = 32
+        MAX_ONUS_PER_PON = 128
         MAX_UNIS_PER_ONU = 16
 
         assert intf_id < MAX_PONS_PER_OLT
