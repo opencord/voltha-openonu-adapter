@@ -153,7 +153,7 @@ class HeartBeat(object):
                     device.connect_status = ConnectStatus.UNREACHABLE
                     device.oper_status = OperStatus.FAILED
                     device.reason = self.heartbeat_last_reason
-                    self._handler.core_proxy.update_device(device)
+                    self._handler.core_proxy.device_update(device)
                     HeartbeatAlarm(self._handler.alarms, 'onu', self._heartbeat_miss).raise_alarm()
                     self._alarm_active = True
                     self.on_heartbeat_alarm(True)
@@ -163,7 +163,7 @@ class HeartBeat(object):
                     device.connect_status = ConnectStatus.REACHABLE
                     device.oper_status = OperStatus.ACTIVE
                     device.reason = ''
-                    self._handler.core_proxy.update_device(device)
+                    self._handler.core_proxy.device_update(device)
                     HeartbeatAlarm(self._handler.alarms, 'onu').clear_alarm()
 
                     self._alarm_active = False
