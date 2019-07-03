@@ -240,9 +240,10 @@ class BrcmOpenomciOnuHandler(object):
                 'heartbeat': self.heartbeat,
                 OnuOmciPmMetrics.OMCI_DEV_KEY: self._onu_omci_device
             }
+            self.log.debug('create-OnuPmMetrics', serial_number=device.serial_number)
             self.pm_metrics = OnuPmMetrics(self.core_proxy, self.device_id,
-                                           self.logical_device_id, grouped=True,
-                                           freq_override=False, **kwargs)
+                                           self.logical_device_id, device.serial_number,
+                                           grouped=True, freq_override=False, **kwargs)
             pm_config = self.pm_metrics.make_proto()
             self._onu_omci_device.set_pm_config(self.pm_metrics.omci_pm.openomci_interval_pm)
             self.log.info("initial-pm-config", pm_config=pm_config)
@@ -250,7 +251,8 @@ class BrcmOpenomciOnuHandler(object):
 
             ############################################################################
             # Setup Alarm handler
-            self.alarms = AdapterAlarms(self.core_proxy, device.id, self.logical_device_id)
+            self.alarms = AdapterAlarms(self.core_proxy, device.id, self.logical_device_id,
+                                        device.serial_number)
             # Note, ONU ID and UNI intf set in add_uni_port method
             self._onu_omci_device.alarm_synchronizer.set_alarm_params(mgr=self.alarms,
                                                                       ani_ports=[self._pon])

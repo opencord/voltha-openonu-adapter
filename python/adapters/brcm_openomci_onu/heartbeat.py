@@ -14,6 +14,7 @@
 
 import structlog
 from twisted.internet import reactor
+from twisted.internet.defer import inlineCallbacks
 from voltha_protos.common_pb2 import OperStatus, ConnectStatus
 from pyvoltha.adapters.extensions.omci.omci_me import OntGFrame
 
@@ -138,6 +139,7 @@ class HeartBeat(object):
         #  TODO: If failed (active = true) due to bad serial-number shut off the UNI port?
         pass
 
+    @inlineCallbacks
     def heartbeat_check_status(self, results):
         """
         Check the number of heartbeat failures against the limit and emit an alarm if needed
@@ -153,7 +155,7 @@ class HeartBeat(object):
                     device.connect_status = ConnectStatus.UNREACHABLE
                     device.oper_status = OperStatus.FAILED
                     device.reason = self.heartbeat_last_reason
-                    self._handler.core_proxy.update_device(device)
+                    yield self._handler.core_proxy.device_update(device)
                     HeartbeatAlarm(self._handler.alarms, 'onu', self._heartbeat_miss).raise_alarm()
                     self._alarm_active = True
                     self.on_heartbeat_alarm(True)
@@ -163,7 +165,7 @@ class HeartBeat(object):
                     device.connect_status = ConnectStatus.REACHABLE
                     device.oper_status = OperStatus.ACTIVE
                     device.reason = ''
-                    self._handler.core_proxy.update_device(device)
+                    yield self._handler.core_proxy.device_update(device)
                     HeartbeatAlarm(self._handler.alarms, 'onu').clear_alarm()
 
                     self._alarm_active = False
