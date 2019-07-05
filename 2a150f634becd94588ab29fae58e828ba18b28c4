@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f7ba120f_14913980",
+        "filename": "python/adapters/brcm_openomci_onu/heartbeat.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2019-07-05T15:09:21Z",
+      "side": 1,
+      "message": "device_update or any function in core_proxy should yield",
+      "range": {
+        "startLine": 156,
+        "startChar": 45,
+        "endLine": 156,
+        "endChar": 58
+      },
+      "revId": "2a150f634becd94588ab29fae58e828ba18b28c4",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0af6708f_892c7bf4",
+        "filename": "python/adapters/brcm_openomci_onu/heartbeat.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 166,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2019-07-05T15:09:21Z",
+      "side": 1,
+      "message": "same as above",
+      "range": {
+        "startLine": 166,
+        "startChar": 45,
+        "endLine": 166,
+        "endChar": 58
+      },
+      "revId": "2a150f634becd94588ab29fae58e828ba18b28c4",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    }
+  ]
+}
