@@ -19,6 +19,7 @@ Broadcom OpenOMCI OLT/ONU adapter handler.
 """
 
 import ast
+import arrow
 import structlog
 
 from collections import OrderedDict
@@ -27,10 +28,10 @@ from twisted.internet import reactor, task
 from twisted.internet.defer import DeferredQueue, inlineCallbacks, returnValue, TimeoutError
 
 from heartbeat import HeartBeat
-from pyvoltha.adapters.extensions.alarms.onu.onu_active_alarm import OnuActiveAlarm
-from pyvoltha.adapters.extensions.kpi.onu.onu_pm_metrics import OnuPmMetrics
-from pyvoltha.adapters.extensions.kpi.onu.onu_omci_pm import OnuOmciPmMetrics
-from pyvoltha.adapters.extensions.alarms.adapter_alarms import AdapterAlarms
+from pyvoltha.adapters.extensions.events.device_events.onu.onu_active_event import OnuActiveEvent
+from pyvoltha.adapters.extensions.events.kpi.onu.onu_pm_metrics import OnuPmMetrics
+from pyvoltha.adapters.extensions.events.kpi.onu.onu_omci_pm import OnuOmciPmMetrics
+from pyvoltha.adapters.extensions.events.adapter_events import AdapterEvents
 
 import pyvoltha.common.openflow.utils as fd
 from pyvoltha.common.utils.registry import registry
@@ -79,7 +80,7 @@ class BrcmOpenomciOnuHandler(object):
         self.proxy_address = None
         self.tx_id = 0
         self._enabled = False
-        self.alarms = None
+        self.events = None
         self.pm_metrics = None
         self._omcc_version = OMCCVersion.Unknown
         self._total_tcont_count = 0  # From ANI-G ME
@@ -239,6 +240,10 @@ class BrcmOpenomciOnuHandler(object):
 
             self.log.debug('pon state initialized', device=device)
             ############################################################################
+            # Setup Alarm handler
+            self.events = AdapterEvents(self.core_proxy, device.id, self.logical_device_id,
+                                        device.serial_number)
+            ############################################################################
             # Setup PM configuration for this device
             # Pass in ONU specific options
             kwargs = {
@@ -247,7 +252,7 @@ class BrcmOpenomciOnuHandler(object):
                 OnuOmciPmMetrics.OMCI_DEV_KEY: self._onu_omci_device
             }
             self.log.debug('create-OnuPmMetrics', serial_number=device.serial_number)
-            self.pm_metrics = OnuPmMetrics(self.core_proxy, self.device_id,
+            self.pm_metrics = OnuPmMetrics(self.events, self.core_proxy, self.device_id,
                                            self.logical_device_id, device.serial_number,
                                            grouped=True, freq_override=False, **kwargs)
             pm_config = self.pm_metrics.make_proto()
@@ -255,12 +260,8 @@ class BrcmOpenomciOnuHandler(object):
             self.log.info("initial-pm-config", pm_config=pm_config)
             yield self.core_proxy.device_pm_config_update(pm_config, init=True)
 
-            ############################################################################
-            # Setup Alarm handler
-            self.alarms = AdapterAlarms(self.core_proxy, device.id, self.logical_device_id,
-                                        device.serial_number)
             # Note, ONU ID and UNI intf set in add_uni_port method
-            self._onu_omci_device.alarm_synchronizer.set_alarm_params(mgr=self.alarms,
+            self._onu_omci_device.alarm_synchronizer.set_alarm_params(mgr=self.events,
                                                                       ani_ports=[self._pon])
 
             #Start collecting stats from the device after a brief pause
@@ -1036,7 +1037,7 @@ class BrcmOpenomciOnuHandler(object):
                                             oper_status=OperStatus.ACTIVE, connect_status=ConnectStatus.REACHABLE)
                     yield self.core_proxy.device_update(device)
                     self._mib_download_task = None
-                    yield self.onu_active_alarm()
+                    yield self.onu_active_event()
 
                 @inlineCallbacks
                 def failure(_reason):
@@ -1097,27 +1098,31 @@ class BrcmOpenomciOnuHandler(object):
         return intf_id << 11 | onu_id << 4 | uni_id
 
     @inlineCallbacks
-    def onu_active_alarm(self):
+    def onu_active_event(self):
         self.log.debug('function-entry')
         try:
             device = yield self.core_proxy.get_device(self.device_id)
             parent_device = yield self.core_proxy.get_device(self.parent_id)
             olt_serial_number = parent_device.serial_number
+            raised_ts = arrow.utcnow().timestamp
 
             self.log.debug("onu-indication-context-data",
                        pon_id=self._onu_indication.intf_id,
+                       onu_id=self._onu_indication.onu_id,
                        registration_id=self.device_id,
                        device_id=self.device_id,
                        onu_serial_number=device.serial_number,
-                       olt_serial_number=olt_serial_number)
+                       olt_serial_number=olt_serial_number,
+                       raised_ts=raised_ts)
 
-            self.log.debug("Trying to raise alarm")
-            OnuActiveAlarm(self.alarms, self.device_id,
+            self.log.debug("Trying-to-raise-onu-active-event")
+            OnuActiveEvent(self.events, self.device_id,
                            self._onu_indication.intf_id,
                            device.serial_number,
                            str(self.device_id),
-                           olt_serial_number).raise_alarm()
-        except Exception as active_alarm_error:
-            self.log.exception('onu-activated-alarm-error',
-                               errmsg=active_alarm_error.message)
+                           olt_serial_number,raised_ts,
+                           onu_id=self._onu_indication.onu_id).send(True)
+        except Exception as active_event_error:
+            self.log.exception('onu-activated-event-error',
+                               errmsg=active_event_error.message)
 
