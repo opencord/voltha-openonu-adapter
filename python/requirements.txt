@@ -60,4 +60,4 @@ pexpect==4.6.0
 python-consul==0.6.2
 afkak==3.0.0.dev20181106
 voltha-protos==1.0.0
-pyvoltha==2.1.1
+pyvoltha==2.1.2
