@@ -168,6 +168,7 @@ services:
       "--kafka_adapter=${DOCKER_HOST_IP}:9092",
       "--kafka_cluster=${DOCKER_HOST_IP}:9092",
       "--core_topic=rwcore"
+      "--event_topic=voltha.events"
     ]
     networks:
     - default
