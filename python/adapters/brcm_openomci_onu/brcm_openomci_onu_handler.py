@@ -1035,7 +1035,7 @@ class BrcmOpenomciOnuHandler(object):
         mac_bridge_port_num = uni_id + 1 # TODO +1 is only to test non-zero index
 
         self.log.debug('uni-port-inputs', uni_no=uni_no, uni_id=uni_id, uni_name=uni_name, uni_type=uni_type,
-                       entity_id=entity_id, mac_bridge_port_num=mac_bridge_port_num)
+                       entity_id=entity_id, mac_bridge_port_num=mac_bridge_port_num, serial_number=device.serial_number)
 
         uni_port = UniPort.create(self, uni_name, uni_id, uni_no, uni_name, uni_type)
         uni_port.entity_id = entity_id
@@ -1049,7 +1049,7 @@ class BrcmOpenomciOnuHandler(object):
         self._unis[uni_port.port_number] = uni_port
 
         self._onu_omci_device.alarm_synchronizer.set_alarm_params(onu_id=self._onu_indication.onu_id,
-                                                                  uni_ports=self._unis.values())
+                                                                  uni_ports=self._unis.values(), serial_number=device.serial_number)
 
     # TODO NEW CORE: Figure out how to gain this knowledge from the olt.  for now cheat terribly.
     def mk_uni_port_num(self, intf_id, onu_id, uni_id):
