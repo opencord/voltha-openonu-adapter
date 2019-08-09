@@ -968,6 +968,9 @@ class BrcmOpenomciOnuHandler(object):
                     try:
                         yield self._add_uni_port(device, entity_id, uni_id, uni_type)
                         uni_id += 1
+                        # TODO: Resource manager and Tech Profile can only support one UNI per ONU
+                        # Only add the first discovered UNI
+                        break
                     except AssertionError as e:
                         self.log.warn("could not add UNI", entity_id=entity_id, uni_type=uni_type, e=e)
 
