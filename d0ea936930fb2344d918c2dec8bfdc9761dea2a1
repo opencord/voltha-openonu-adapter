@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "57402c37_2a23406e",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 971,
+      "author": {
+        "id": 1000127
+      },
+      "writtenOn": "2019-08-11T14:57:23Z",
+      "side": 1,
+      "message": "What is the issue you see in resource manager and techprofile module for multi-uni ? I can have a look at it.",
+      "revId": "d0ea936930fb2344d918c2dec8bfdc9761dea2a1",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    }
+  ]
+}
