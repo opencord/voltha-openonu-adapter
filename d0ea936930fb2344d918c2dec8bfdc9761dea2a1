@@ -16,6 +16,24 @@
       "revId": "d0ea936930fb2344d918c2dec8bfdc9761dea2a1",
       "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "753fa8bd_05c27707",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 971,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2019-08-12T15:01:44Z",
+      "side": 1,
+      "message": "Ill attach the BAL and openolt agent logs to a ticket.  Basically its a combination of \"Entry already exists\" and:\n\n[00752.750: E MAC_UTIL_PON_0      ] bal_mac_util_xgpon.c 2304| maple_xgpon_us_alloc_id_add: rc \u003d No resources, agg_id \u003d 1026 if_id \u003d 0, sla \u003d {g bw: 445952000, max bw: 446080000, cb_nrt_bw: 0, cb_rt_bw: 0}\n[00752.750: E MAC_UTIL_PON_0      ] bal_mac_util_xgpon.c 2308| err_text \u003d\n[00752.750: E MAC_UTIL_PON_0      ] bal_mac_util_common_pon.c 569| maple_mac_agg_port_add failed with error No resources",
+      "parentUuid": "57402c37_2a23406e",
+      "revId": "d0ea936930fb2344d918c2dec8bfdc9761dea2a1",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
     }
   ]
 }
