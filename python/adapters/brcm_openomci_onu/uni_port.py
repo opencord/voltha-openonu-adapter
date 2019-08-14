@@ -51,7 +51,7 @@ class UniPort(object):
         self._uni_id = uni_id
 
         self._admin_state = AdminState.ENABLED
-        self._oper_status = OperStatus.ACTIVE
+        self._oper_status = OperStatus.DISCOVERED
 
     def __str__(self):
         return "UniPort - name: {}, port_number: {}, entity_id: {}, mac_bridge_port_num: {}, type: {}, ofp_port: {}"\
@@ -68,7 +68,7 @@ class UniPort(object):
     def _start(self):
         self._cancel_deferred()
         self._admin_state = AdminState.ENABLED
-        self._oper_status = OperStatus.ACTIVE
+        self._oper_status = OperStatus.ACTIVATING
 
     def _stop(self):
         self._cancel_deferred()
@@ -81,6 +81,22 @@ class UniPort(object):
 
     def _cancel_deferred(self):
         pass
+
+    @property
+    def adminstate(self):
+        return self._admin_state
+
+    @adminstate.setter
+    def adminstate(self, value):
+        self._admin_state = value
+
+    @property
+    def operstatus(self):
+        return self._oper_status
+
+    @operstatus.setter
+    def operstatus(self, value):
+        self._oper_status = value
 
     @property
     def name(self):

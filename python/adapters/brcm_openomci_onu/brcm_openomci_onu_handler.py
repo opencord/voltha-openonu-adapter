@@ -181,13 +181,17 @@ class BrcmOpenomciOnuHandler(object):
         name = device.serial_number + '-' + str(uni_port.mac_bridge_port_num)
         self.log.debug('ofp_port_name', port_no=port_no, name=name)
 
+        ofstate = OFPPS_LINK_DOWN
+        if uni_port.operstatus is OperStatus.ACTIVE:
+            ofstate = OFPPS_LIVE
+
         return PortCapability(
             port=LogicalPort(
                 ofp_port=ofp_port(
                     name=name,
                     hw_addr=hw_addr,
                     config=0,
-                    state=OFPPS_LIVE,
+                    state=ofstate,
                     curr=cap,
                     advertised=cap,
                     peer=cap,
@@ -850,6 +854,9 @@ class BrcmOpenomciOnuHandler(object):
         self.log.info('disable-ports', device_id=self.device_id, onu_device=onu_device)
 
         # Disable all ports on that device
+        for port in self.uni_ports:
+            port.operstate = OperStatus.UNKNOWN
+
         yield self.core_proxy.ports_state_update(self.device_id, OperStatus.UNKNOWN)
 
     @inlineCallbacks
@@ -857,6 +864,9 @@ class BrcmOpenomciOnuHandler(object):
         self.log.info('enable-ports', device_id=self.device_id, onu_device=onu_device)
 
         # Enable all ports on that device
+        for port in self.uni_ports:
+            port.operstate = OperStatus.ACTIVE
+
         yield self.core_proxy.ports_state_update(self.device_id, OperStatus.ACTIVE)
 
     # Called just before openomci state machine is started.  These listen for events from selected state machines,
