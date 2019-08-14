@@ -74,7 +74,6 @@ class BrcmUniLockTask(Task):
         super(BrcmUniLockTask, self).start()
         self._local_deferred = reactor.callLater(0, self.perform_lock)
 
-    @inlineCallbacks
     def perform_lock(self):
         """
         Perform the lock/unlock
@@ -88,53 +87,51 @@ class BrcmUniLockTask(Task):
             pptp_list = sorted(self._config.pptp_entities) if self._config.pptp_entities else []
             veip_list = sorted(self._config.veip_entities) if self._config.veip_entities else []
 
-            for entity_id in pptp_list:
-                pptp_value = self._config.pptp_entities[entity_id]
-                msg = PptpEthernetUniFrame(entity_id,
-                                           attributes=dict(administrative_state=state))
-                yield self._send_uni_lock_msg(entity_id, pptp_value, msg)
+            if self._lock is True:
+                # lock unis first, ontg must be last
+                for entity_id in pptp_list:
+                    msg = PptpEthernetUniFrame(entity_id,
+                                               attributes=dict(administrative_state=state))
+                    self._send_omci_msg(msg)
 
-            for entity_id in veip_list:
-                veip_value = self._config.veip_entities[entity_id]
-                msg = VeipUniFrame(entity_id,
-                                   attributes=dict(administrative_state=state))
-                yield self._send_uni_lock_msg(entity_id, veip_value, msg)
+                for entity_id in veip_list:
+                    msg = VeipUniFrame(entity_id,
+                                       attributes=dict(administrative_state=state))
+                    self._send_omci_msg(msg)
 
-            msg = OntGFrame(attributes={'administrative_state': state})
-            frame = msg.set()
-            self.log.debug('openomci-msg', omci_msg=msg)
-            results = yield self._device.omci_cc.send(frame)
-            self.strobe_watchdog()
-
-            status = results.fields['omci_message'].fields['success_code']
-            self.log.info('response-status', status=status)
-
-            # Success?
-            if status in (RC.Success.value, RC.InstanceExists):
-                self.log.debug('set-lock-ontg', lock=self._lock)
+                msg = OntGFrame(attributes={'administrative_state': state})
+                self._send_omci_msg(msg)
             else:
-                self.log.warn('cannot-set-lock-ontg', lock=self._lock)
+                # ontg must be unlocked first, then unis
+                msg = OntGFrame(attributes={'administrative_state': state})
+                self._send_omci_msg(msg)
 
-            self.deferred.callback(self)
+                for entity_id in pptp_list:
+                    msg = PptpEthernetUniFrame(entity_id,
+                                               attributes=dict(administrative_state=state))
+                    self._send_omci_msg(msg)
+
+                for entity_id in veip_list:
+                    msg = VeipUniFrame(entity_id,
+                                       attributes=dict(administrative_state=state))
+                    self._send_omci_msg(msg)
+
+            self.deferred.callback('setting-uni-lock-state-finished')
 
         except Exception as e:
             self.log.exception('setting-uni-lock-state', e=e)
             self.deferred.errback(failure.Failure(e))
 
     @inlineCallbacks
-    def _send_uni_lock_msg(self, entity_id, value, me_message):
+    def _send_omci_msg(self, me_message):
         frame = me_message.set()
         self.log.debug('openomci-msg', omci_msg=me_message)
         results = yield self._device.omci_cc.send(frame)
         self.strobe_watchdog()
 
         status = results.fields['omci_message'].fields['success_code']
-        self.log.info('response-status', status=status)
+        self.log.debug('response-status', status=status)
 
         # Success?
-        if status in (RC.Success.value, RC.InstanceExists):
-            self.log.debug('set-lock-uni', uni=entity_id, value=value, lock=self._lock)
-        else:
-            self.log.warn('cannot-set-lock-uni', uni=entity_id, value=value, lock=self._lock)
-
-        returnValue(None)
+        if status not in (RC.Success.value, RC.InstanceExists):
+            raise BrcmUniLockException('openomci-set-failed')

@@ -185,13 +185,8 @@ class BrcmMibDownloadTask(Task):
                 yield self.perform_initial_bridge_setup()
 
                 for uni_port in self._handler.uni_ports:
-                    yield self.enable_uni(uni_port, True)
-
                     # Provision the initial bridge configuration
                     yield self.perform_uni_initial_bridge_setup(uni_port)
-
-                    # And re-enable the UNIs if needed
-                    yield self.enable_uni(uni_port, False)
 
                 self.deferred.callback('initial-download-success')
 
@@ -315,54 +310,6 @@ class BrcmMibDownloadTask(Task):
 
         except Exception as e:
             self.log.exception('omci-setup-initial-per-uni-setup', e=e)
-            raise
-
-        returnValue(None)
-
-    @inlineCallbacks
-    def enable_uni(self, uni_port, force_lock):
-        """
-        Lock or unlock a single uni port
-
-        :param uni_port: UniPort to admin up/down
-        :param force_lock: (boolean) If True, force lock regardless of enabled state
-        """
-        self.log.debug('function-entry')
-
-        omci_cc = self._onu_device.omci_cc
-        frame = None
-
-        ################################################################################
-        #  Lock/Unlock UNI  -  0 to Unlock, 1 to lock
-        #
-        #  EntityID is referenced by:
-        #            - MAC bridge port configuration data for the UNI side
-        #  References:
-        #            - Nothing
-        try:
-            state = 1 if force_lock or not uni_port.enabled else 0
-            msg = None
-            if uni_port.type.value == UniType.PPTP.value:
-                msg = PptpEthernetUniFrame(uni_port.entity_id,
-                                           attributes=dict(administrative_state=state))
-            elif uni_port.type.value == UniType.VEIP.value:
-                msg = VeipUniFrame(uni_port.entity_id,
-                                   attributes=dict(administrative_state=state))
-            else:
-                self.log.warn('unknown-uni-type', uni_port=uni_port)
-
-            if msg:
-               frame = msg.set()
-               self.log.debug('openomci-msg', omci_msg=msg)
-               results = yield omci_cc.send(frame)
-               self.check_status_and_state(results, 'set-pptp-ethernet-uni-lock-restore')
-
-        except TimeoutError as e:
-            self.log.warn('rx-timeout', e=e)
-            raise
-
-        except Exception as e:
-            self.log.exception('omci-failure', e=e)
             raise
 
         returnValue(None)
