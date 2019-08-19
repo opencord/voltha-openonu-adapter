@@ -109,6 +109,10 @@ class BrcmOpenomciOnuHandler(object):
 
         self._tp_service_specific_task = dict()
         self._tech_profile_download_done = dict()
+        # Stores information related to queued vlan filter tasks
+        # Dictionary with key being uni_id and value being device,uni port ,uni id and vlan id
+
+        self._queued_vlan_filter_task = dict()
 
         # Initialize KV store client
         self.args = registry('main').get_args()
@@ -383,6 +387,26 @@ class BrcmOpenomciOnuHandler(object):
 
             self.log.debug('pon-add-gemport', gem_port=gem_port)
 
+    def _execute_queued_vlan_filter_tasks(self, uni_id):
+        # During OLT Reboots, ONU Reboots, ONU Disable/Enable, it is seen that vlan_filter
+        # task is scheduled even before tp task. So we queue vlan-filter task if tp_task
+        # or initial-mib-download is not done. Once the tp_task is completed, we execute
+        # such queued vlan-filter tasks
+        try:
+            if uni_id in self._queued_vlan_filter_task:
+                self.log.info("executing-queued-vlan-filter-task",
+                              uni_id=uni_id)
+                filter_info = self._queued_vlan_filter_task[uni_id]
+                reactor.callLater(0, self._add_vlan_filter_task, filter_info.get("device"),
+                                  uni_id, filter_info.get("uni_port"), filter_info.get("set_vlan_vid"))
+                # Now remove the entry from the dictionary
+                self._queued_vlan_filter_task[uni_id].clear()
+                self.log.debug("executed-queued-vlan-filter-task",
+                               uni_id=uni_id)
+        except Exception as e:
+            self.log.error("vlan-filter-configuration-failed", uni_id=uni_id, error=e)
+
+
     def _do_tech_profile_configuration(self, uni_id, tp):
         num_of_tconts = tp['num_of_tconts']
         us_scheduler = tp['us_scheduler']
@@ -426,7 +450,8 @@ class BrcmOpenomciOnuHandler(object):
                     if tp_path in self._tp_service_specific_task[uni_id]:
                         del self._tp_service_specific_task[uni_id][tp_path]
                     self._tech_profile_download_done[uni_id][tp_path] = True
-
+                    # Now execute any vlan filter tasks that were queued for later
+                    self._execute_queued_vlan_filter_tasks(uni_id)
                 @inlineCallbacks
                 def failure(_reason):
                     self.log.warn('tech-profile-config-failure-retrying',
@@ -505,9 +530,11 @@ class BrcmOpenomciOnuHandler(object):
                 if is_downstream(_in_port):
                     self.log.debug('downstream-flow', in_port=_in_port, out_port=_out_port)
                     uni_port = self.uni_port(_out_port)
+                    uni_id = _out_port  & 0xF
                 elif is_upstream(_in_port):
                     self.log.debug('upstream-flow', in_port=_in_port, out_port=_out_port)
                     uni_port = self.uni_port(_in_port)
+                    uni_id = _in_port & 0xF
                 else:
                     raise Exception('port should be 1 or 2 by our convention')
 
@@ -615,35 +642,42 @@ class BrcmOpenomciOnuHandler(object):
                 elif _set_vlan_vid is None or _set_vlan_vid == 0:
                     self.log.warn('ignorning-flow-that-does-not-set-vlanid')
                 else:
-                    self.log.warn('set-vlanid', uni_id=uni_port.port_number, set_vlan_vid=_set_vlan_vid)
-                    self._add_vlan_filter_task(device, uni_port, _set_vlan_vid)
-
+                    self.log.warn('set-vlanid', uni_id=uni_id, uni_port=uni_port, set_vlan_vid=_set_vlan_vid)
+                    self._add_vlan_filter_task(device, uni_id, uni_port, _set_vlan_vid)
             except Exception as e:
                 self.log.exception('failed-to-install-flow', e=e, flow=flow)
 
 
-    def _add_vlan_filter_task(self, device, uni_port, _set_vlan_vid):
+
+    def _add_vlan_filter_task(self, device,uni_id, uni_port, _set_vlan_vid):
         assert uni_port is not None
+        if uni_id in self._tech_profile_download_done and self._tech_profile_download_done[uni_id] != {}:
+            @inlineCallbacks
+            def success(_results):
+                self.log.info('vlan-tagging-success', uni_port=uni_port, vlan=_set_vlan_vid)
+                device.reason = 'omci-flows-pushed'
+                yield self.core_proxy.device_update(device)
+                self._vlan_filter_task = None
 
-        @inlineCallbacks
-        def success(_results):
-            self.log.info('vlan-tagging-success', uni_port=uni_port, vlan=_set_vlan_vid)
-            device.reason = 'omci-flows-pushed'
-            yield self.core_proxy.device_update(device)
-            self._vlan_filter_task = None
+            @inlineCallbacks
+            def failure(_reason):
+                self.log.warn('vlan-tagging-failure', uni_port=uni_port, vlan=_set_vlan_vid)
+                device.reason = 'omci-flows-failed-retrying'
+                yield self.core_proxy.device_update(device)
+                self._vlan_filter_task = reactor.callLater(_STARTUP_RETRY_WAIT,
+                                                       self._add_vlan_filter_task, device,uni_port.port_number, uni_port, _set_vlan_vid)
 
-        @inlineCallbacks
-        def failure(_reason):
-            self.log.warn('vlan-tagging-failure', uni_port=uni_port, vlan=_set_vlan_vid)
-            device.reason = 'omci-flows-failed-retrying'
-            yield self.core_proxy.device_update(device)
-            self._vlan_filter_task = reactor.callLater(_STARTUP_RETRY_WAIT,
-                                                       self._add_vlan_filter_task, device, uni_port, _set_vlan_vid)
-
-        self.log.info('setting-vlan-tag')
-        self._vlan_filter_task = BrcmVlanFilterTask(self.omci_agent, self.device_id, uni_port, _set_vlan_vid)
-        self._deferred = self._onu_omci_device.task_runner.queue_task(self._vlan_filter_task)
-        self._deferred.addCallbacks(success, failure)
+            self.log.info('setting-vlan-tag')
+            self._vlan_filter_task = BrcmVlanFilterTask(self.omci_agent, self.device_id, uni_port, _set_vlan_vid)
+            self._deferred = self._onu_omci_device.task_runner.queue_task(self._vlan_filter_task)
+            self._deferred.addCallbacks(success, failure)
+        else:
+            self.log.info('tp-service-specific-task-not-done-adding-request-to-local-cache',
+                          uni_id=uni_id)
+            self._queued_vlan_filter_task[uni_id] = {"device": device, \
+                                                     "uni_id":uni_id,
+                                                     "uni_port": uni_port,
+                                                     "set_vlan_vid": _set_vlan_vid}
 
     def get_tx_id(self):
         self.log.debug('function-entry')
