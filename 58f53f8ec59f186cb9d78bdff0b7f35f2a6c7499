@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "89fcebb7_e8b5dd5b",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 703,
+      "author": {
+        "id": 1000455
+      },
+      "writtenOn": "2019-08-19T18:09:11Z",
+      "side": 1,
+      "message": "The usage of core proxy here is not current with how 2.0 does it. 1) I am not sure if the core proxy is in the registry, but regardless, it should be accessed with self.core_proxy.\n2) parent_adapter \u003d parent_core_proxy.adapter.devices[parent_device.id]\nThis won\u0027t work with the 2.0 as parent adapter info needs to be obtained with a get_device call, using the parent device id. I believe we actually include the uni information in the flow metadata now, so this needs to be reconsidered.",
+      "revId": "58f53f8ec59f186cb9d78bdff0b7f35f2a6c7499",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cc9163b9_0cb11c50",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 752,
+      "author": {
+        "id": 1000455
+      },
+      "writtenOn": "2019-08-19T18:09:11Z",
+      "side": 1,
+      "message": "update_device should be device_update",
+      "revId": "58f53f8ec59f186cb9d78bdff0b7f35f2a6c7499",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    }
+  ]
+}
