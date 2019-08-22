@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4b4f5a9d_96834eb9",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 5
+      },
+      "lineNbr": 533,
+      "author": {
+        "id": 1000127
+      },
+      "writtenOn": "2019-08-22T08:00:17Z",
+      "side": 1,
+      "message": "I do not think we should do this in ONU adapter. This will tight-couple openonu and openolt adapters.",
+      "revId": "04d2cdb18db41c9086d9a618e1303663cce7b348",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1347f254_e3ca3826",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 5
+      },
+      "lineNbr": 537,
+      "author": {
+        "id": 1000127
+      },
+      "writtenOn": "2019-08-22T08:00:17Z",
+      "side": 1,
+      "message": "Same here",
+      "revId": "04d2cdb18db41c9086d9a618e1303663cce7b348",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    }
+  ]
+}
