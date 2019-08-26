@@ -21,6 +21,7 @@ from pyvoltha.adapters.extensions.omci.omci_me import *
 
 RC = ReasonCodes
 OP = EntityOperations
+RESERVED_VLAN = 4095
 
 
 class BrcmVlanFilterException(Exception):
@@ -94,12 +95,16 @@ class BrcmVlanFilterTask(Task):
             self.strobe_watchdog()
             results = yield self._device.omci_cc.send(frame)
             self.check_status_and_state(results, 'flow-delete-vlan-tagging-filter-data')
+            forward_operation = 0x10  # VID investigation
+            # When the PUSH VLAN is RESERVED_VLAN (4095), let ONU be transparent
+            if self._set_vlan_id == RESERVED_VLAN:
+                forward_operation = 0x00  # no investigation, ONU transparent
 
             # Re-Create bridge ani side vlan filter
             msg = VlanTaggingFilterDataFrame(
                 _mac_bridge_port_ani_entity_id + self._uni_port.mac_bridge_port_num,  # Entity ID
                 vlan_tcis=[self._set_vlan_id],  # VLAN IDs
-                forward_operation=0x10
+                forward_operation=forward_operation
             )
             frame = msg.create()
             self.log.debug('openomci-msg', omci_msg=msg)
@@ -109,32 +114,53 @@ class BrcmVlanFilterTask(Task):
 
             # Re-Create bridge ani side vlan filter
 
-            # Update uni side extended vlan filter
-            # filter for untagged
-            # probably for eapol
-            # TODO: Create constants for the operation values.  See omci spec
-            attributes = dict(
-                received_frame_vlan_tagging_operation_table=
-                VlanTaggingOperation(
-                    filter_outer_priority=15,
-                    filter_outer_vid=4096,
-                    filter_outer_tpid_de=0,
-
-                    filter_inner_priority=15,
-                    filter_inner_vid=4096,
-                    filter_inner_tpid_de=0,
-                    filter_ether_type=0,
-
-                    treatment_tags_to_remove=0,
-                    treatment_outer_priority=15,
-                    treatment_outer_vid=0,
-                    treatment_outer_tpid_de=0,
-
-                    treatment_inner_priority=0,
-                    treatment_inner_vid=self._set_vlan_id,
-                    treatment_inner_tpid_de=4
+            if self._set_vlan_id == RESERVED_VLAN:
+                # Transparently send any single tagged packet.
+                # Any other specific rules will take priority over this
+                attributes = dict(
+                    received_frame_vlan_tagging_operation_table=
+                    VlanTaggingOperation(
+                        filter_outer_priority=15,
+                        filter_outer_vid=4096,
+                        filter_outer_tpid_de=0,
+                        filter_inner_priority=14,
+                        filter_inner_vid=4096,
+                        filter_inner_tpid_de=0,
+                        filter_ether_type=0,
+                        treatment_tags_to_remove=0,
+                        treatment_outer_priority=15,
+                        treatment_outer_vid=0,
+                        treatment_outer_tpid_de=0,
+                        treatment_inner_priority=15,
+                        treatment_inner_vid=0,
+                        treatment_inner_tpid_de=4
+                    )
                 )
-            )
+            else:
+                # Update uni side extended vlan filter
+                # filter for untagged
+                # probably for eapol
+                # TODO: Create constants for the operation values.  See omci spec
+                attributes = dict(
+                    received_frame_vlan_tagging_operation_table=
+                    VlanTaggingOperation(
+                        filter_outer_priority=15,
+                        filter_outer_vid=4096,
+                        filter_outer_tpid_de=0,
+                        filter_inner_priority=15,
+                        filter_inner_vid=4096,
+                        filter_inner_tpid_de=0,
+                        filter_ether_type=0,
+                        treatment_tags_to_remove=0,
+                        treatment_outer_priority=15,
+                        treatment_outer_vid=0,
+                        treatment_outer_tpid_de=0,
+                        treatment_inner_priority=0,
+                        treatment_inner_vid=self._set_vlan_id,
+                        treatment_inner_tpid_de=4
+                    )
+                )
+
             msg = ExtendedVlanTaggingOperationConfigurationDataFrame(
                 _mac_bridge_service_profile_entity_id + self._uni_port.mac_bridge_port_num,  # Bridge Entity ID
                 attributes=attributes  # See above
@@ -214,3 +240,4 @@ class BrcmVlanFilterTask(Task):
 
         elif status == RC.InstanceExists:
             return False
+
