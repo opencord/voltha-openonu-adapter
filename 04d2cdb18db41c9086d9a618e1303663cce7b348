@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "9e461425_524978b3",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 5
+      },
+      "lineNbr": 533,
+      "author": {
+        "id": 1000127
+      },
+      "writtenOn": "2019-08-28T10:02:23Z",
+      "side": 1,
+      "message": "It seems mk_uni_port_num already assumes the OLT uni port number assignment logic. So, I guess this is \"OK\".\nIdeally the ONU adapter should not assume anything about olt adapter.",
+      "parentUuid": "4b4f5a9d_96834eb9",
+      "revId": "04d2cdb18db41c9086d9a618e1303663cce7b348",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1347f254_e3ca3826",
         "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
         "patchSetId": 5
