@@ -733,8 +733,8 @@ class BrcmOpenomciOnuHandler(object):
 
         self.log.debug('starting-openomci-statemachine')
         self._subscribe_to_events()
-        reactor.callLater(1, self._onu_omci_device.start)
         onu_device.reason = "starting-openomci"
+        reactor.callLater(1, self._onu_omci_device.start,onu_device)
         yield self.core_proxy.device_update(onu_device)
         self._heartbeat.enabled = True
 
