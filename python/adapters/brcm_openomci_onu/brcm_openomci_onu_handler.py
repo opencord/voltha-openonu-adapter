@@ -714,7 +714,7 @@ class BrcmOpenomciOnuHandler(object):
 
                 if onu_indication.oper_state == "up":
                     self.create_interface(onu_indication)
-                elif onu_indication.oper_state == "down":
+                elif onu_indication.oper_state == "down" or onu_indication.oper_state=="unreachable":
                     self.update_interface(onu_indication)
                 else:
                     self.log.error("unknown-onu-indication", onu_indication=onu_indication)
@@ -756,7 +756,9 @@ class BrcmOpenomciOnuHandler(object):
     def update_interface(self, onu_indication):
         self.log.debug('function-entry', onu_indication=onu_indication)
 
-        if onu_indication.oper_state == 'down':
+        onu_device = yield self.core_proxy.get_device(self.device_id)
+
+        if onu_indication.oper_state == 'down' or onu_indication.oper_state == "unreachable":
             self.log.debug('stopping-openomci-statemachine')
             reactor.callLater(0, self._onu_omci_device.stop)
 
