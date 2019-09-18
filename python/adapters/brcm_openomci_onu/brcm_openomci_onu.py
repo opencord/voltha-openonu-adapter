@@ -40,7 +40,6 @@ from pyvoltha.adapters.extensions.omci.database.mib_db_dict import MibDbVolatile
 
 from brcm_openomci_onu_handler import BrcmOpenomciOnuHandler
 from omci.brcm_capabilities_task import BrcmCapabilitiesTask
-from omci.brcm_mib_sync import BrcmMibSynchronizer
 from copy import deepcopy
 
 log = structlog.get_logger()
@@ -77,7 +76,7 @@ class BrcmOpenomciOnuAdapter(object):
         # Customize OpenOMCI for Broadcom ONUs
         self.broadcom_omci = deepcopy(OpenOmciAgentDefaults)
 
-        self.broadcom_omci['mib-synchronizer']['state-machine'] = BrcmMibSynchronizer
+        self.broadcom_omci['mib-synchronizer']['audit-delay'] = 0  # disable audits as brcm onu wont upload once provisioned
         self.broadcom_omci['mib-synchronizer']['database'] = MibDbVolatileDict
         self.broadcom_omci['alarm-synchronizer']['database'] = MibDbVolatileDict
         self.broadcom_omci['omci-capabilities']['tasks']['get-capabilities'] = BrcmCapabilitiesTask
