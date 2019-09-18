@@ -77,7 +77,7 @@ class BrcmOpenomciOnuAdapter(object):
         # Customize OpenOMCI for Broadcom ONUs
         self.broadcom_omci = deepcopy(OpenOmciAgentDefaults)
 
-        self.broadcom_omci['mib-synchronizer']['state-machine'] = BrcmMibSynchronizer
+        self.broadcom_omci['mib-synchronizer']['audit-delay'] = 0  # disable audits as brcm onu wont upload once provisioned
         self.broadcom_omci['mib-synchronizer']['database'] = MibDbVolatileDict
         self.broadcom_omci['alarm-synchronizer']['database'] = MibDbVolatileDict
         self.broadcom_omci['omci-capabilities']['tasks']['get-capabilities'] = BrcmCapabilitiesTask
