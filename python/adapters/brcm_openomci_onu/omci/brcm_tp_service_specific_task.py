@@ -21,8 +21,7 @@ from pyvoltha.adapters.extensions.omci.tasks.task import Task
 from pyvoltha.adapters.extensions.omci.omci_defs import *
 from pyvoltha.adapters.extensions.omci.omci_entities import *
 from adapters.brcm_openomci_onu.uni_port import *
-from adapters.brcm_openomci_onu.pon_port \
-    import BRDCM_DEFAULT_VLAN, TASK_PRIORITY, DEFAULT_TPID, DEFAULT_GEM_PAYLOAD
+from adapters.brcm_openomci_onu.pon_port import TASK_PRIORITY, DEFAULT_GEM_PAYLOAD
 
 
 OP = EntityOperations
@@ -54,7 +53,8 @@ class BrcmTpServiceSpecificTask(Task):
         Class initialization
 
         :param omci_agent: (OmciAdapterAgent) OMCI Adapter agent
-        :param device_id: (str) ONU Device ID
+        :param handler: (BrcmOpenomciOnuHandler) ONU Device Handler Instance
+        :param uni_id: (int) numeric id of the uni port on the onu device, starts at 0
         """
         log = structlog.get_logger(device_id=handler.device_id, uni_id=uni_id)
         log.debug('function-entry')
@@ -70,19 +70,8 @@ class BrcmTpServiceSpecificTask(Task):
         self._onu_device = omci_agent.get_device(handler.device_id)
         self._local_deferred = None
 
-        # Frame size
-        self._max_gem_payload = DEFAULT_GEM_PAYLOAD
-
         self._uni_port = handler.uni_ports[uni_id]
         assert self._uni_port.uni_id == uni_id
-
-        # Port numbers
-        self._input_tpid = DEFAULT_TPID
-        self._output_tpid = DEFAULT_TPID
-
-        self._vlan_tcis_1 = BRDCM_DEFAULT_VLAN
-        self._cvid = BRDCM_DEFAULT_VLAN
-        self._vlan_config_entity_id = self._vlan_tcis_1
 
         # Entity IDs. IDs with values can probably be most anything for most ONUs,
         #             IDs set to None are discovered/set
@@ -411,113 +400,12 @@ class BrcmTpServiceSpecificTask(Task):
             results = yield omci_cc.send(frame)
             self.check_status_and_state(results, 'set-8021p-mapper-service-profile-ul')
 
-            ################################################################################
-            # Create Extended VLAN Tagging Operation config (PON-side)
-            #
-            #  EntityID relates to the VLAN TCIS
-            #  References:
-            #            - VLAN TCIS from previously created VLAN Tagging filter data
-            #            - PPTP Ethernet or VEIP UNI
-            #
-
-            # TODO: do this for all uni/ports...
-            # TODO: magic.  static variable for assoc_type
-
-            # default to PPTP
-            if self._uni_port.type.value == UniType.VEIP.value:
-                association_type = 10
-            elif self._uni_port.type.value == UniType.PPTP.value:
-                association_type = 2
-            else:
-                association_type = 2
-
-            attributes = dict(
-                association_type=association_type,                  # Assoc Type, PPTP/VEIP Ethernet UNI
-                associated_me_pointer=self._uni_port.entity_id,      # Assoc ME, PPTP/VEIP Entity Id
-
-                # See VOL-1311 - Need to set table during create to avoid exception
-                # trying to read back table during post-create-read-missing-attributes
-                # But, because this is a R/W attribute. Some ONU may not accept the
-                # value during create. It is repeated again in a set below.
-                input_tpid=self._input_tpid,  # input TPID
-                output_tpid=self._output_tpid,  # output TPID
-            )
-
-            msg = ExtendedVlanTaggingOperationConfigurationDataFrame(
-                self._mac_bridge_service_profile_entity_id + self._uni_port.mac_bridge_port_num,  # Bridge Entity ID
-                attributes=attributes
-            )
-
-            frame = msg.create()
-            self.log.debug('openomci-msg', omci_msg=msg)
-            results = yield omci_cc.send(frame)
-            self.check_status_and_state(results, 'create-extended-vlan-tagging-operation-configuration-data')
-
-            attributes = dict(
-                # Specifies the TPIDs in use and that operations in the downstream direction are
-                # inverse to the operations in the upstream direction
-                input_tpid=self._input_tpid,    # input TPID
-                output_tpid=self._output_tpid,  # output TPID
-                downstream_mode=0,              # inverse of upstream
-            )
-
-            msg = ExtendedVlanTaggingOperationConfigurationDataFrame(
-                self._mac_bridge_service_profile_entity_id + self._uni_port.mac_bridge_port_num,  # Bridge Entity ID
-                attributes=attributes
-            )
-
-            frame = msg.set()
-            self.log.debug('openomci-msg', omci_msg=msg)
-            results = yield omci_cc.send(frame)
-            self.check_status_and_state(results, 'set-extended-vlan-tagging-operation-configuration-data')
-
-            attributes = dict(
-                # parameters: Entity Id ( 0x900), Filter Inner Vlan Id(0x1000-4096,do not filter on Inner vid,
-                #             Treatment Inner Vlan Id : 2
-
-                # Update uni side extended vlan filter
-                # filter for untagged
-                # probably for eapol
-                # TODO: lots of magic
-                # TODO: magic 0x1000 / 4096?
-                received_frame_vlan_tagging_operation_table=
-                VlanTaggingOperation(
-                    filter_outer_priority=15,  # This entry is not a double-tag rule
-                    filter_outer_vid=4096,     # Do not filter on the outer VID value
-                    filter_outer_tpid_de=0,    # Do not filter on the outer TPID field
-
-                    filter_inner_priority=15,
-                    filter_inner_vid=4096,
-                    filter_inner_tpid_de=0,
-                    filter_ether_type=0,
-
-                    treatment_tags_to_remove=0,
-                    treatment_outer_priority=15,
-                    treatment_outer_vid=0,
-                    treatment_outer_tpid_de=0,
-
-                    treatment_inner_priority=0,
-                    treatment_inner_vid=self._cvid,
-                    treatment_inner_tpid_de=4,
-                )
-            )
-
-            msg = ExtendedVlanTaggingOperationConfigurationDataFrame(
-                self._mac_bridge_service_profile_entity_id + self._uni_port.mac_bridge_port_num,  # Bridge Entity ID
-                attributes=attributes
-            )
-
-            frame = msg.set()
-            self.log.debug('openomci-msg', omci_msg=msg)
-            results = yield omci_cc.send(frame)
-            self.check_status_and_state(results, 'set-extended-vlan-tagging-operation-configuration-data-table')
-
             self.deferred.callback("tech-profile-download-success")
 
         except TimeoutError as e:
-            self.log.warn('rx-timeout-2', e=e)
+            self.log.warn('rx-timeout-tech-profile', e=e)
             self.deferred.errback(failure.Failure(e))
 
         except Exception as e:
-            self.log.exception('omci-setup-2', e=e)
+            self.log.exception('omci-setup-tech-profile', e=e)
             self.deferred.errback(failure.Failure(e))
