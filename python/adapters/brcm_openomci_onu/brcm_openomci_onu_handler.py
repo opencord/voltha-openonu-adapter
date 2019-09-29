@@ -230,12 +230,6 @@ class BrcmOpenomciOnuHandler(object):
             self.logical_device_id = self.device_id
 
             yield self.core_proxy.device_update(device)
-	    #We commented out the line below because it is now being done in openolt-adapter,
-	    #in onuDiscovery step. Line can be removed after tests.
-            #yield self.core_proxy.device_state_update(device.id, oper_status=OperStatus.DISCOVERED,
-            #                                             connect_status=ConnectStatus.REACHABLE)
-
-
             self.log.debug('device updated', device=device)
 
             yield self._init_pon_state()
@@ -651,13 +645,12 @@ class BrcmOpenomciOnuHandler(object):
                         self.log.error('unsupported-action-type',
                                        action_type=action.type, in_port=_in_port)
 
-                # TODO: We only set vlan omci flows.  Handle omci matching ethertypes at some point in another task
-                if _type is not None:
-                    self.log.warn('ignoring-flow-with-ethType', ethType=_type)
-                elif _set_vlan_vid is None or _set_vlan_vid == 0:
-                    self.log.warn('ignorning-flow-that-does-not-set-vlanid')
+                # OMCI set vlan task can only filter and set on vlan header attributes.  Any other openflow
+                # supported match and action criteria cannot be handled by omci and must be ignored.
+                if _set_vlan_vid is None or _set_vlan_vid == 0:
+                    self.log.warn('ignoring-flow-that-does-not-set-vlanid')
                 else:
-                    self.log.warn('set-vlanid', uni_id=uni_id, uni_port=uni_port, set_vlan_vid=_set_vlan_vid)
+                    self.log.info('set-vlanid', uni_id=uni_id, uni_port=uni_port, set_vlan_vid=_set_vlan_vid)
                     self._add_vlan_filter_task(device, uni_id, uni_port, _set_vlan_vid)
             except Exception as e:
                 self.log.exception('failed-to-install-flow', e=e, flow=flow)
@@ -681,13 +674,13 @@ class BrcmOpenomciOnuHandler(object):
                                                        self._add_vlan_filter_task, device,uni_port.port_number, uni_port, _set_vlan_vid)
 
             self.log.info('setting-vlan-tag')
-            self._vlan_filter_task = BrcmVlanFilterTask(self.omci_agent, self.device_id, uni_port, _set_vlan_vid)
+            self._vlan_filter_task = BrcmVlanFilterTask(self.omci_agent, self, uni_port, _set_vlan_vid)
             self._deferred = self._onu_omci_device.task_runner.queue_task(self._vlan_filter_task)
             self._deferred.addCallbacks(success, failure)
         else:
             self.log.info('tp-service-specific-task-not-done-adding-request-to-local-cache',
                           uni_id=uni_id)
-            self._queued_vlan_filter_task[uni_id] = {"device": device, \
+            self._queued_vlan_filter_task[uni_id] = {"device": device,
                                                      "uni_id":uni_id,
                                                      "uni_port": uni_port,
                                                      "set_vlan_vid": _set_vlan_vid}
