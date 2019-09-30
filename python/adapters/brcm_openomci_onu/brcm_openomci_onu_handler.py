@@ -867,7 +867,7 @@ class BrcmOpenomciOnuHandler(object):
             self._subscribe_to_events()
             device.reason = "restarting-openomci"
             yield self.core_proxy.device_update(device)
-            reactor.callLater(1, self._onu_omci_device.start)
+            reactor.callLater(1, self._onu_omci_device.start, device)
             self._heartbeat.enabled = True
         except Exception as e:
             log.exception('exception-in-onu-reenable', exception=e)
