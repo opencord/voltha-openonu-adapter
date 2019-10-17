@@ -34,6 +34,24 @@
       "revId": "e1874f5034735ae95dcbfb862423248308a15e9f",
       "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "468ad04f_ccb819be",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 304,
+      "author": {
+        "id": 1000056
+      },
+      "writtenOn": "2019-10-17T19:12:24Z",
+      "side": 1,
+      "message": "That should not be the case with the new events protos.  Can you please raise a Jira to track this cleanup?  Thanks.",
+      "parentUuid": "ad065af3_bce02e74",
+      "revId": "e1874f5034735ae95dcbfb862423248308a15e9f",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
     }
   ]
 }
