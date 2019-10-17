@@ -16,6 +16,24 @@
       "revId": "e1874f5034735ae95dcbfb862423248308a15e9f",
       "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ad065af3_bce02e74",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 304,
+      "author": {
+        "id": 1000218
+      },
+      "writtenOn": "2019-10-17T18:58:05Z",
+      "side": 1,
+      "message": "It seems that it is used in OnuPmMetrics and AdapterEvents.\nNote: PM and Alarm initializations/configurations should be discussed to be added to reconcile.",
+      "parentUuid": "57021ddd_cec41cbe",
+      "revId": "e1874f5034735ae95dcbfb862423248308a15e9f",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
     }
   ]
 }
