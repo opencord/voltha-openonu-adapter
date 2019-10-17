@@ -52,6 +52,24 @@
       "revId": "e1874f5034735ae95dcbfb862423248308a15e9f",
       "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c2a8d9a3_c21c9ce3",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 304,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2019-10-17T19:16:18Z",
+      "side": 1,
+      "message": "yes this was a migration workaround for the mentioned PM and events.  it needs a cleanup.",
+      "parentUuid": "468ad04f_ccb819be",
+      "revId": "e1874f5034735ae95dcbfb862423248308a15e9f",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
     }
   ]
 }
