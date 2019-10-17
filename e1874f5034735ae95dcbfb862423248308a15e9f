@@ -70,6 +70,24 @@
       "revId": "e1874f5034735ae95dcbfb862423248308a15e9f",
       "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "040ba6da_68e0f1c5",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 304,
+      "author": {
+        "id": 1000218
+      },
+      "writtenOn": "2019-10-17T20:04:10Z",
+      "side": 1,
+      "message": "Sure I can. \nMatt, should we do the pm and alarm configurations in reconcile(), as it is done in activate()? In another patch of course.",
+      "parentUuid": "c2a8d9a3_c21c9ce3",
+      "revId": "e1874f5034735ae95dcbfb862423248308a15e9f",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
     }
   ]
 }
