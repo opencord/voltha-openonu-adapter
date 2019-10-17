@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "57021ddd_cec41cbe",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 304,
+      "author": {
+        "id": 1000056
+      },
+      "writtenOn": "2019-10-17T18:49:53Z",
+      "side": 1,
+      "message": "Why logical device id here?  Is the ONU adapter still using the logical device id?",
+      "revId": "e1874f5034735ae95dcbfb862423248308a15e9f",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    }
+  ]
+}
