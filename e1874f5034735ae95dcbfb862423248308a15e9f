@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "79b58fac_38b2a9ae",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 230,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2019-10-17T20:10:57Z",
+      "side": 1,
+      "message": "see here.  i used TODO NEW CORE to ease my guilty conscience.",
+      "range": {
+        "startLine": 228,
+        "startChar": 0,
+        "endLine": 230,
+        "endChar": 51
+      },
+      "revId": "e1874f5034735ae95dcbfb862423248308a15e9f",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "57021ddd_cec41cbe",
         "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
         "patchSetId": 4
@@ -85,6 +108,24 @@
       "side": 1,
       "message": "Sure I can. \nMatt, should we do the pm and alarm configurations in reconcile(), as it is done in activate()? In another patch of course.",
       "parentUuid": "c2a8d9a3_c21c9ce3",
+      "revId": "e1874f5034735ae95dcbfb862423248308a15e9f",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b38e83c8_45c62a5c",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 304,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2019-10-17T20:10:57Z",
+      "side": 1,
+      "message": "It needs to be redone in activate() too.  likely pyvoltha will have to change given the required logical_device_id field is bogus and we had to put something in:\n\n            self.pm_metrics \u003d OnuPmMetrics(self.events, self.core_proxy, self.device_id,\n                                           self.logical_device_id, device.serial_number,\n                                           grouped\u003dTrue, freq_override\u003dFalse, **kwargs)",
+      "parentUuid": "040ba6da_68e0f1c5",
       "revId": "e1874f5034735ae95dcbfb862423248308a15e9f",
       "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
       "unresolved": false
