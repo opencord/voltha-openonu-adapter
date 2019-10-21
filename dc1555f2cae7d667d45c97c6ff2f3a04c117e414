@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c64799fd_99a6494c",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_tp_service_specific_task.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 397,
+      "author": {
+        "id": 1000127
+      },
+      "writtenOn": "2019-10-21T13:19:47Z",
+      "side": 1,
+      "message": "We need the \u0027reversed\u0027 action before we enumerate. Otherwise wrong p-bits will be assigned to the wrong gem ports. This is exactly how it was in voltha 1.7 and was verified to be working.",
+      "revId": "dc1555f2cae7d667d45c97c6ff2f3a04c117e414",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    }
+  ]
+}
