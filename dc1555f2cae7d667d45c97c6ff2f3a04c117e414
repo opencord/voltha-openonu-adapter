@@ -16,6 +16,24 @@
       "revId": "dc1555f2cae7d667d45c97c6ff2f3a04c117e414",
       "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b62e35be_19442dd2",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_tp_service_specific_task.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 397,
+      "author": {
+        "id": 1000405
+      },
+      "writtenOn": "2019-10-21T13:25:18Z",
+      "side": 1,
+      "message": "Yes, but it is not working for voltha 2.x - voltha 2.x openolt adapter reads from index 0 to index 7. So, do we need to update the openolt adapter logic?",
+      "parentUuid": "c64799fd_99a6494c",
+      "revId": "dc1555f2cae7d667d45c97c6ff2f3a04c117e414",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
     }
   ]
 }
