@@ -84,6 +84,21 @@ class BrcmUniLockTask(Task):
             state = 1 if self._lock else 0
 
             # lock the whole ont and all the pptp.  some onu dont causing odd behavior.
+            pptp_list = sorted(self._config.pptp_entities) if self._config.pptp_entities else []
+            veip_list = sorted(self._config.veip_entities) if self._config.veip_entities else []
+
+            for entity_id in pptp_list:
+                pptp_value = self._config.pptp_entities[entity_id]
+                msg = PptpEthernetUniFrame(entity_id,
+                                           attributes=dict(administrative_state=state))
+                yield self._send_uni_lock_msg(entity_id, pptp_value, msg)
+
+            for entity_id in veip_list:
+                veip_value = self._config.veip_entities[entity_id]
+                msg = VeipUniFrame(entity_id,
+                                           attributes=dict(administrative_state=state))
+                yield self._send_uni_lock_msg(entity_id, veip_value, msg)
+
             msg = OntGFrame(attributes={'administrative_state': state})
             frame = msg.set()
             self.log.debug('openomci-msg', omci_msg=msg)
@@ -98,21 +113,6 @@ class BrcmUniLockTask(Task):
                 self.log.debug('set-lock-ontg', lock=self._lock)
             else:
                 self.log.warn('cannot-set-lock-ontg', lock=self._lock)
-
-            pptp_list = sorted(self._config.pptp_entities) if self._config.pptp_entities else []
-            veip_list = sorted(self._config.veip_entities) if self._config.veip_entities else []
-
-            for entity_id in pptp_list:
-                pptp_value = self._config.pptp_entities[entity_id]
-                msg = PptpEthernetUniFrame(entity_id,
-                                           attributes=dict(administrative_state=state))
-                self._send_uni_lock_msg(entity_id, pptp_value, msg)
-
-            for entity_id in veip_list:
-                veip_value = self._config.veip_entities[entity_id]
-                msg = VeipUniFrame(entity_id,
-                                           attributes=dict(administrative_state=state))
-                self._send_uni_lock_msg(entity_id, veip_value, msg)
 
             self.deferred.callback(self)
 
