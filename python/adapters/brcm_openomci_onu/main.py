@@ -409,7 +409,7 @@ class Main(object):
                     # TODO: Add KV Store object reference
                     kv_store=self.args.backend,
                     default_topic=self.args.name,
-                    group_id_prefix=self.args.instance_id,
+                    group_id_prefix='onuadaptergrp',
                     target_cls=openonu_request_handler
                 )
             ).start()
