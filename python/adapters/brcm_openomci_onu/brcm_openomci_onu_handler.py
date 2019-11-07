@@ -815,6 +815,13 @@ class BrcmOpenomciOnuHandler(object):
         self.log.debug('function-entry', device=device)
         try:
             self.log.info('sending-uni-lock-towards-device', device=device)
+            @inlineCallbacks
+            def success(reason):
+                self.log.debug("disable-onu-success")
+                self.disable_ports()
+                device.oper_status = OperStatus.UNKNOWN
+                device.reason = "omci-admin-lock"
+                yield self.core_proxy.device_update(device)
 
             @inlineCallbacks
             def stop_anyway(reason):
@@ -828,15 +835,10 @@ class BrcmOpenomciOnuHandler(object):
                 for uni_id in self._tech_profile_download_done:
                     self._tech_profile_download_done[uni_id].clear()
 
-                self.disable_ports()
-                device.oper_status = OperStatus.UNKNOWN
-                device.reason = "omci-admin-lock"
-                yield self.core_proxy.device_update(device)
-
             # lock all the unis
             task = BrcmUniLockTask(self.omci_agent, self.device_id, lock=True)
             self._deferred = self._onu_omci_device.task_runner.queue_task(task)
-            self._deferred.addCallbacks(stop_anyway, stop_anyway)
+            self._deferred.addCallbacks(success, stop_anyway)
         except Exception as e:
             log.exception('exception-in-onu-disable', exception=e)
 
