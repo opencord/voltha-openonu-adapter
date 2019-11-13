@@ -65,14 +65,14 @@ local-protos:
 	mkdir -p local_imports
 ifdef LOCAL_PROTOS
 	mkdir -p local_imports/voltha-protos/dist
-	cp ../../voltha-protos/dist/*.tar.gz local_imports/voltha-protos/dist/
+	cp ${LOCAL_PROTOS}/dist/*.tar.gz local_imports/voltha-protos/dist/
 endif
 
 local-pyvoltha:
 	mkdir -p local_imports
 ifdef LOCAL_PYVOLTHA
 	mkdir -p local_imports/pyvoltha/dist
-	cp ../../pyvoltha/dist/*.tar.gz local_imports/pyvoltha/dist/
+	cp ${LOCAL_PYVOLTHA}/dist/*.tar.gz local_imports/pyvoltha/dist/
 endif
 
 docker-build: local-protos local-pyvoltha
