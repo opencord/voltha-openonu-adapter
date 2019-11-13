@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5e9092c0_5c527d54",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 424,
+      "author": {
+        "id": 1000127
+      },
+      "writtenOn": "2019-11-13T08:16:44Z",
+      "side": 0,
+      "message": "The num_of_tconts is being removed as part of https://gerrit.opencord.org/#/c/16176/ patch. But this change could go in independently as the \u0027num_of_tconts\u0027 field is not used anyway in onu adapter.",
+      "revId": "f72875bde3090747b30fe1bc816fda952db42a03",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    }
+  ]
+}
