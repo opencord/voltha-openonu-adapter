@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "202b117a_8898c411",
+        "filename": "python/adapters/brcm_openomci_onu/main.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 410,
+      "author": {
+        "id": 1000455
+      },
+      "writtenOn": "2019-11-14T15:14:18Z",
+      "side": 1,
+      "message": "These tabs should be cleaned up.",
+      "revId": "0e725dfcc12bfc60643e64669e55b2de377afb17",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    }
+  ]
+}
