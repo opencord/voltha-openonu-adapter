@@ -96,10 +96,9 @@ docker-push:
 VENVDIR := venv-openonu
 
 venv: distclean local-protos local-pyvoltha
-	virtualenv ${VENVDIR};\
+	virtualenv --python=python3.6 ${VENVDIR};\
         source ./${VENVDIR}/bin/activate ; set -u ;\
-	rm ${VENVDIR}/local/bin ${VENVDIR}/local/lib ${VENVDIR}/local/include ;\
-        pip install -r requirements.txt
+        #pip install -r requirements.txt
 
 ifdef LOCAL_PYVOLTHA
 	source ./${VENVDIR}/bin/activate ; set -u ;\
