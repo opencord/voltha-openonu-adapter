@@ -18,14 +18,16 @@
 Broadcom OpenOMCI OLT/ONU adapter handler.
 """
 
-import ast
+from __future__ import absolute_import
+import six
 import arrow
 import structlog
+import json
 
 from collections import OrderedDict
 
-from twisted.internet import reactor, task
-from twisted.internet.defer import DeferredQueue, inlineCallbacks, returnValue, TimeoutError
+from twisted.internet import reactor
+from twisted.internet.defer import DeferredQueue, inlineCallbacks
 
 from heartbeat import HeartBeat
 from pyvoltha.adapters.extensions.events.device_events.onu.onu_active_event import OnuActiveEvent
@@ -35,8 +37,10 @@ from pyvoltha.adapters.extensions.events.adapter_events import AdapterEvents
 
 import pyvoltha.common.openflow.utils as fd
 from pyvoltha.common.utils.registry import registry
+from pyvoltha.common.utils.nethelpers import mac_str_to_tuple
 from pyvoltha.common.config.config_backend import ConsulStore
 from pyvoltha.common.config.config_backend import EtcdStore
+from voltha_protos.logical_device_pb2 import LogicalPort
 from voltha_protos.common_pb2 import OperStatus, ConnectStatus, AdminState
 from voltha_protos.openflow_13_pb2 import OFPXMC_OPENFLOW_BASIC, ofp_port, OFPPS_LIVE, OFPPF_FIBER, OFPPF_1GB_FD
 from voltha_protos.inter_container_pb2 import InterAdapterMessageType, \
@@ -49,14 +53,15 @@ from omci.brcm_mib_download_task import BrcmMibDownloadTask
 from omci.brcm_tp_service_specific_task import BrcmTpServiceSpecificTask
 from omci.brcm_uni_lock_task import BrcmUniLockTask
 from omci.brcm_vlan_filter_task import BrcmVlanFilterTask
-from onu_gem_port import *
-from onu_tcont import *
-from pon_port import *
-from uni_port import *
-from onu_traffic_descriptor import *
+from onu_gem_port import OnuGemPort
+from onu_tcont import OnuTCont
+from pon_port import PonPort
+from uni_port import UniPort, UniType
+from onu_traffic_descriptor import OnuTrafficDescriptor
 from pyvoltha.common.tech_profile.tech_profile import TechProfile
 from pyvoltha.adapters.extensions.omci.tasks.omci_test_request import OmciTestRequest
 from pyvoltha.adapters.extensions.omci.omci_entities import AniG
+from pyvoltha.adapters.extensions.omci.omci_defs import EntityOperations, ReasonCodes
 
 OP = EntityOperations
 RC = ReasonCodes
@@ -154,10 +159,10 @@ class BrcmOpenomciOnuHandler(object):
 
     @property
     def uni_ports(self):
-        return self._unis.values()
+        return list(self._unis.values())
 
     def uni_port(self, port_no_or_name):
-        if isinstance(port_no_or_name, (str, unicode)):
+        if isinstance(port_no_or_name, six.string_types):
             return next((uni for uni in self.uni_ports
                          if uni.name == port_no_or_name), None)
 
@@ -448,8 +453,9 @@ class BrcmOpenomciOnuHandler(object):
                                    tp_path=tp_path)
                     return
 
-                tp = self.kv_client[tp_path]
-                tp = ast.literal_eval(tp)
+                tpstored = self.kv_client[tp_path]
+                tpstring = tpstored.decode('ascii')
+                tp = json.loads(tpstring)
                 self.log.debug("tp-instance", tp=tp)
                 self._do_tech_profile_configuration(uni_id, tp)
 
@@ -993,7 +999,7 @@ class BrcmOpenomciOnuHandler(object):
                     uni_entities[entity_id] = UniType.VEIP
 
                 uni_id = 0
-                for entity_id, uni_type in uni_entities.iteritems():
+                for entity_id, uni_type in uni_entities.items():
                     try:
                         yield self._add_uni_port(device, entity_id, uni_id, uni_type)
                         uni_id += 1
@@ -1074,7 +1080,7 @@ class BrcmOpenomciOnuHandler(object):
         self._unis[uni_port.port_number] = uni_port
 
         self._onu_omci_device.alarm_synchronizer.set_alarm_params(onu_id=self._onu_indication.onu_id,
-                                                                  uni_ports=self._unis.values(), serial_number=device.serial_number)
+                                                                  uni_ports=self.uni_ports, serial_number=device.serial_number)
 
     # TODO NEW CORE: Figure out how to gain this knowledge from the olt.  for now cheat terribly.
     def mk_uni_port_num(self, intf_id, onu_id, uni_id):

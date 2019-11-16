@@ -20,22 +20,22 @@ Broadcom OpenOMCI OLT/ONU adapter.
 This adapter does NOT support XPON
 """
 
-from twisted.internet import reactor, task
+from __future__ import absolute_import
+import structlog
+from twisted.internet import reactor
 from twisted.internet.defer import inlineCallbacks
 
 from zope.interface import implementer
 
 from pyvoltha.adapters.interface import IAdapterInterface
-from pyvoltha.adapters.iadapter import OnuAdapter
 from voltha_protos.adapter_pb2 import Adapter
 from voltha_protos.adapter_pb2 import AdapterConfig
 from voltha_protos.common_pb2 import LogLevel
-from voltha_protos.device_pb2 import DeviceType, DeviceTypes, Port, Image
+from voltha_protos.device_pb2 import DeviceType, DeviceTypes
 from voltha_protos.health_pb2 import HealthStatus
 
 from pyvoltha.adapters.common.frameio.frameio import hexify
 from pyvoltha.adapters.extensions.omci.openomci_agent import OpenOMCIAgent, OpenOmciAgentDefaults
-from pyvoltha.adapters.extensions.omci.omci_me import *
 from pyvoltha.adapters.extensions.omci.database.mib_db_dict import MibDbVolatileDict
 
 from brcm_openomci_onu_handler import BrcmOpenomciOnuHandler

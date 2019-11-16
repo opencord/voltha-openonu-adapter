@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+from __future__ import absolute_import
 from pyvoltha.adapters.extensions.omci.tasks.task import Task
 from twisted.internet import reactor
 from twisted.internet.defer import inlineCallbacks, failure, returnValue

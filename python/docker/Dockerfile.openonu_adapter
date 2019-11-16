@@ -11,26 +11,24 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-FROM voltha/voltha-python-base:1.0.0
+FROM voltha/voltha-python-base:2.0.0
 
 # Install adapter requirements.
 COPY requirements.txt /tmp/requirements.txt
-RUN pip install -r /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt
 
 ARG LOCAL_PYVOLTHA
 ARG LOCAL_PROTOS
 COPY local_imports/ /local_imports/
 RUN if [ -n "$LOCAL_PYVOLTHA" ] ; then \
-    pip install /local_imports/pyvoltha/dist/*.tar.gz ; \
+    pip install --no-cache-dir /local_imports/pyvoltha/dist/*.tar.gz ; \
 fi
 
 RUN if [ -n "$LOCAL_PROTOS" ] ; then \
-    pip install /local_imports/voltha-protos/dist/*.tar.gz ; \
+    pip install --no-cache-dir /local_imports/voltha-protos/dist/*.tar.gz ; \
 fi
 
 # Bundle app source
-RUN mkdir /voltha && touch /voltha/__init__.py
-RUN mkdir /voltha/adapters && touch /voltha/adapters/__init__.py
 ENV PYTHONPATH=/voltha
 COPY adapters/brcm_openomci_onu /voltha/adapters/brcm_openomci_onu
 

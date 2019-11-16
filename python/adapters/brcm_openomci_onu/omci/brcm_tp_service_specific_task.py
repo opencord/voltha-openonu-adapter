@@ -13,15 +13,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import absolute_import
 import structlog
 from twisted.internet import reactor
-from twisted.internet.defer import inlineCallbacks, returnValue, TimeoutError, failure
-from pyvoltha.adapters.extensions.omci.omci_me import *
+from twisted.internet.defer import inlineCallbacks, TimeoutError, failure
+from pyvoltha.adapters.extensions.omci.omci_me import Ont2G, OmciNullPointer, PriorityQueueFrame, \
+    Ieee8021pMapperServiceProfileFrame
 from pyvoltha.adapters.extensions.omci.tasks.task import Task
-from pyvoltha.adapters.extensions.omci.omci_defs import *
-from pyvoltha.adapters.extensions.omci.omci_entities import *
-from adapters.brcm_openomci_onu.uni_port import *
-from adapters.brcm_openomci_onu.pon_port import TASK_PRIORITY, DEFAULT_GEM_PAYLOAD
+from pyvoltha.adapters.extensions.omci.omci_defs import EntityOperations, ReasonCodes
+from pyvoltha.adapters.extensions.omci.omci_entities import OntG, Tcont, PriorityQueueG
+from pon_port import TASK_PRIORITY
 
 
 OP = EntityOperations
@@ -90,12 +91,12 @@ class BrcmTpServiceSpecificTask(Task):
         # due to additional tasks on different UNIs. So, it we cannot use the pon_port affter
         # this initializer
         self._tconts = []
-        for tcont in handler.pon_port.tconts.itervalues():
+        for tcont in list(handler.pon_port.tconts.values()):
             if tcont.uni_id is not None and tcont.uni_id != self._uni_port.uni_id: continue
             self._tconts.append(tcont)
 
         self._gem_ports = []
-        for gem_port in handler.pon_port.gem_ports.itervalues():
+        for gem_port in list(handler.pon_port.gem_ports.values()):
             if gem_port.uni_id is not None and gem_port.uni_id != self._uni_port.uni_id: continue
             self._gem_ports.append(gem_port)
 
@@ -189,6 +190,8 @@ class BrcmTpServiceSpecificTask(Task):
                 if tcont.entity_id is None:
                     free_entity_id = None
                     for k, v in tcont_idents.items():
+                        if not isinstance(v, dict):
+                            continue
                         alloc_check = v.get('attributes', {}).get('alloc_id', 0)
                         # Some onu report both to indicate an available tcont
                         if alloc_check == 0xFF or alloc_check == 0xFFFF:

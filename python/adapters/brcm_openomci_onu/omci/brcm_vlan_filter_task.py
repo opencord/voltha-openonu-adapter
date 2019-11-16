@@ -14,6 +14,7 @@
 # limitations under the License.
 #
 
+from __future__ import absolute_import
 import structlog
 from pyvoltha.adapters.extensions.omci.tasks.task import Task
 from twisted.internet import reactor
@@ -21,8 +22,8 @@ from twisted.internet.defer import inlineCallbacks, failure, returnValue
 from pyvoltha.adapters.extensions.omci.omci_defs import ReasonCodes, EntityOperations
 from pyvoltha.adapters.extensions.omci.omci_me import \
     VlanTaggingOperation, VlanTaggingFilterDataFrame, ExtendedVlanTaggingOperationConfigurationDataFrame
-from adapters.brcm_openomci_onu.uni_port import UniType
-from adapters.brcm_openomci_onu.pon_port import DEFAULT_TPID
+from uni_port import UniType
+from pon_port import DEFAULT_TPID
 
 RC = ReasonCodes
 OP = EntityOperations

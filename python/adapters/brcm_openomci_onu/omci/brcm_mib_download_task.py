@@ -16,11 +16,13 @@
 import structlog
 from twisted.internet import reactor
 from twisted.internet.defer import inlineCallbacks, returnValue, TimeoutError, failure
-from pyvoltha.adapters.extensions.omci.omci_me import *
+from pyvoltha.adapters.extensions.omci.omci_me import PptpEthernetUniFrame, GalEthernetProfileFrame, \
+    MacBridgePortConfigurationDataFrame, MacBridgeServiceProfileFrame, Ieee8021pMapperServiceProfileFrame, \
+    VeipUniFrame, ExtendedVlanTaggingOperationConfigurationDataFrame
 from pyvoltha.adapters.extensions.omci.tasks.task import Task
-from pyvoltha.adapters.extensions.omci.omci_defs import *
-from adapters.brcm_openomci_onu.uni_port import *
-from adapters.brcm_openomci_onu.pon_port \
+from pyvoltha.adapters.extensions.omci.omci_defs import EntityOperations, ReasonCodes
+from uni_port import UniType
+from pon_port \
     import TASK_PRIORITY, DEFAULT_TPID, DEFAULT_GEM_PAYLOAD
 
 OP = EntityOperations

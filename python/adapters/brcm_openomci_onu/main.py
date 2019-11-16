@@ -17,13 +17,14 @@
 
 """OpenONU Adapter main entry point"""
 
+from __future__ import absolute_import
 import argparse
 import os
 import time
 
 import arrow
 import yaml
-import SocketServer
+import socketserver
 
 from packaging.version import Version
 from simplejson import dumps
@@ -46,9 +47,8 @@ from pyvoltha.adapters.kafka.kafka_inter_container_library import IKafkaMessagin
 from pyvoltha.adapters.kafka.kafka_proxy import KafkaProxy, get_kafka_proxy
 from voltha_protos.adapter_pb2 import AdapterConfig
 
-from brcm_openomci_onu import BrcmOpenomciOnuAdapter
+from brcm_openomci_onu_adapter import BrcmOpenomciOnuAdapter
 from probe import Probe
-
 
 defs = dict(
     version_file='./VERSION',
@@ -299,9 +299,9 @@ class Main(object):
         current_time = arrow.utcnow().timestamp
         self.instance_id = self.args.instance_id + '_' + str(current_time)
 
-        self.core_topic = args.core_topic
-        self.event_topic = args.event_topic
-        self.listening_topic = args.name
+        self.core_topic = str(args.core_topic)
+        self.event_topic = str(args.event_topic)
+        self.listening_topic = str(args.name)
         self.startup_components()
 
         if not args.no_heartbeat:
@@ -445,7 +445,7 @@ class Main(object):
         args = self.args
         host = args.probe.split(':')[0]
         port = args.probe.split(':')[1]
-        server = SocketServer.TCPServer((host, int(port)), Probe)
+        server = socketserver.TCPServer((host, int(port)), Probe)
         server.serve_forever()
 
     @inlineCallbacks
@@ -509,14 +509,14 @@ class Main(object):
                 else:
                     Probe.kafka_cluster_proxy_running = False
                     self.log.error('kafka-proxy-unavailable')
-            except Exception, e:
+            except Exception as e:
                 self.log.exception('failed-sending-message-heartbeat', e=e)
 
         try:
             t0 = time.time()
             lc = LoopingCall(send_msg, t0)
             lc.start(10)
-        except Exception, e:
+        except Exception as e:
             self.log.exception('failed-kafka-heartbeat', e=e)
 
 

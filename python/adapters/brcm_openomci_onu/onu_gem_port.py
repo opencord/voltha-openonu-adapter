@@ -13,10 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import absolute_import
 import structlog
 from twisted.internet.defer import inlineCallbacks, returnValue
-from pyvoltha.adapters.extensions.omci.omci_me import *
-from pyvoltha.adapters.extensions.omci.omci_defs import *
+from pyvoltha.adapters.extensions.omci.omci_me import GemInterworkingTpFrame, GemPortNetworkCtpFrame
+from pyvoltha.adapters.extensions.omci.omci_defs import ReasonCodes
 
 RC = ReasonCodes
 
@@ -262,6 +263,7 @@ class OnuGemPort(object):
 
     @staticmethod
     def create(handler, gem_port):
+        log = structlog.get_logger(gem_port=gem_port)
         log.debug('function-entry', gem_port=gem_port)
 
         return OnuGemPort(gem_id=gem_port['gemport_id'],
