@@ -36,13 +36,8 @@ logging:
             maxBytes: 2097152
             backupCount: 10
             level: DEBUG
-        null:
-            class: logging.NullHandler
 
     loggers:
-        amqp:
-            handlers: [null]
-            propagate: False
         conf:
             propagate: False
         '': # root logger

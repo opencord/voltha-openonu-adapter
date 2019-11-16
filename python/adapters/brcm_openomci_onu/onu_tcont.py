@@ -13,10 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import absolute_import
 import structlog
-from twisted.internet.defer import  inlineCallbacks, returnValue, succeed
-from pyvoltha.adapters.extensions.omci.omci_me import *
-from pyvoltha.adapters.extensions.omci.omci_defs import *
+from twisted.internet.defer import inlineCallbacks, returnValue
+from pyvoltha.adapters.extensions.omci.omci_me import TcontFrame
+from pyvoltha.adapters.extensions.omci.omci_defs import ReasonCodes
 
 RC = ReasonCodes
 

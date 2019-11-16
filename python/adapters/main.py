@@ -17,6 +17,7 @@
 
 """OpenONU Adapter main entry point"""
 
+from __future__ import absolute_import
 import argparse
 import os
 import time
@@ -44,10 +45,10 @@ from pyvoltha.adapters.kafka.kafka_inter_container_library import IKafkaMessagin
 from pyvoltha.adapters.kafka.kafka_proxy import KafkaProxy, get_kafka_proxy
 from voltha_protos.adapter_pb2 import AdapterConfig
 
-from brcm_openomci_onu import BrcmOpenomciOnuAdapter
+from brcm_openomci_onu.brcm_openomci_onu import BrcmOpenomciOnuAdapter
 
 defs = dict(
-    version_file='./VERSION',
+    version_file='./brcm_openomci_onu/VERSION',
     config=os.environ.get('CONFIG', './openonu.yml'),
     container_name_regex=os.environ.get('CONTAINER_NUMBER_EXTRACTOR', '^.*\.(['
                                                                       '0-9]+)\..*$'),
@@ -287,9 +288,9 @@ class Main(object):
         current_time = arrow.utcnow().timestamp
         self.instance_id = self.args.instance_id + '_' + str(current_time)
 
-        self.core_topic = args.core_topic
-        self.event_topic = args.event_topic
-        self.listening_topic = args.name
+        self.core_topic = str(args.core_topic)
+        self.event_topic = str(args.event_topic)
+        self.listening_topic = str(args.name)
         self.startup_components()
 
         if not args.no_heartbeat:
@@ -485,14 +486,14 @@ class Main(object):
                     kafka_cluster_proxy.send_message(topic, dumps(message))
                 else:
                     self.log.error('kafka-proxy-unavailable')
-            except Exception, e:
+            except Exception as e:
                 self.log.exception('failed-sending-message-heartbeat', e=e)
 
         try:
             t0 = time.time()
             lc = LoopingCall(send_msg, t0)
             lc.start(10)
-        except Exception, e:
+        except Exception as e:
             self.log.exception('failed-kafka-heartbeat', e=e)
 
 
