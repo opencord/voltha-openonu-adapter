@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cc6a3146_64cd785f",
+        "filename": "python/adapters/brcm_openomci_onu/main.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 403,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2019-11-19T13:48:02Z",
+      "side": 1,
+      "message": "remove unneeded tab",
+      "range": {
+        "startLine": 403,
+        "startChar": 0,
+        "endLine": 403,
+        "endChar": 12
+      },
+      "revId": "35ec5bd29d3950204255a4baea02c6bd03ba5a7a",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a60c894f_37c7d664",
+        "filename": "python/adapters/brcm_openomci_onu/main.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 410,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2019-11-19T13:48:02Z",
+      "side": 1,
+      "message": "same as above",
+      "range": {
+        "startLine": 410,
+        "startChar": 0,
+        "endLine": 410,
+        "endChar": 12
+      },
+      "revId": "35ec5bd29d3950204255a4baea02c6bd03ba5a7a",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    }
+  ]
+}
