@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "ebf3bd02_49b0fe51",
+        "filename": "python/adapters/brcm_openomci_onu/main.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1000016
+      },
+      "writtenOn": "2019-11-19T15:39:25Z",
+      "side": 1,
+      "message": "should this be hostname:port ? or should the --probe argument description be changed?",
+      "range": {
+        "startLine": 74,
+        "startChar": 4,
+        "endLine": 74,
+        "endChar": 41
+      },
+      "revId": "35ec5bd29d3950204255a4baea02c6bd03ba5a7a",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "cc6a3146_64cd785f",
         "filename": "python/adapters/brcm_openomci_onu/main.py",
         "patchSetId": 2
