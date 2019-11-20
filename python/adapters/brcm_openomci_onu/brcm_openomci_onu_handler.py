@@ -21,6 +21,7 @@ Broadcom OpenOMCI OLT/ONU adapter handler.
 import ast
 import arrow
 import structlog
+import random
 
 from collections import OrderedDict
 
@@ -63,7 +64,7 @@ RC = ReasonCodes
 
 log = structlog.get_logger()
 
-_STARTUP_RETRY_WAIT = 20
+_STARTUP_RETRY_WAIT = 5
 
 
 class BrcmOpenomciOnuHandler(object):
@@ -258,7 +259,7 @@ class BrcmOpenomciOnuHandler(object):
 
             # Note, ONU ID and UNI intf set in add_uni_port method
             self._onu_omci_device.alarm_synchronizer.set_alarm_params(mgr=self.events,
-                                                                      ani_ports=[self._pon])
+                                                                     ani_ports=[self._pon])
 
             #Start collecting stats from the device after a brief pause
             reactor.callLater(10, self.pm_metrics.start_collector)
@@ -738,6 +739,13 @@ class BrcmOpenomciOnuHandler(object):
         self.log.debug('starting-openomci-statemachine')
         self._subscribe_to_events()
         onu_device.reason = "starting-openomci"
+        try:
+            self._onu_omci_device.mib_synchronizer._database.load_from_json(self.device_id)
+            self.log.debug("Loaded mib data")
+        except Exception as e:
+            import traceback
+            tb = traceback.format_exc()
+            self.log.error("Error loading", e, tb)
         reactor.callLater(1, self._onu_omci_device.start,onu_device)
         yield self.core_proxy.device_reason_update(self.device_id, onu_device.reason)
         self._heartbeat.enabled = True
@@ -942,6 +950,8 @@ class BrcmOpenomciOnuHandler(object):
         omci = self._onu_omci_device
         in_sync = omci.mib_db_in_sync
 
+        omci.mib_synchronizer._database.dump_to_json()
+
         device = yield self.core_proxy.get_device(self.device_id)
         yield self.core_proxy.device_reason_update(self.device_id, 'discovery-mibsync-complete')
 
@@ -1019,7 +1029,8 @@ class BrcmOpenomciOnuHandler(object):
 
         if self._dev_info_loaded:
             if device.admin_state == AdminState.PREPROVISIONED or device.admin_state == AdminState.ENABLED:
-
+                failures = 0
+                this = self
                 @inlineCallbacks
                 def success(_results):
                     self.log.info('mib-download-success', _results=_results)
@@ -1032,10 +1043,14 @@ class BrcmOpenomciOnuHandler(object):
 
                 @inlineCallbacks
                 def failure(_reason):
-                    self.log.warn('mib-download-failure-retrying', _reason=_reason)
+                    self.log.warn('mib-download-failure-retrying', _reason=_reason)                    
+                                        #*(failures+1)+(random.randint(-3,3)
                     yield self.core_proxy.device_reason_update(self.device_id, 'initial-mib-download-failure-retrying')
-                    self._deferred = reactor.callLater(_STARTUP_RETRY_WAIT, self._mib_in_sync)
+                    self.log.debug("initial-mib-downlaod-message-sent")
+                    #failures += 1
+                    self._deferred = reactor.callLater(_STARTUP_RETRY_WAIT, this._mib_in_sync)
 
+                    
                 # Download an initial mib that creates simple bridge that can pass EAP.  On success (above) finally set
                 # the device to active/reachable.   This then opens up the handler to openflow pushes from outside
                 self.log.info('downloading-initial-mib-configuration')

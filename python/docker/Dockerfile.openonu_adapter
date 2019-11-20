@@ -33,7 +33,7 @@ RUN mkdir /voltha && touch /voltha/__init__.py
 RUN mkdir /voltha/adapters && touch /voltha/adapters/__init__.py
 ENV PYTHONPATH=/voltha
 COPY adapters/brcm_openomci_onu /voltha/adapters/brcm_openomci_onu
-
+COPY data.json /
 # Label image
 ARG org_label_schema_version=unknown
 ARG org_label_schema_vcs_url=unknown
