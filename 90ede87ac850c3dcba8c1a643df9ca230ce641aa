@@ -34,6 +34,29 @@
       "revId": "90ede87ac850c3dcba8c1a643df9ca230ce641aa",
       "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "07ffcca9_500dd7ef",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 1082,
+      "author": {
+        "id": 1000218
+      },
+      "writtenOn": "2019-11-21T16:51:24Z",
+      "side": 1,
+      "message": "Do you mind to change this to 256 also? So we can support up to 256 splits.",
+      "range": {
+        "startLine": 1082,
+        "startChar": 27,
+        "endLine": 1082,
+        "endChar": 30
+      },
+      "revId": "90ede87ac850c3dcba8c1a643df9ca230ce641aa",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
     }
   ]
 }
