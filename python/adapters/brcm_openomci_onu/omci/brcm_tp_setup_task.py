@@ -18,12 +18,11 @@ import structlog
 from twisted.internet import reactor
 from twisted.internet.defer import inlineCallbacks, TimeoutError, failure
 from pyvoltha.adapters.extensions.omci.omci_me import Ont2G, OmciNullPointer, PriorityQueueFrame, \
-    Ieee8021pMapperServiceProfileFrame
+    Ieee8021pMapperServiceProfileFrame, MacBridgePortConfigurationDataFrame
 from pyvoltha.adapters.extensions.omci.tasks.task import Task
 from pyvoltha.adapters.extensions.omci.omci_defs import EntityOperations, ReasonCodes
-from pyvoltha.adapters.extensions.omci.omci_entities import OntG, Tcont, PriorityQueueG
+from pyvoltha.adapters.extensions.omci.omci_entities import OntG, Tcont, PriorityQueueG, Ieee8021pMapperServiceProfile
 from pon_port import TASK_PRIORITY
-
 
 OP = EntityOperations
 RC = ReasonCodes
@@ -41,7 +40,7 @@ class TechProfileResourcesFailure(Exception):
     """
 
 
-class BrcmTpServiceSpecificTask(Task):
+class BrcmTpSetupTask(Task):
     """
     OpenOMCI Tech-Profile Download Task
 
@@ -49,22 +48,23 @@ class BrcmTpServiceSpecificTask(Task):
 
     name = "Broadcom Tech-Profile Download Task"
 
-    def __init__(self, omci_agent, handler, uni_id):
+    def __init__(self, omci_agent, handler, uni_id, tconts, gem_ports, tp_table_id):
         """
         Class initialization
 
         :param omci_agent: (OmciAdapterAgent) OMCI Adapter agent
         :param handler: (BrcmOpenomciOnuHandler) ONU Device Handler Instance
         :param uni_id: (int) numeric id of the uni port on the onu device, starts at 0
+        :param tp_table_id: (int) Technology Profile Table-ID
         """
         log = structlog.get_logger(device_id=handler.device_id, uni_id=uni_id)
         log.debug('function-entry')
 
-        super(BrcmTpServiceSpecificTask, self).__init__(BrcmTpServiceSpecificTask.name,
-                                                        omci_agent,
-                                                        handler.device_id,
-                                                        priority=TASK_PRIORITY,
-                                                        exclusive=True)
+        super(BrcmTpSetupTask, self).__init__(BrcmTpSetupTask.name,
+                                              omci_agent,
+                                              handler.device_id,
+                                              priority=TASK_PRIORITY,
+                                              exclusive=True)
 
         self.log = log
 
@@ -73,6 +73,9 @@ class BrcmTpServiceSpecificTask(Task):
 
         self._uni_port = handler.uni_ports[uni_id]
         assert self._uni_port.uni_id == uni_id
+
+        # Tech Profile Table ID
+        self._tp_table_id = tp_table_id
 
         # Entity IDs. IDs with values can probably be most anything for most ONUs,
         #             IDs set to None are discovered/set
@@ -86,26 +89,20 @@ class BrcmTpServiceSpecificTask(Task):
         self._gal_enet_profile_entity_id = \
             handler.gal_enet_profile_entity_id
 
-        # Extract the current set of TCONT and GEM Ports from the Handler's pon_port that are
-        # relevant to this task's UNI. It won't change. But, the underlying pon_port may change
-        # due to additional tasks on different UNIs. So, it we cannot use the pon_port affter
-        # this initializer
         self._tconts = []
-        for tcont in list(handler.pon_port.tconts.values()):
-            if tcont.uni_id is not None and tcont.uni_id != self._uni_port.uni_id: continue
-            self._tconts.append(tcont)
+        for t in tconts:
+            self._tconts.append(t)
 
         self._gem_ports = []
-        for gem_port in list(handler.pon_port.gem_ports.values()):
-            if gem_port.uni_id is not None and gem_port.uni_id != self._uni_port.uni_id: continue
-            self._gem_ports.append(gem_port)
+        for g in gem_ports:
+            self._gem_ports.append(g)
 
         self.tcont_me_to_queue_map = dict()
         self.uni_port_to_queue_map = dict()
 
     def cancel_deferred(self):
         self.log.debug('function-entry')
-        super(BrcmTpServiceSpecificTask, self).cancel_deferred()
+        super(BrcmTpSetupTask, self).cancel_deferred()
 
         d, self._local_deferred = self._local_deferred, None
         try:
@@ -119,7 +116,7 @@ class BrcmTpServiceSpecificTask(Task):
         Start the Tech-Profile Download
         """
         self.log.debug('function-entry')
-        super(BrcmTpServiceSpecificTask, self).start()
+        super(BrcmTpSetupTask, self).start()
         self._local_deferred = reactor.callLater(0, self.perform_service_specific_steps)
 
     def stop(self):
@@ -130,7 +127,7 @@ class BrcmTpServiceSpecificTask(Task):
         self.log.debug('stopping')
 
         self.cancel_deferred()
-        super(BrcmTpServiceSpecificTask, self).stop()
+        super(BrcmTpSetupTask, self).stop()
 
     def check_status_and_state(self, results, operation=''):
         """
@@ -161,7 +158,7 @@ class BrcmTpServiceSpecificTask(Task):
 
         raise TechProfileDownloadFailure(
             '{} failed with a status of {}, error_mask: {}, failed_mask: {}, unsupported_mask: {}'
-            .format(operation, status, error_mask, failed_mask, unsupported_mask))
+                .format(operation, status, error_mask, failed_mask, unsupported_mask))
 
     @inlineCallbacks
     def perform_service_specific_steps(self):
@@ -180,6 +177,12 @@ class BrcmTpServiceSpecificTask(Task):
             #            - GemPortNetworkCtp
             #  References:
             #            - ONU created TCONT (created on ONU startup)
+
+            # Do not do this if we do not have to setup tconts
+            tcont_idents = dict()
+
+            # Setup 8021p mapper and ani mac bridge port, one per tp per uni
+            yield self._setup__8021pMapper__ani_mac_bridge_port()
 
             tcont_idents = self._onu_device.query_mib(Tcont.class_id)
             self.log.debug('tcont-idents', tcont_idents=tcont_idents)
@@ -266,22 +269,21 @@ class BrcmTpServiceSpecificTask(Task):
                         tcont_me = (related_port & 0xffff0000) >> 16
                         if tcont_me not in self.tcont_me_to_queue_map:
                             self.log.debug("prior-q-related-port-and-tcont-me",
-                                            related_port=related_port,
-                                            tcont_me=tcont_me)
+                                           related_port=related_port,
+                                           tcont_me=tcont_me)
                             self.tcont_me_to_queue_map[tcont_me] = list()
 
                         self.tcont_me_to_queue_map[tcont_me].append(k)
                     else:
                         uni_port = (related_port & 0xffff0000) >> 16
-                        if uni_port ==  self._uni_port.entity_id:
+                        if uni_port == self._uni_port.entity_id:
                             if uni_port not in self.uni_port_to_queue_map:
                                 self.log.debug("prior-q-related-port-and-uni-port-me",
-                                                related_port=related_port,
-                                                uni_port_me=uni_port)
+                                               related_port=related_port,
+                                               uni_port_me=uni_port)
                                 self.uni_port_to_queue_map[uni_port] = list()
 
                             self.uni_port_to_queue_map[uni_port].append(k)
-
 
             self.log.debug("ul-prior-q", ul_prior_q=self.tcont_me_to_queue_map)
             self.log.debug("dl-prior-q", dl_prior_q=self.uni_port_to_queue_map)
@@ -324,11 +326,11 @@ class BrcmTpServiceSpecificTask(Task):
 
                     # TODO: Need to restore on failure.  Need to check status/results
                     results = yield gem_port.add_to_hardware(omci_cc,
-                                             tcont.entity_id,
-                                             self._ieee_mapper_service_profile_entity_id +
-                                                      self._uni_port.mac_bridge_port_num,
-                                             self._gal_enet_profile_entity_id,
-                                             ul_prior_q_entity_id, dl_prior_q_entity_id)
+                                                             tcont.entity_id,
+                                                             self._ieee_mapper_service_profile_entity_id +
+                                                             self._uni_port.mac_bridge_port_num,
+                                                             self._gal_enet_profile_entity_id,
+                                                             ul_prior_q_entity_id, dl_prior_q_entity_id)
                     self.check_status_and_state(results, 'assign-gem-port')
                 elif gem_port.direction == "downstream":
                     # Downstream is inverse of upstream
@@ -344,10 +346,10 @@ class BrcmTpServiceSpecificTask(Task):
             #
 
             ont2g = self._onu_device.query_mib(Ont2G.class_id)
-            qos_config_flexibility_ie = ont2g.get(0, {}).get('attributes', {}).\
-                                        get('qos_configuration_flexibility', None)
+            qos_config_flexibility_ie = ont2g.get(0, {}).get('attributes', {}). \
+                get('qos_configuration_flexibility', None)
             self.log.debug("qos_config_flexibility",
-                            qos_config_flexibility=qos_config_flexibility_ie)
+                           qos_config_flexibility=qos_config_flexibility_ie)
 
             if qos_config_flexibility_ie & 0b100000:
                 is_related_ports_configurable = True
@@ -364,12 +366,11 @@ class BrcmTpServiceSpecificTask(Task):
                     self.log.debug("updating-pq-priority")
                     related_port = pq_to_related_port[v["pq_entity_id"]]
                     related_port = related_port & 0xffff0000
-                    related_port = related_port | v['priority_q'] # Set priority
+                    related_port = related_port | v['priority_q']  # Set priority
                     msg = PriorityQueueFrame(v["pq_entity_id"], related_port=related_port)
                     frame = msg.set()
                     results = yield omci_cc.send(frame)
                     self.check_status_and_state(results, 'set-priority-queues-priority')
-
 
             ################################################################################
             # Update the IEEE 802.1p Mapper Service Profile config
@@ -381,6 +382,11 @@ class BrcmTpServiceSpecificTask(Task):
             #
 
             gem_entity_ids = [OmciNullPointer] * 8
+            ieee_8021p_mapper = self._onu_device.query_mib(Ieee8021pMapperServiceProfile.class_id)
+            for i in range(len(gem_entity_ids)):
+                gem_entity_ids[i] = ieee_8021p_mapper.get('attributes', {}).\
+                    get('interwork_tp_pointer_for_p_bit_priority_'.join(str(i)), OmciNullPointer)
+
             for gem_port in self._gem_ports:
                 self.log.debug("tp-gem-port", entity_id=gem_port.entity_id, uni_id=gem_port.uni_id)
 
@@ -395,7 +401,9 @@ class BrcmTpServiceSpecificTask(Task):
                     pass
 
             msg = Ieee8021pMapperServiceProfileFrame(
-                self._ieee_mapper_service_profile_entity_id + self._uni_port.mac_bridge_port_num,  # 802.1p mapper Service Mapper Profile ID
+                (self._ieee_mapper_service_profile_entity_id +
+                 self._uni_port.mac_bridge_port_num + self._tp_table_id),
+                # 802.1p mapper Service Mapper Profile ID
                 interwork_tp_pointers=gem_entity_ids  # Interworking TP IDs
             )
             frame = msg.set()
@@ -412,3 +420,74 @@ class BrcmTpServiceSpecificTask(Task):
         except Exception as e:
             self.log.exception('omci-setup-tech-profile', e=e)
             self.deferred.errback(failure.Failure(e))
+
+    @inlineCallbacks
+    def _setup__8021pMapper__ani_mac_bridge_port(self):
+
+        omci_cc = self._onu_device.omci_cc
+
+        try:
+            ################################################################################
+            # PON Specific                                                                 #
+            ################################################################################
+            # IEEE 802.1 Mapper Service config - One per tech-profile per UNI
+            #
+            #  EntityID will be referenced by:
+            #            - MAC Bridge Port Configuration Data for the PON port and TP ID
+            #  References:
+            #            - Nothing at this point. When a GEM port is created, this entity will
+            #              be updated to reference the GEM Interworking TP
+
+            msg = Ieee8021pMapperServiceProfileFrame(
+                self._ieee_mapper_service_profile_entity_id +
+                self._uni_port.mac_bridge_port_num +
+                self._tp_table_id
+            )
+            frame = msg.create()
+            self.log.debug('openomci-msg', omci_msg=msg)
+            results = yield omci_cc.send(frame)
+            self.check_status_and_state(results, 'create-8021p-mapper-service-profile')
+
+            ################################################################################
+            # Create MAC Bridge Port Configuration Data for the PON port via IEEE 802.1
+            # mapper service and this per TechProfile. Upon receipt by the ONU, the ONU will create an instance
+            # of the following before returning the response.
+            #
+            #     - MAC bridge port designation data
+            #     - MAC bridge port filter table data
+            #     - MAC bridge port bridge table data
+            #
+            #  EntityID will be referenced by:
+            #            - Implicitly by the VLAN tagging filter data
+            #  References:
+            #            - MAC Bridge Service Profile (the bridge)
+            #            - IEEE 802.1p mapper service profile for PON port
+
+            # TODO: magic. make a static variable for tp_type
+            msg = MacBridgePortConfigurationDataFrame(
+                self._mac_bridge_port_ani_entity_id + self._uni_port.mac_bridge_port_num + self._tp_table_id,
+                bridge_id_pointer=(
+                        self._mac_bridge_service_profile_entity_id +
+                        self._uni_port.mac_bridge_port_num),
+                # Bridge Entity ID
+                port_num=0xff,  # Port ID - unique number within the bridge
+                tp_type=3,  # TP Type (IEEE 802.1p mapper service)
+                tp_pointer=(
+                        self._ieee_mapper_service_profile_entity_id +
+                        self._uni_port.mac_bridge_port_num +
+                        self._tp_table_id
+                )
+                # TP ID, 8021p mapper ID
+            )
+            frame = msg.create()
+            self.log.debug('openomci-msg', omci_msg=msg)
+            results = yield omci_cc.send(frame)
+            self.check_status_and_state(results, 'create-mac-bridge-port-configuration-data-8021p-mapper')
+
+        except TimeoutError as e:
+            self.log.warn('rx-timeout-8021p-ani-port-setup', e=e)
+            raise
+
+        except Exception as e:
+            self.log.exception('omci-setup-8021p-ani-port-setup', e=e)
+            raise

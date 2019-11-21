@@ -226,7 +226,7 @@ class PonPort(object):
         # returnValue(results)
 
     @inlineCallbacks
-    def remove_tcont(self, alloc_id):
+    def remove_tcont(self, alloc_id, remove_from_hw=True):
         self.log.debug('function-entry')
 
         tcont = self._tconts.get(alloc_id)
@@ -236,8 +236,9 @@ class PonPort(object):
 
         try:
             del self._tconts[alloc_id]
-            results = yield tcont.remove_from_hardware(self._handler.openomci.omci_cc)
-            returnValue(results)
+            if remove_from_hw:
+                results = yield tcont.remove_from_hardware(self._handler.openomci.omci_cc)
+                returnValue(results)
 
         except Exception as e:
             self.log.exception('delete', e=e)
@@ -275,12 +276,13 @@ class PonPort(object):
         self._gem_ports[(gem_port.gem_id, gem_port.direction)] = gem_port
 
     @inlineCallbacks
-    def remove_gem_id(self, gem_id, direction):
+    def remove_gem_id(self, gem_id, direction, remove_from_hw=True):
         """
         Remove a GEM Port from this ONU
 
         :param gem_id: (GemPort) GEM Port to remove
         :param direction: Direction of the gem port
+        :param remove_from_hw: Remove the GemPort from hardware (remove if True else not)
         :return: deferred
         """
         self.log.debug('function-entry', gem_id=gem_id)
@@ -292,8 +294,9 @@ class PonPort(object):
 
         try:
             del self._gem_ports[(gem_id, direction)]
-            results = yield gem_port.remove_from_hardware(self._handler.openomci.omci_cc)
-            returnValue(results)
+            if remove_from_hw:
+                results = yield gem_port.remove_from_hardware(self._handler.openomci.omci_cc)
+                returnValue(results)
 
         except Exception as ex:
             self.log.exception('gem-port-delete', e=ex)
