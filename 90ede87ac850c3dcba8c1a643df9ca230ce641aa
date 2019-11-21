@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "affb0c34_349c18bc",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 1080,
+      "author": {
+        "id": 1000548
+      },
+      "writtenOn": "2019-11-21T12:44:40Z",
+      "side": 1,
+      "message": "Amit , Uni port derivation logic should be same as how uni port is formed in parent olt adapter",
+      "revId": "90ede87ac850c3dcba8c1a643df9ca230ce641aa",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    }
+  ]
+}
