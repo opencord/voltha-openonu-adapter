@@ -47,10 +47,10 @@ class BrcmUniLockTask(Task):
         :param priority: (int) OpenOMCI Task priority (0..255) 255 is the highest
         """
         super(BrcmUniLockTask, self).__init__(BrcmUniLockTask.name,
-                                                omci_agent,
-                                                device_id,
-                                                priority=priority,
-                                                exclusive=True)
+                                              omci_agent,
+                                              device_id,
+                                              priority=priority,
+                                              exclusive=True)
         self._device = omci_agent.get_device(device_id)
         self._lock = lock
         self._results = None
@@ -73,7 +73,6 @@ class BrcmUniLockTask(Task):
         """
         super(BrcmUniLockTask, self).start()
         self._local_deferred = reactor.callLater(0, self.perform_lock)
-
 
     @inlineCallbacks
     def perform_lock(self):
@@ -98,7 +97,7 @@ class BrcmUniLockTask(Task):
             for entity_id in veip_list:
                 veip_value = self._config.veip_entities[entity_id]
                 msg = VeipUniFrame(entity_id,
-                                           attributes=dict(administrative_state=state))
+                                   attributes=dict(administrative_state=state))
                 yield self._send_uni_lock_msg(entity_id, veip_value, msg)
 
             msg = OntGFrame(attributes={'administrative_state': state})
@@ -121,7 +120,6 @@ class BrcmUniLockTask(Task):
         except Exception as e:
             self.log.exception('setting-uni-lock-state', e=e)
             self.deferred.errback(failure.Failure(e))
-
 
     @inlineCallbacks
     def _send_uni_lock_msg(self, entity_id, value, me_message):
