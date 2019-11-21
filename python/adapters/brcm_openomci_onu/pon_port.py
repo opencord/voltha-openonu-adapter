@@ -48,8 +48,8 @@ class PonPort(object):
         self._admin_state = AdminState.ENABLED
         self._oper_status = OperStatus.ACTIVE
 
-        self._gem_ports = {}                           # gem-id -> GemPort
-        self._tconts = {}                              # alloc-id -> TCont
+        self._gem_ports = {}  # gem-id -> GemPort
+        self._tconts = {}  # alloc-id -> TCont
 
         self.ieee_mapper_service_profile_entity_id = 0x8001
         self.mac_bridge_port_ani_entity_id = 0x2102  # TODO: can we just use the entity id from the anis list?
@@ -126,17 +126,6 @@ class PonPort(object):
         return self._port_number
 
     @property
-    def next_gem_entity_id(self):
-        self.log.debug('function-entry')
-        entity_id = self._next_entity_id
-
-        self._next_entity_id = self._next_entity_id + 1
-        if self._next_entity_id > PonPort.MAX_GEM_ENTITY_ID:
-            self._next_entity_id = PonPort.MIN_GEM_ENTITY_ID
-
-        return entity_id
-
-    @property
     def tconts(self):
         self.log.debug('function-entry')
         return self._tconts
@@ -182,7 +171,7 @@ class PonPort(object):
         # adapter_agent add_port also does an update of port status
         try:
             yield self._handler.core_proxy.port_state_update(self._handler.device_id, self._port.type,
-                                                             self._port.port_no,self._port.oper_status)
+                                                             self._port.port_no, self._port.oper_status)
         except Exception as e:
             self.log.exception('update-port', e=e)
 
@@ -197,10 +186,10 @@ class PonPort(object):
         self.log.debug('function-entry', tcont=tcont.alloc_id)
 
         if not self._valid:
-            return      # Deleting
+            return  # Deleting
 
         if not reflow and tcont.alloc_id in self._tconts:
-            return      # already created
+            return  # already created
 
         self.log.info('add-tcont', tcont=tcont.alloc_id, reflow=reflow)
         self._tconts[tcont.alloc_id] = tcont
@@ -216,17 +205,17 @@ class PonPort(object):
         tcont.traffic_descriptor = new_td
 
         # TODO: Not yet implemented
-        #TODO: How does this affect ONU tcont settings?
-        #try:
+        # TODO: How does this affect ONU tcont settings?
+        # try:
         #    results = yield tcont.add_to_hardware(self._handler.omci)
-        #except Exception as e:
+        # except Exception as e:
         #    self.log.exception('tcont', tcont=tcont, e=e)
         #    # May occur with xPON provisioning, use hw-resync to recover
         #    results = 'resync needed'
         # returnValue(results)
 
     @inlineCallbacks
-    def remove_tcont(self, alloc_id):
+    def remove_tcont(self, alloc_id, remove_from_hw=True):
         self.log.debug('function-entry')
 
         tcont = self._tconts.get(alloc_id)
@@ -236,8 +225,9 @@ class PonPort(object):
 
         try:
             del self._tconts[alloc_id]
-            results = yield tcont.remove_from_hardware(self._handler.openomci.omci_cc)
-            returnValue(results)
+            if remove_from_hw:
+                results = yield tcont.remove_from_hardware(self._handler.openomci.omci_cc)
+                returnValue(results)
 
         except Exception as e:
             self.log.exception('delete', e=e)
@@ -269,18 +259,19 @@ class PonPort(object):
         if not reflow and (gem_port.gem_id, gem_port.direction) in self._gem_ports:
             return  # nop
 
-        # if this is actually a new gem port then issue the next entity_id
-        gem_port.entity_id = self.next_gem_entity_id
+        # The gem_port entity id is set to be same as gem_id
+        gem_port.entity_id = gem_port.gem_id
         self.log.info('add-gem-port', gem_port=gem_port, reflow=reflow)
         self._gem_ports[(gem_port.gem_id, gem_port.direction)] = gem_port
 
     @inlineCallbacks
-    def remove_gem_id(self, gem_id, direction):
+    def remove_gem_id(self, gem_id, direction, remove_from_hw=True):
         """
         Remove a GEM Port from this ONU
 
         :param gem_id: (GemPort) GEM Port to remove
         :param direction: Direction of the gem port
+        :param remove_from_hw: Remove the GemPort from hardware (remove if True else not)
         :return: deferred
         """
         self.log.debug('function-entry', gem_id=gem_id)
@@ -292,11 +283,10 @@ class PonPort(object):
 
         try:
             del self._gem_ports[(gem_id, direction)]
-            results = yield gem_port.remove_from_hardware(self._handler.openomci.omci_cc)
-            returnValue(results)
+            if remove_from_hw:
+                results = yield gem_port.remove_from_hardware(self._handler.openomci.omci_cc)
+                returnValue(results)
 
         except Exception as ex:
             self.log.exception('gem-port-delete', e=ex)
             raise
-
-
