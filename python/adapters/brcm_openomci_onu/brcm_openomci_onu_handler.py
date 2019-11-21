@@ -1078,7 +1078,7 @@ class BrcmOpenomciOnuHandler(object):
 
     # TODO NEW CORE: Figure out how to gain this knowledge from the olt.  for now cheat terribly.
     def mk_uni_port_num(self, intf_id, onu_id, uni_id):
-        MAX_PONS_PER_OLT = 16
+        MAX_PONS_PER_OLT = 256
         MAX_ONUS_PER_PON = 128
         MAX_UNIS_PER_ONU = 16
 
