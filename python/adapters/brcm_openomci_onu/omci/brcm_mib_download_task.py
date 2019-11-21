@@ -279,51 +279,6 @@ class BrcmMibDownloadTask(Task):
             self.check_status_and_state(results, 'create-mac-bridge-service-profile')
 
             ################################################################################
-            # PON Specific                                                                 #
-            ################################################################################
-            # IEEE 802.1 Mapper Service config - Once per PON
-            #
-            #  EntityID will be referenced by:
-            #            - MAC Bridge Port Configuration Data for the PON port
-            #  References:
-            #            - Nothing at this point. When a GEM port is created, this entity will
-            #              be updated to reference the GEM Interworking TP
-
-            msg = Ieee8021pMapperServiceProfileFrame(self._ieee_mapper_service_profile_entity_id + uni_port.mac_bridge_port_num)
-            frame = msg.create()
-            self.log.debug('openomci-msg', omci_msg=msg)
-            results = yield omci_cc.send(frame)
-            self.check_status_and_state(results, 'create-8021p-mapper-service-profile')
-
-            ################################################################################
-            # Create MAC Bridge Port Configuration Data for the PON port via IEEE 802.1
-            # mapper service. Upon receipt by the ONU, the ONU will create an instance
-            # of the following before returning the response.
-            #
-            #     - MAC bridge port designation data
-            #     - MAC bridge port filter table data
-            #     - MAC bridge port bridge table data
-            #
-            #  EntityID will be referenced by:
-            #            - Implicitly by the VLAN tagging filter data
-            #  References:
-            #            - MAC Bridge Service Profile (the bridge)
-            #            - IEEE 802.1p mapper service profile for PON port
-
-            # TODO: magic. make a static variable for tp_type
-            msg = MacBridgePortConfigurationDataFrame(
-                self._mac_bridge_port_ani_entity_id + uni_port.mac_bridge_port_num,
-                bridge_id_pointer=self._mac_bridge_service_profile_entity_id + uni_port.mac_bridge_port_num,  # Bridge Entity ID
-                port_num= 0xff, # Port ID - unique number within the bridge
-                tp_type=3, # TP Type (IEEE 802.1p mapper service)
-                tp_pointer=self._ieee_mapper_service_profile_entity_id + uni_port.mac_bridge_port_num  # TP ID, 8021p mapper ID
-            )
-            frame = msg.create()
-            self.log.debug('openomci-msg', omci_msg=msg)
-            results = yield omci_cc.send(frame)
-            self.check_status_and_state(results, 'create-mac-bridge-port-configuration-data-8021p-mapper')
-
-            ################################################################################
             # UNI Specific                                                                 #
             ################################################################################
             # MAC Bridge Port config
