@@ -90,7 +90,8 @@ class OnuGemPort(object):
         self.tx_bytes = 0
 
     def __str__(self):
-        return "OnuGemPort - entity_id {}, alloc-id: {}, gem-id: {}, ".format(self.entity_id, self.alloc_id, self.gem_id)
+        return "OnuGemPort - entity_id {}, alloc-id: {}, gem-id: {}, ".format(self.entity_id, self.alloc_id,
+                                                                              self.gem_id)
 
     def __repr__(self):
         return str(self)
