@@ -1084,14 +1084,14 @@ class BrcmOpenomciOnuHandler(object):
 
     # TODO NEW CORE: Figure out how to gain this knowledge from the olt.  for now cheat terribly.
     def mk_uni_port_num(self, intf_id, onu_id, uni_id):
-        MAX_PONS_PER_OLT = 16
-        MAX_ONUS_PER_PON = 128
+        MAX_PONS_PER_OLT = 256
+        MAX_ONUS_PER_PON = 256
         MAX_UNIS_PER_ONU = 16
 
         assert intf_id < MAX_PONS_PER_OLT
         assert onu_id < MAX_ONUS_PER_PON
         assert uni_id < MAX_UNIS_PER_ONU
-        return intf_id << 11 | onu_id << 4 | uni_id
+        return intf_id << 12 | onu_id << 4 | uni_id
 
     @inlineCallbacks
     def onu_active_event(self):
