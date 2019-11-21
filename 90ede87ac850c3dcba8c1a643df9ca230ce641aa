@@ -16,6 +16,24 @@
       "revId": "90ede87ac850c3dcba8c1a643df9ca230ce641aa",
       "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e71cf36d_5f6f2c68",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 1080,
+      "author": {
+        "id": 1000097
+      },
+      "writtenOn": "2019-11-21T13:40:52Z",
+      "side": 1,
+      "message": "Yes I have submitted another patchset for the corresponding changes in the openolt adapter",
+      "parentUuid": "affb0c34_349c18bc",
+      "revId": "90ede87ac850c3dcba8c1a643df9ca230ce641aa",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
     }
   ]
 }
