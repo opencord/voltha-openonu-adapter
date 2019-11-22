@@ -46,6 +46,30 @@
       "revId": "b9f5b03cc8549e7e2b43e87c19f3ceaed9370087",
       "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "96ebb13d_2903094b",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 1086,
+      "author": {
+        "id": 1000548
+      },
+      "writtenOn": "2019-11-22T16:46:32Z",
+      "side": 1,
+      "message": "sorry small correction: After successful activation of ONT",
+      "parentUuid": "4e6bad3b_b38ad50d",
+      "range": {
+        "startLine": 1086,
+        "startChar": 4,
+        "endLine": 1086,
+        "endChar": 7
+      },
+      "revId": "b9f5b03cc8549e7e2b43e87c19f3ceaed9370087",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
     }
   ]
 }
