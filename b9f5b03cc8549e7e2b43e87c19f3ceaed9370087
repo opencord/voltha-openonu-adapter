@@ -22,6 +22,30 @@
       "revId": "b9f5b03cc8549e7e2b43e87c19f3ceaed9370087",
       "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4e6bad3b_b38ad50d",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 1086,
+      "author": {
+        "id": 1000548
+      },
+      "writtenOn": "2019-11-22T16:44:54Z",
+      "side": 1,
+      "message": "\u003e Amit , General suggestion. Wouldn’t be good if uni port base passed\n \u003e via Adopt from core via parent device adapter during discovery\n \u003e phase ? This will help child in sync with patent device more\n \u003e dynamic\n\nOr it can be even after successful activation of OLT via inter_adapter_message ( ONU admin status up ) before initial mib download",
+      "parentUuid": "6fb57288_9da29eeb",
+      "range": {
+        "startLine": 1086,
+        "startChar": 4,
+        "endLine": 1086,
+        "endChar": 7
+      },
+      "revId": "b9f5b03cc8549e7e2b43e87c19f3ceaed9370087",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
     }
   ]
 }
