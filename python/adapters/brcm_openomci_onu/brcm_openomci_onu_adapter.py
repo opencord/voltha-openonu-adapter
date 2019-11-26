@@ -60,7 +60,7 @@ class BrcmOpenomciOnuAdapter(object):
     ]
 
     def __init__(self, core_proxy, adapter_proxy, config):
-        log.debug('function-entry', config=config)
+        log.debug('BrcmOpenomciOnuAdapter-function-entry', config=config)
         self.core_proxy = core_proxy
         self.adapter_proxy = adapter_proxy
         self.config = config
@@ -177,7 +177,7 @@ class BrcmOpenomciOnuAdapter(object):
         :param device: A Voltha.Device object.
         :return: Will return result of self test
         """
-        log.info('self-test-device - Not implemented yet', device=device.id)
+        log.info('self-test-device - Not implemented yet', device_id=device.id, serial_number=device.serial_number)
         raise NotImplementedError()
 
     def delete_device(self, device):
@@ -194,7 +194,7 @@ class BrcmOpenomciOnuAdapter(object):
 
     # TODO(smbaker): When BrcmOpenomciOnuAdapter is updated to inherit from OnuAdapter, this function can be deleted
     def update_pm_config(self, device, pm_config):
-        log.info("adapter-update-pm-config", device=device,
+        log.info("adapter-update-pm-config", device_id=device.id, serial_number=device.serial_number,
                  pm_config=pm_config)
         handler = self.devices_handlers[device.id]
         handler.update_pm_config(device, pm_config)
@@ -247,13 +247,15 @@ class BrcmOpenomciOnuAdapter(object):
 
     def get_ofp_port_info(self, device, port_no):
         ofp_port_info = self.devices_handlers[device.id].get_ofp_port_info(device, port_no)
-        log.debug('get_ofp_port_info', device_id=device.id, ofp_port_info=ofp_port_info)
+        log.debug('get_ofp_port_info', device_id=device.id,
+                  port_name=ofp_port_info.port.ofp_port.name, port_no=ofp_port_info.port.device_port_no)
         return ofp_port_info
 
     def process_inter_adapter_message(self, msg):
-        log.debug('process-inter-adapter-message', msg=msg)
         # Unpack the header to know which device needs to handle this message
         if msg.header:
+            log.debug('process-inter-adapter-message', type=msg.header.type, from_topic=msg.header.from_topic,
+                      to_topic=msg.header.to_topic, to_device_id=msg.header.to_device_id)
             handler = self.devices_handlers[msg.header.to_device_id]
             handler.process_inter_adapter_message(msg)
 
