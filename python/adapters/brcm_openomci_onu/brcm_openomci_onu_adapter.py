@@ -60,7 +60,7 @@ class BrcmOpenomciOnuAdapter(object):
     ]
 
     def __init__(self, core_proxy, adapter_proxy, config):
-        log.debug('function-entry', config=config)
+        log.debug('BrcmOpenomciOnuAdapter-function-entry', config=config)
         self.core_proxy = core_proxy
         self.adapter_proxy = adapter_proxy
         self.config = config
@@ -177,7 +177,7 @@ class BrcmOpenomciOnuAdapter(object):
         :param device: A Voltha.Device object.
         :return: Will return result of self test
         """
-        log.info('self-test-device - Not implemented yet', device=device.id)
+        log.info('self-test-device - Not implemented yet', device_id=device.id, device_sn=device.serial_number.id)
         raise NotImplementedError()
 
     def delete_device(self, device):
@@ -194,7 +194,7 @@ class BrcmOpenomciOnuAdapter(object):
 
     # TODO(smbaker): When BrcmOpenomciOnuAdapter is updated to inherit from OnuAdapter, this function can be deleted
     def update_pm_config(self, device, pm_config):
-        log.info("adapter-update-pm-config", device=device,
+        log.info("adapter-update-pm-config", device_id=device.id, device_sn=device.serial_number,
                  pm_config=pm_config)
         handler = self.devices_handlers[device.id]
         handler.update_pm_config(device, pm_config)
