@@ -21,6 +21,7 @@ from __future__ import absolute_import
 import argparse
 import os
 import time
+import logging
 
 import arrow
 import yaml
@@ -279,7 +280,18 @@ class Main(object):
         self.args = args = parse_args()
         self.config = load_config(args)
 
-        verbosity_adjust = (args.verbose or 0) - (args.quiet or 0)
+        # log levels in python are:
+        # 1 - DEBUG => verbosity_adjust = 0
+        # 2 - INFO => verbosity_adjust = 1
+        # 3 - WARNING => verbosity_adjust = 2
+        # 4 - ERROR
+        # 5 - CRITICAL
+        # If no flags are set we want to stick with INFO,
+        # if verbose is set we want to go down to DEBUG
+        # if quiet is set we want to go up to WARNING
+        # if you set both, you're doing something non-sense and you'll be back at INFO
+
+        verbosity_adjust = 1 - (args.verbose or 0) + (args.quiet or 0)
         self.log = setup_logging(self.config.get('logging', {}),
                                  args.instance_id,
                                  verbosity_adjust=verbosity_adjust)
@@ -287,8 +299,7 @@ class Main(object):
                       regex=args.container_name_regex)
 
         self.adapter_version = self.get_version()
-        self.log.info('OpenONU-Adapter-Version', version=
-        self.adapter_version)
+        self.log.info('OpenONU-Adapter-Version', version=self.adapter_version)
 
         if not args.no_banner:
             print_banner(self.log)
