@@ -30,6 +30,8 @@ from packaging.version import Version
 from simplejson import dumps
 from twisted.internet.defer import inlineCallbacks, returnValue
 from twisted.internet.task import LoopingCall
+from twisted.internet import reactor
+
 from zope.interface import implementer
 
 from pyvoltha.common.structlog_setup import setup_logging, update_logging
@@ -205,6 +207,12 @@ def parse_args():
                         action='store',
                         default=defs['kafka_adapter'],
                         help=_help)
+    _help = ('partiion to be used')
+    parser.add_argument('-p', '--partition',
+                        dest='partition',
+                        action='store',
+                        default=0,
+                        help=_help)
 
     _help = ('<hostname>:<port> of the kafka cluster broker (default: %s). ('
              'If not '
@@ -361,7 +369,8 @@ class Main(object):
                 KafkaProxy(
                     self.args.consul,
                     self.args.kafka_cluster,
-                    config=self.config.get('kafka-cluster-proxy', {})
+                    config=self.config.get('kafka-cluster-proxy', {}),
+                    partition=int(self.args.partition)
                 )
             ).start()
             Probe.kafka_cluster_proxy_running = True
@@ -405,9 +414,9 @@ class Main(object):
             self.adapter_proxy.kafka_proxy = get_messaging_proxy()
 
             # retry for ever
-            res = yield self._register_with_core(-1)
-            Probe.register_adapter_with_core = True
+            reactor.callLater(10, self._register_with_core, -1)
 
+            Probe.register_adapter_with_core = True
             self.log.info('started-internal-services')
 
         except Exception as e:
@@ -433,7 +442,6 @@ class Main(object):
             t.join()
 
     def start_reactor(self):
-        from twisted.internet import reactor
         reactor.callWhenRunning(
             lambda: self.log.info('twisted-reactor-started'))
         reactor.addSystemEventTrigger('before', 'shutdown',
