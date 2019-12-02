@@ -31,7 +31,7 @@ fi
 # Bundle app source
 ENV PYTHONPATH=/voltha
 COPY adapters/brcm_openomci_onu /voltha/adapters/brcm_openomci_onu
-
+COPY data.json /
 # Label image
 ARG org_label_schema_version=unknown
 ARG org_label_schema_vcs_url=unknown
