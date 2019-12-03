@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6f9a993e_6788d65d",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_adapter.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 180,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2019-12-03T01:49:55Z",
+      "side": 1,
+      "message": "seems this should be device.serial_number",
+      "range": {
+        "startLine": 180,
+        "startChar": 101,
+        "endLine": 180,
+        "endChar": 117
+      },
+      "revId": "b248dc2576e0480719fb67917ec2fd0aeaf9d7ba",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8dda8942_c7dfa967",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_adapter.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 258,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2019-12-03T01:49:55Z",
+      "side": 1,
+      "message": "im not sure if a msg would ever not have a header, but the log message above will null pointer if it does not.  maybe the log above gets moved after this if statement?",
+      "range": {
+        "startLine": 258,
+        "startChar": 11,
+        "endLine": 258,
+        "endChar": 21
+      },
+      "revId": "b248dc2576e0480719fb67917ec2fd0aeaf9d7ba",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    }
+  ]
+}
