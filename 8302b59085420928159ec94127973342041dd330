@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "22e5ee70_7e4b5713",
+        "filename": "VERSION",
+        "patchSetId": 8
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2019-12-03T15:51:06Z",
+      "side": 1,
+      "message": "id hold off on doing this just yet.  there is another patch thats going to release this version.",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 5
+      },
+      "revId": "8302b59085420928159ec94127973342041dd330",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    }
+  ]
+}
