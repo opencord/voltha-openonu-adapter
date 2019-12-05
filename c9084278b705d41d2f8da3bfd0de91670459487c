@@ -2,6 +2,52 @@
   "comments": [
     {
       "key": {
+        "uuid": "a89b6fbf_e642d398",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 12
+      },
+      "lineNbr": 587,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2019-12-05T18:54:12Z",
+      "side": 1,
+      "message": "this needs to be self.log.debug.",
+      "range": {
+        "startLine": 587,
+        "startChar": 12,
+        "endLine": 587,
+        "endChar": 75
+      },
+      "revId": "c9084278b705d41d2f8da3bfd0de91670459487c",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d7b3dfda_5ae22ff2",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 12
+      },
+      "lineNbr": 594,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2019-12-05T18:54:12Z",
+      "side": 1,
+      "message": "same as above.",
+      "range": {
+        "startLine": 594,
+        "startChar": 12,
+        "endLine": 594,
+        "endChar": 21
+      },
+      "revId": "c9084278b705d41d2f8da3bfd0de91670459487c",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b9639da2_df6211d0",
         "filename": "python/adapters/brcm_openomci_onu/omci/brcm_tp_setup_task.py",
         "patchSetId": 12
