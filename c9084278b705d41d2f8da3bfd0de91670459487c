@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b9639da2_df6211d0",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_tp_setup_task.py",
+        "patchSetId": 12
+      },
+      "lineNbr": 340,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2019-12-05T17:12:41Z",
+      "side": 1,
+      "message": "i think the problem is here.  onu complains that a priority queue of 8042 does not exist.  I think this instance id composition with the table id needs to match below.",
+      "range": {
+        "startLine": 339,
+        "startChar": 61,
+        "endLine": 340,
+        "endChar": 96
+      },
+      "revId": "c9084278b705d41d2f8da3bfd0de91670459487c",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5757cc16_ec4082c0",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_tp_setup_task.py",
+        "patchSetId": 12
+      },
+      "lineNbr": 465,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2019-12-05T17:12:41Z",
+      "side": 1,
+      "message": "here is the new instance id.  but does not match whats used on the GEM IW TP.",
+      "range": {
+        "startLine": 463,
+        "startChar": 0,
+        "endLine": 465,
+        "endChar": 33
+      },
+      "revId": "c9084278b705d41d2f8da3bfd0de91670459487c",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    }
+  ]
+}
