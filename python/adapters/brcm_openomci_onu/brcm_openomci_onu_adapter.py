@@ -36,6 +36,7 @@ from voltha_protos.health_pb2 import HealthStatus
 from pyvoltha.adapters.common.frameio.frameio import hexify
 from pyvoltha.adapters.extensions.omci.openomci_agent import OpenOMCIAgent, OpenOmciAgentDefaults
 from pyvoltha.adapters.extensions.omci.database.mib_db_dict import MibDbVolatileDict
+from pyvoltha.adapters.extensions.omci.database.mib_db_dict_lazy import MibDbLazyWriteDict
 
 from brcm_openomci_onu_handler import BrcmOpenomciOnuHandler
 from omci.brcm_capabilities_task import BrcmCapabilitiesTask
@@ -77,7 +78,7 @@ class BrcmOpenomciOnuAdapter(object):
         self.broadcom_omci = deepcopy(OpenOmciAgentDefaults)
 
         self.broadcom_omci['mib-synchronizer']['audit-delay'] = 0  # disable audits as brcm onu wont upload once provisioned
-        self.broadcom_omci['mib-synchronizer']['database'] = MibDbVolatileDict
+        self.broadcom_omci['mib-synchronizer']['database'] = MibDbLazyWriteDict
         self.broadcom_omci['alarm-synchronizer']['database'] = MibDbVolatileDict
         self.broadcom_omci['omci-capabilities']['tasks']['get-capabilities'] = BrcmCapabilitiesTask
 
@@ -129,8 +130,12 @@ class BrcmOpenomciOnuAdapter(object):
 
     def reconcile_device(self, device):
         self.log.info('reconcile-device', device_id=device.id)
-        self.devices_handlers[device.id] = BrcmOpenomciOnuHandler(self, device.id)
-        reactor.callLater(0, self.devices_handlers[device.id].reconcile, device)
+        if not device.id in self.devices_handlers:
+            self.devices_handlers[device.id] = BrcmOpenomciOnuHandler(self, device.id)
+            reactor.callLater(0, self.devices_handlers[device.id].reconcile, device)
+        else:
+            self.log.debug('already-called-reconcile-device', device_id=device.id)
+        return device
 
     def abandon_device(self, device):
         raise NotImplementedError()
