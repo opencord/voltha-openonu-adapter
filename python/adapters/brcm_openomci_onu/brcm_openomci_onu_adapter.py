@@ -37,6 +37,7 @@ from voltha_protos.health_pb2 import HealthStatus
 from pyvoltha.adapters.common.frameio.frameio import hexify
 from pyvoltha.adapters.extensions.omci.openomci_agent import OpenOMCIAgent, OpenOmciAgentDefaults
 from pyvoltha.adapters.extensions.omci.database.mib_db_dict import MibDbVolatileDict
+from pyvoltha.adapters.extensions.omci.database.mib_db_dict_lazy import MibDbLazyWriteDict
 
 from brcm_openomci_onu_handler import BrcmOpenomciOnuHandler
 from omci.brcm_capabilities_task import BrcmCapabilitiesTask
@@ -78,7 +79,7 @@ class BrcmOpenomciOnuAdapter(object):
         self.broadcom_omci = deepcopy(OpenOmciAgentDefaults)
 
         self.broadcom_omci['mib-synchronizer']['audit-delay'] = 0  # disable audits as brcm onu wont upload once provisioned
-        self.broadcom_omci['mib-synchronizer']['database'] = MibDbVolatileDict
+        self.broadcom_omci['mib-synchronizer']['database'] = MibDbLazyWriteDict
         self.broadcom_omci['alarm-synchronizer']['database'] = MibDbVolatileDict
         self.broadcom_omci['omci-capabilities']['tasks']['get-capabilities'] = BrcmCapabilitiesTask
 
