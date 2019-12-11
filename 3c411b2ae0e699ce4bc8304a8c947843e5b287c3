@@ -46,6 +46,30 @@
       "revId": "3c411b2ae0e699ce4bc8304a8c947843e5b287c3",
       "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1ce5f321_006a63e8",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 14
+      },
+      "lineNbr": 1006,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2019-12-11T11:54:26Z",
+      "side": 1,
+      "message": "Yes onu reboot and disable/enable works.  \n\nThough with BAL 3.1 ive noticed the olt reboot and fiber disconnect/reconnect the indication does not properly get handled by the olt and does not get to the onu.  So its likely broken using openolt with 3.1",
+      "parentUuid": "e88bcdbc_beecb0e6",
+      "range": {
+        "startLine": 1003,
+        "startChar": 18,
+        "endLine": 1006,
+        "endChar": 12
+      },
+      "revId": "3c411b2ae0e699ce4bc8304a8c947843e5b287c3",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
     }
   ]
 }
