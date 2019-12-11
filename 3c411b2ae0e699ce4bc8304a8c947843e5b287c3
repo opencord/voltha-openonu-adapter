@@ -22,6 +22,30 @@
       "revId": "3c411b2ae0e699ce4bc8304a8c947843e5b287c3",
       "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e88bcdbc_beecb0e6",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 14
+      },
+      "lineNbr": 1006,
+      "author": {
+        "id": 1000127
+      },
+      "writtenOn": "2019-12-11T09:27:07Z",
+      "side": 1,
+      "message": "Good point. AFAIK, update_interface with oper_state \u0027down\u0027 happens on ONU reboot. I was under the assumption that ONU reboot scenario is not functional yet and I did not attempt it yet. Consequently, the update_interface part of code is untouched.\nThe scenario I have tested is eap -\u003e subcriber_provision- \u003e eap -\u003e dhcp -\u003e hsia -\u003e disable-enable onu.\n\nIs reboot ONU working. If so I can test that too.",
+      "parentUuid": "befb6c66_2e7384b7",
+      "range": {
+        "startLine": 1003,
+        "startChar": 18,
+        "endLine": 1006,
+        "endChar": 12
+      },
+      "revId": "3c411b2ae0e699ce4bc8304a8c947843e5b287c3",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
     }
   ]
 }
