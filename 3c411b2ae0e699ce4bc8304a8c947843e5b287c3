@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "befb6c66_2e7384b7",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 14
+      },
+      "lineNbr": 1006,
+      "author": {
+        "id": 1000218
+      },
+      "writtenOn": "2019-12-11T06:35:21Z",
+      "side": 1,
+      "message": "What about update_interface? tech\u003dprofile states are cleared in there too. Should it remain as is?",
+      "range": {
+        "startLine": 1003,
+        "startChar": 18,
+        "endLine": 1006,
+        "endChar": 12
+      },
+      "revId": "3c411b2ae0e699ce4bc8304a8c947843e5b287c3",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    }
+  ]
+}
