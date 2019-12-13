@@ -114,7 +114,8 @@ class BrcmVlanFilterTask(Task):
 
             # Delete bridge ani side vlan filter
             # TODO: check if its in our local mib first before blindly deleting
-            msg = VlanTaggingFilterDataFrame(self._mac_bridge_port_ani_entity_id + self._uni_port.mac_bridge_port_num)
+            eid = self._mac_bridge_port_ani_entity_id + self._uni_port.entity_id  # Entity ID
+            msg = VlanTaggingFilterDataFrame(eid)
             frame = msg.delete()
             self.log.debug('openomci-msg', omci_msg=msg)
             self.strobe_watchdog()
@@ -129,7 +130,7 @@ class BrcmVlanFilterTask(Task):
                 forward_operation = 0x00  # no investigation, ONU transparent
 
             msg = VlanTaggingFilterDataFrame(
-                self._mac_bridge_port_ani_entity_id + self._uni_port.mac_bridge_port_num,  # Entity ID
+                eid,
                 vlan_tcis=[self._set_vlan_id],  # VLAN IDs
                 forward_operation=forward_operation
             )

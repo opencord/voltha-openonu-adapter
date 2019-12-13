@@ -304,7 +304,7 @@ class BrcmMibDownloadTask(Task):
                 association_type = 2
 
             msg = MacBridgePortConfigurationDataFrame(
-                uni_port.entity_id,            # Entity ID - This is read-only/set-by-create !!!
+                self._mac_bridge_port_ani_entity_id + uni_port.entity_id,  # Entity ID
                 bridge_id_pointer=self._mac_bridge_service_profile_entity_id + uni_port.mac_bridge_port_num,  # Bridge Entity ID
                 port_num=uni_port.mac_bridge_port_num,   # Port ID
                 tp_type=tp_type,                         # PPTP Ethernet or VEIP UNI

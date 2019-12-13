@@ -487,7 +487,7 @@ class BrcmTpSetupTask(Task):
 
             # TODO: magic. make a static variable for tp_type
             msg = MacBridgePortConfigurationDataFrame(
-                self._mac_bridge_port_ani_entity_id + self._uni_port.mac_bridge_port_num + self._tp_table_id,
+                self._mac_bridge_port_ani_entity_id + self._uni_port.entity_id + self._tp_table_id,  # Entity ID
                 bridge_id_pointer=(
                         self._mac_bridge_service_profile_entity_id +
                         self._uni_port.mac_bridge_port_num),
