@@ -255,21 +255,7 @@ class BrcmTpDeleteTask(Task):
             ################################################################################
             # TODO: magic. make a static variable for tp_type
             msg = MacBridgePortConfigurationDataFrame(
-                self._mac_bridge_port_ani_entity_id + self._uni_port.mac_bridge_port_num + self._tp_table_id,
-                bridge_id_pointer=(
-                        self._mac_bridge_service_profile_entity_id +
-                        self._uni_port.mac_bridge_port_num +
-                        self._tp_table_id
-                ),
-                # Bridge Entity ID
-                port_num=0xff,  # Port ID - unique number within the bridge
-                tp_type=3,  # TP Type (IEEE 802.1p mapper service)
-                tp_pointer=(
-                        self._ieee_mapper_service_profile_entity_id +
-                        self._uni_port.mac_bridge_port_num +
-                        self._tp_table_id
-                )
-                # TP ID, 8021p mapper ID
+                self._mac_bridge_port_ani_entity_id + self._uni_port.entity_id + self._tp_table_id,  # Entity ID
             )
             frame = msg.delete()
             self.log.debug('openomci-msg', omci_msg=msg)

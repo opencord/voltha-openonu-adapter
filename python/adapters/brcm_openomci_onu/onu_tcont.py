@@ -109,7 +109,7 @@ class OnuTCont(object):
         # TODO: magic number, create a named variable
 
         try:
-            msg = TcontFrame(self.entity_id, 0xFFFF)
+            msg = TcontFrame(self.entity_id, 0xFF)
             frame = msg.set()
             self.log.debug('openomci-msg', omci_msg=msg)
             results = yield omci.send(frame)
