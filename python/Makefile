@@ -26,6 +26,7 @@ DOCKER_REPOSITORY        ?=
 DOCKER_BUILD_ARGS        ?=
 DOCKER_TAG               ?= ${VERSION}
 ADAPTER_IMAGENAME        := ${DOCKER_REGISTRY}${DOCKER_REPOSITORY}voltha-openonu-adapter:${DOCKER_TAG}
+TYPE                     ?= minimal
 
 ## Docker labels. Only set ref and commit date if committed
 DOCKER_LABEL_VCS_URL     ?= $(shell git remote get-url $(shell git remote))
@@ -90,7 +91,9 @@ docker-build: local-protos local-pyvoltha
 docker-push:
 	docker push ${ADAPTER_IMAGENAME}
 
-
+docker-kind-load:
+	@if [ "`kind get clusters | grep voltha-$(TYPE)`" = '' ]; then echo "no voltha-$(TYPE) cluster found" && exit 1; fi
+	kind load docker-image ${ADAPTER_IMAGENAME} --name=voltha-$(TYPE) --nodes $(shell kubectl get nodes --template='{{range .items}}{{.metadata.name}},{{end}}' | sed 's/,$$//')
 ## Python venv dev environment
 
 VENVDIR := venv-openonu
