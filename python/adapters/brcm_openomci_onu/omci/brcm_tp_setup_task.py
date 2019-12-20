@@ -59,16 +59,19 @@ class BrcmTpSetupTask(Task):
         :param uni_id: (int) numeric id of the uni port on the onu device, starts at 0
         :param tp_table_id: (int) Technology Profile Table-ID
         """
-        log = structlog.get_logger(device_id=handler.device_id, uni_id=uni_id)
-        log.debug('function-entry')
-
         super(BrcmTpSetupTask, self).__init__(BrcmTpSetupTask.name,
                                               omci_agent,
                                               handler.device_id,
                                               priority=SETUP_TP_TASK_PRIORITY,
                                               exclusive=True)
 
-        self.log = log
+        self.log = structlog.get_logger(device_id=handler.device_id,
+                                        name=BrcmTpSetupTask.name,
+                                        task_id=self._task_id,
+                                        tconts=tconts,
+                                        gem_ports=gem_ports,
+                                        uni_id=uni_id,
+                                        tp_table_id=tp_table_id)
 
         self._onu_device = omci_agent.get_device(handler.device_id)
         self._local_deferred = None
@@ -103,7 +106,6 @@ class BrcmTpSetupTask(Task):
         self.uni_port_to_queue_map = dict()
 
     def cancel_deferred(self):
-        self.log.debug('function-entry')
         super(BrcmTpSetupTask, self).cancel_deferred()
 
         d, self._local_deferred = self._local_deferred, None
@@ -117,7 +119,6 @@ class BrcmTpSetupTask(Task):
         """
         Start the Tech-Profile Download
         """
-        self.log.debug('function-entry')
         super(BrcmTpSetupTask, self).start()
         self._local_deferred = reactor.callLater(0, self.perform_service_specific_steps)
 
@@ -125,9 +126,6 @@ class BrcmTpSetupTask(Task):
         """
         Shutdown Tech-Profile download tasks
         """
-        self.log.debug('function-entry')
-        self.log.debug('stopping')
-
         self.cancel_deferred()
         super(BrcmTpSetupTask, self).stop()
 
@@ -140,7 +138,6 @@ class BrcmTpSetupTask(Task):
         :param operation: (str) what operation was being performed
         :return: True if successful, False if the entity existed (already created)
         """
-        self.log.debug('function-entry')
 
         omci_msg = results.fields['omci_message'].fields
         status = omci_msg['success_code']
@@ -164,7 +161,7 @@ class BrcmTpSetupTask(Task):
 
     @inlineCallbacks
     def perform_service_specific_steps(self):
-        self.log.debug('function-entry')
+        self.log.info('creating-tcont-mapper-gemport-iw')
 
         omci_cc = self._onu_device.omci_cc
         gem_pq_associativity = dict()

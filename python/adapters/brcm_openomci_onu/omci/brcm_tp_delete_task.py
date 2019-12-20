@@ -60,16 +60,17 @@ class BrcmTpDeleteTask(Task):
         :param uni_id: (int) numeric id of the uni port on the onu device, starts at 0
         :param tp_table_id: (int) Technology Profile Table-ID
         """
-        log = structlog.get_logger(device_id=handler.device_id, uni_id=uni_id)
-        log.debug('function-entry')
-
         super(BrcmTpDeleteTask, self).__init__(BrcmTpDeleteTask.name,
                                                omci_agent,
                                                handler.device_id,
                                                priority=DELETE_TP_TASK_PRIORITY,
                                                exclusive=True)
 
-        self.log = log
+        self.log = structlog.get_logger(device_id=handler.device_id,
+                                        name=BrcmTpDeleteTask.name,
+                                        task_id=self._task_id,
+                                        uni_id=uni_id,
+                                        tp_table_id=tp_table_id)
 
         self._onu_device = omci_agent.get_device(handler.device_id)
         self._local_deferred = None
@@ -96,7 +97,6 @@ class BrcmTpDeleteTask(Task):
             handler.pon_port.mac_bridge_port_ani_entity_id
 
     def cancel_deferred(self):
-        self.log.debug('function-entry')
         super(BrcmTpDeleteTask, self).cancel_deferred()
 
         d, self._local_deferred = self._local_deferred, None
@@ -110,7 +110,6 @@ class BrcmTpDeleteTask(Task):
         """
         Start the Tech-Profile Delete
         """
-        self.log.debug('function-entry')
         super(BrcmTpDeleteTask, self).start()
         if self._tcont is not None:
             self._local_deferred = reactor.callLater(0, self.delete_tcont_and_associated_me)
@@ -123,9 +122,6 @@ class BrcmTpDeleteTask(Task):
         """
         Shutdown Tech-Profile delete tasks
         """
-        self.log.debug('function-entry')
-        self.log.debug('stopping')
-
         self.cancel_deferred()
         super(BrcmTpDeleteTask, self).stop()
 
@@ -138,7 +134,6 @@ class BrcmTpDeleteTask(Task):
         :param operation: (str) what operation was being performed
         :return: True if successful, False if the entity existed (already created)
         """
-        self.log.debug('function-entry')
 
         omci_msg = results.fields['omci_message'].fields
         status = omci_msg['success_code']
@@ -162,7 +157,7 @@ class BrcmTpDeleteTask(Task):
 
     @inlineCallbacks
     def delete_tcont_and_associated_me(self):
-        self.log.debug('function-entry')
+        self.log.info('deleting-tcont')
 
         omci_cc = self._onu_device.omci_cc
 
@@ -213,6 +208,8 @@ class BrcmTpDeleteTask(Task):
 
     @inlineCallbacks
     def delete_gem_port_nw_ctp_and_associated_me(self):
+        self.log.info('deleting-gem-port-iw')
+
         omci_cc = self._onu_device.omci_cc
         try:
             ################################################################################

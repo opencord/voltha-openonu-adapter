@@ -15,6 +15,7 @@
 #
 
 from __future__ import absolute_import
+import structlog
 from pyvoltha.adapters.extensions.omci.tasks.task import Task
 from twisted.internet import reactor
 from twisted.internet.defer import inlineCallbacks, failure, returnValue
@@ -51,6 +52,12 @@ class BrcmUniLockTask(Task):
                                               device_id,
                                               priority=priority,
                                               exclusive=True)
+
+        self.log = structlog.get_logger(device_id=device_id,
+                                        name=BrcmUniLockTask.name,
+                                        task_id=self._task_id,
+                                        setting_lock=lock)
+
         self._device = omci_agent.get_device(device_id)
         self._lock = lock
         self._results = None

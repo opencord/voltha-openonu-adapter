@@ -21,13 +21,12 @@ from __future__ import absolute_import
 import argparse
 import os
 import time
-import logging
 
 import arrow
 import yaml
 import socketserver
+import configparser
 
-from packaging.version import Version
 from simplejson import dumps
 from twisted.internet.defer import inlineCallbacks, returnValue
 from twisted.internet.task import LoopingCall
@@ -237,7 +236,6 @@ def parse_args():
                         default=defs['event_topic'],
                         help=_help)
 
-
     _help = '<hostname>:<port> for liveness and readiness probes (default: %s)' % defs['probe']
     parser.add_argument(
         '-P', '--probe', dest='probe', action='store',
@@ -265,11 +263,26 @@ def load_config(args):
     return config
 
 
+def load_version():
+    path =  defs['version_file']
+    if not path.startswith('/'):
+        dir = os.path.dirname(os.path.abspath(__file__))
+        path = os.path.join(dir, path)
+
+    path = os.path.abspath(path)
+    versionconfig = configparser.ConfigParser()
+    versionconfig.read(path)
+    return versionconfig
+
+
 def print_banner(log):
-   log.info('                                                    ')
-   log.info('               OpenOnu Adapter                      ')
-   log.info('                                                    ')
-   log.info('(to stop: press Ctrl-C)')
+    log.info('       ___________ _____ _   _ _____ _   _ _   _       ')
+    log.info('      |  _  | ___ \  ___| \ | |  _  | \ | | | | |      ')
+    log.info('      | | | | |_/ / |__ |  \| | | | |  \| | | | |      ')
+    log.info('      | | | |  __/|  __|| . ` | | | | . ` | | | |      ')
+    log.info('      \ \_/ / |   | |___| |\  \ \_/ / |\  | |_| |      ')
+    log.info('       \___/\_|   \____/\_| \_/\___/\_| \_/\___/       ')
+    log.info('                                                       ')
 
 
 @implementer(IComponent)
@@ -279,6 +292,7 @@ class Main(object):
 
         self.args = args = parse_args()
         self.config = load_config(args)
+        self.versionconfig = load_version()
 
         # log levels in python are:
         # 1 - DEBUG => verbosity_adjust = 0
@@ -298,11 +312,12 @@ class Main(object):
         self.log.info('container-number-extractor',
                       regex=args.container_name_regex)
 
-        self.adapter_version = self.get_version()
+        self.adapter_version = self.versionconfig.get('buildinfo', 'version')
         self.log.info('OpenONU-Adapter-Version', version=self.adapter_version)
 
         if not args.no_banner:
             print_banner(self.log)
+            self.log.info(list(self.versionconfig.items('buildinfo')))
 
         self.adapter = None
         # Create a unique instance id using the passed-in instance id and
@@ -318,23 +333,6 @@ class Main(object):
         if not args.no_heartbeat:
             self.start_heartbeat()
             self.start_kafka_cluster_heartbeat(self.instance_id)
-
-    def get_version(self):
-        path = defs['version_file']
-        if not path.startswith('/'):
-            dir = os.path.dirname(os.path.abspath(__file__))
-            path = os.path.join(dir, path)
-
-        path = os.path.abspath(path)
-        version_file = open(path, 'r')
-        v = version_file.read()
-
-        # Use Version to validate the version string - exception will be raised
-        # if the version is invalid
-        Version(v)
-
-        version_file.close()
-        return v
 
     def start(self):
         self.start_reactor()  # will not return except Keyboard interrupt
@@ -392,7 +390,8 @@ class Main(object):
 
             self.adapter = BrcmOpenomciOnuAdapter(
                 core_proxy=self.core_proxy, adapter_proxy=self.adapter_proxy,
-                config=config)
+                config=config,
+                versionconfig=self.versionconfig)
 
             self.adapter.start()
 
