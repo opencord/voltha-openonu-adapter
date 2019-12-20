@@ -109,7 +109,11 @@ class OnuTCont(object):
         # TODO: magic number, create a named variable
 
         try:
-            msg = TcontFrame(self.entity_id, 0xFF)
+            # Value 0x00FF or 0xFFFF for ITU-T G.984 systems,
+            # and the value 0xFFFF for ITU-T G.987 systems.
+            # G.987 ITU-T specification corresponds to 10-Gigabit-capable
+            # passive optical network (XG-PON) systems.
+            msg = TcontFrame(self.entity_id, 0xFFFF)
             frame = msg.set()
             self.log.debug('openomci-msg', omci_msg=msg)
             results = yield omci.send(frame)
