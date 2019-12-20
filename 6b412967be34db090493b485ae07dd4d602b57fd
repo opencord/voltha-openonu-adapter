@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "efb7ceaa_5506b81e",
+        "filename": "python/adapters/brcm_openomci_onu/onu_tcont.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2019-12-20T14:37:34Z",
+      "side": 1,
+      "message": "We are at an impasse here.   I had to change this just recently to work with some onu i have that run based on different G.98X specifications.  I had tested with my Alpha too (and 0xFF worked), but ive found the Alpha will accept many omci commands that it probably should not.   \n\n\nBut we can query for this support level, its an attribute of Ont2G and helper classes can get at the value.  Something like:\n\nonu_device \u003d self._handler._onu_omci_device\nomcc_version \u003d onu_device.configuration.omcc_version\n\nif omcc_version is in [list of types that want 0xFFFF]\n  use 0xFFFF\nelse\n  use 0xFF\n\nSee onu_configuration, class OMCCVersion for the list of supported omci versions and their values.",
+      "range": {
+        "startLine": 116,
+        "startChar": 45,
+        "endLine": 116,
+        "endChar": 51
+      },
+      "revId": "6b412967be34db090493b485ae07dd4d602b57fd",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    }
+  ]
+}
