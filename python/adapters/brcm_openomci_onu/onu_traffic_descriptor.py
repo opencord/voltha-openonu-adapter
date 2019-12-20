@@ -34,7 +34,6 @@ class OnuTrafficDescriptor(object):
                  name=None):
 
         self.log = structlog.get_logger(fixed=fixed, assured=assured, maximum=maximum, additional=additional)
-        self.log.debug('function-entry')
 
         self.name = name
         self.fixed_bandwidth = fixed       # bps
@@ -47,8 +46,6 @@ class OnuTrafficDescriptor(object):
 
     @staticmethod
     def to_string(value):
-        log = structlog.get_logger()
-        log.debug('function-entry', value=value)
         return {
             NON_ASSURED_SHARING: "non-assured-sharing",
             BEST_EFFORT_SHARING: "best-effort-sharing",
@@ -58,8 +55,6 @@ class OnuTrafficDescriptor(object):
 
     @staticmethod
     def from_value(value):
-        log = structlog.get_logger()
-        log.debug('function-entry', value=value)
         return {
             0: NONE,
             1: BEST_EFFORT_SHARING,
@@ -68,14 +63,12 @@ class OnuTrafficDescriptor(object):
 
 
     def __str__(self):
-        self.log.debug('function-entry')
         return "OnuTrafficDescriptor: {}, {}/{}/{}".format(self.name,
                                                         self.fixed_bandwidth,
                                                         self.assured_bandwidth,
                                                         self.maximum_bandwidth)
 
     def to_dict(self):
-        self.log.debug('function-entry')
         val = {
             'fixed-bandwidth': self.fixed_bandwidth,
             'assured-bandwidth': self.assured_bandwidth,
@@ -87,8 +80,6 @@ class OnuTrafficDescriptor(object):
 
     @staticmethod
     def create(traffic_disc):
-        log = structlog.get_logger()
-        log.debug('function-entry',traffic_disc=traffic_disc)
 
         additional = OnuTrafficDescriptor.from_value(
             traffic_disc['additional-bw-eligibility-indicator'])
@@ -105,7 +96,6 @@ class OnuTrafficDescriptor(object):
 
     @inlineCallbacks
     def add_to_hardware(self, omci):
-       self.log.debug('function-entry', omci=omci)
        results = succeed('TODO: Implement me')
        returnValue(results)
 

@@ -42,8 +42,6 @@ from brcm_openomci_onu_handler import BrcmOpenomciOnuHandler
 from omci.brcm_capabilities_task import BrcmCapabilitiesTask
 from copy import deepcopy
 
-log = structlog.get_logger()
-
 
 @implementer(IAdapterInterface)
 class BrcmOpenomciOnuAdapter(object):
@@ -59,15 +57,17 @@ class BrcmOpenomciOnuAdapter(object):
         )
     ]
 
-    def __init__(self, core_proxy, adapter_proxy, config):
-        log.debug('BrcmOpenomciOnuAdapter-function-entry', config=config)
+    def __init__(self, core_proxy, adapter_proxy, config, build_info):
+        self.log = structlog.get_logger()
+        self.log.debug('starting-adapter', config=config)
+
         self.core_proxy = core_proxy
         self.adapter_proxy = adapter_proxy
         self.config = config
         self.descriptor = Adapter(
             id=self.name,
-            vendor='Voltha project',
-            version='2.0',
+            vendor='VOLTHA OpenONU',
+            version=build_info.version,
             config=AdapterConfig(log_level=LogLevel.INFO)
         )
         self.devices_handlers = dict()
@@ -89,25 +89,25 @@ class BrcmOpenomciOnuAdapter(object):
     @property
     def omci_agent(self):
         if not hasattr(self, '_omci_agent') or self._omci_agent is None:
-            log.debug('creating-omci-agent')
+            self.log.debug('creating-omci-agent')
             self._omci_agent = OpenOMCIAgent(self.core_proxy,
                                              self.adapter_proxy,
                                              support_classes=self.broadcom_omci)
         return self._omci_agent
 
     def start(self):
-        log.debug('starting')
+        self.log.debug('starting')
         self.omci_agent.start()
-        log.info('started')
+        self.log.info('started')
 
     def stop(self):
-        log.debug('stopping')
+        self.log.debug('stopping')
 
         omci, self._omci_agent = self._omci_agent, None
         if omci is not None:
             self._omci_agent.stop()
 
-        log.info('stopped')
+        self.log.info('stopped')
 
     def adapter_descriptor(self):
         return self.descriptor
@@ -122,13 +122,13 @@ class BrcmOpenomciOnuAdapter(object):
         raise NotImplementedError()
 
     def adopt_device(self, device):
-        log.info('adopt_device', device_id=device.id)
+        self.log.info('adopt-device', device_id=device.id)
         self.devices_handlers[device.id] = BrcmOpenomciOnuHandler(self, device.id)
         reactor.callLater(0, self.devices_handlers[device.id].activate, device)
         return device
 
     def reconcile_device(self, device):
-        log.info('reconcile-device', device_id=device.id)
+        self.log.info('reconcile-device', device_id=device.id)
         self.devices_handlers[device.id] = BrcmOpenomciOnuHandler(self, device.id)
         reactor.callLater(0, self.devices_handlers[device.id].reconcile, device)
 
@@ -136,21 +136,21 @@ class BrcmOpenomciOnuAdapter(object):
         raise NotImplementedError()
 
     def disable_device(self, device):
-        log.info('disable-onu-device', device_id=device.id)
+        self.log.info('disable-onu-device', device_id=device.id)
         if device.id in self.devices_handlers:
             handler = self.devices_handlers[device.id]
             if handler is not None:
                 handler.disable(device)
 
     def reenable_device(self, device):
-        log.info('reenable-onu-device', device_id=device.id)
+        self.log.info('reenable-onu-device', device_id=device.id)
         if device.id in self.devices_handlers:
             handler = self.devices_handlers[device.id]
             if handler is not None:
                 handler.reenable(device)
 
     def reboot_device(self, device):
-        log.info('reboot-device', device_id=device.id)
+        self.log.info('reboot-device', device_id=device.id)
         if device.id in self.devices_handlers:
             handler = self.devices_handlers[device.id]
             if handler is not None:
@@ -177,11 +177,11 @@ class BrcmOpenomciOnuAdapter(object):
         :param device: A Voltha.Device object.
         :return: Will return result of self test
         """
-        log.info('self-test-device - Not implemented yet', device_id=device.id, serial_number=device.serial_number)
+        self.log.info('self-test-device - Not implemented yet', device_id=device.id, serial_number=device.serial_number)
         raise NotImplementedError()
 
     def delete_device(self, device):
-        log.info('delete-device', device_id=device.id)
+        self.log.info('delete-device', device_id=device.id)
         if device.id in self.devices_handlers:
             handler = self.devices_handlers[device.id]
             if handler is not None:
@@ -194,7 +194,7 @@ class BrcmOpenomciOnuAdapter(object):
 
     # TODO(smbaker): When BrcmOpenomciOnuAdapter is updated to inherit from OnuAdapter, this function can be deleted
     def update_pm_config(self, device, pm_config):
-        log.info("adapter-update-pm-config", device_id=device.id, serial_number=device.serial_number,
+        self.log.info("adapter-update-pm-config", device_id=device.id, serial_number=device.serial_number,
                  pm_config=pm_config)
         handler = self.devices_handlers[device.id]
         handler.update_pm_config(device, pm_config)
@@ -212,11 +212,11 @@ class BrcmOpenomciOnuAdapter(object):
         raise NotImplementedError()
 
     def send_proxied_message(self, proxy_address, msg):
-        log.debug('send-proxied-message', proxy_address=proxy_address, msg=msg)
+        self.log.debug('send-proxied-message', proxy_address=proxy_address, msg=msg)
 
     @inlineCallbacks
     def receive_proxied_message(self, proxy_address, msg):
-        log.debug('receive-proxied-message', proxy_address=proxy_address,
+        self.log.debug('receive-proxied-message', proxy_address=proxy_address,
                  device_id=proxy_address.device_id, msg=hexify(msg))
         # Device_id from the proxy_address is the olt device id. We need to
         # get the onu device id using the port number in the proxy_address
@@ -227,12 +227,12 @@ class BrcmOpenomciOnuAdapter(object):
             handler.receive_message(msg)
 
     def receive_packet_out(self, logical_device_id, egress_port_no, msg):
-        log.info('packet-out', logical_device_id=logical_device_id,
+        self.log.debug('packet-out', logical_device_id=logical_device_id,
                  egress_port_no=egress_port_no, msg_len=len(msg))
 
     @inlineCallbacks
     def receive_inter_adapter_message(self, msg):
-        log.debug('receive_inter_adapter_message', msg=msg)
+        self.log.debug('receive-inter-adapter-message', msg=msg)
         proxy_address = msg['proxy_address']
         assert proxy_address is not None
         # Device_id from the proxy_address is the olt device id. We need to
@@ -243,106 +243,39 @@ class BrcmOpenomciOnuAdapter(object):
             handler = self.devices_handlers[device.id]
             handler.event_messages.put(msg)
         else:
-            log.error("device-not-found")
+            self.log.error("device-not-found")
 
     def get_ofp_port_info(self, device, port_no):
         ofp_port_info = self.devices_handlers[device.id].get_ofp_port_info(device, port_no)
-        log.debug('get_ofp_port_info', device_id=device.id,
+        self.log.debug('get-ofp-port-info', device_id=device.id,
                   port_name=ofp_port_info.port.ofp_port.name, port_no=ofp_port_info.port.device_port_no)
         return ofp_port_info
 
     def process_inter_adapter_message(self, msg):
         # Unpack the header to know which device needs to handle this message
         if msg.header:
-            log.debug('process-inter-adapter-message', type=msg.header.type, from_topic=msg.header.from_topic,
+            self.log.debug('process-inter-adapter-message', type=msg.header.type, from_topic=msg.header.from_topic,
                       to_topic=msg.header.to_topic, to_device_id=msg.header.to_device_id)
             handler = self.devices_handlers[msg.header.to_device_id]
             handler.process_inter_adapter_message(msg)
 
     def create_interface(self, device, data):
-        log.debug('create-interface', device_id=device.id)
+        self.log.debug('create-interface', device_id=device.id)
         if device.id in self.devices_handlers:
             handler = self.devices_handlers[device.id]
             if handler is not None:
                 handler.create_interface(data)
 
     def update_interface(self, device, data):
-        log.debug('update-interface', device_id=device.id)
+        self.log.debug('update-interface', device_id=device.id)
         if device.id in self.devices_handlers:
             handler = self.devices_handlers[device.id]
             if handler is not None:
                 handler.update_interface(data)
 
     def remove_interface(self, device, data):
-        log.debug('remove-interface', device_id=device.id)
+        self.log.debug('remove-interface', device_id=device.id)
         if device.id in self.devices_handlers:
             handler = self.devices_handlers[device.id]
             if handler is not None:
                 handler.remove_interface(data)
-
-    def receive_onu_detect_state(self, device_id, state):
-        raise NotImplementedError()
-
-    def create_tcont(self, device, tcont_data, traffic_descriptor_data):
-        log.debug('create-tcont', device_id=device.id)
-        if device.id in self.devices_handlers:
-            handler = self.devices_handlers[device.id]
-            if handler is not None:
-                handler.create_tcont(tcont_data, traffic_descriptor_data)
-
-    def update_tcont(self, device, tcont_data, traffic_descriptor_data):
-        raise NotImplementedError()
-
-    def remove_tcont(self, device, tcont_data, traffic_descriptor_data):
-        log.debug('remove-tcont', device_id=device.id)
-        if device.id in self.devices_handlers:
-            handler = self.devices_handlers[device.id]
-            if handler is not None:
-                handler.remove_tcont(tcont_data, traffic_descriptor_data)
-
-    def create_gemport(self, device, data):
-        log.debug('create-gemport', device_id=device.id)
-        if device.id in self.devices_handlers:
-            handler = self.devices_handlers[device.id]
-            if handler is not None:
-                handler.create_gemport(data)
-
-    def update_gemport(self, device, data):
-        raise NotImplementedError()
-
-    def remove_gemport(self, device, data):
-        log.debug('remove-gemport', device_id=device.id)
-        if device.id in self.devices_handlers:
-            handler = self.devices_handlers[device.id]
-            if handler is not None:
-                handler.remove_gemport(data)
-
-    def create_multicast_gemport(self, device, data):
-        log.debug('create-multicast-gemport', device_id=device.id)
-        if device.id in self.devices_handlers:
-            handler = self.devices_handlers[device.id]
-            if handler is not None:
-                handler.create_multicast_gemport(data)
-
-    def update_multicast_gemport(self, device, data):
-        raise NotImplementedError()
-
-    def remove_multicast_gemport(self, device, data):
-        raise NotImplementedError()
-
-    def create_multicast_distribution_set(self, device, data):
-        raise NotImplementedError()
-
-    def update_multicast_distribution_set(self, device, data):
-        raise NotImplementedError()
-
-    def remove_multicast_distribution_set(self, device, data):
-        raise NotImplementedError()
-
-    def suppress_alarm(self, filter):
-        raise NotImplementedError()
-
-    def unsuppress_alarm(self, filter):
-        raise NotImplementedError()
-
-

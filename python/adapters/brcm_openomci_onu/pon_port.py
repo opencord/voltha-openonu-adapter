@@ -34,7 +34,6 @@ class PonPort(object):
 
     def __init__(self, handler, port_no):
         self.log = structlog.get_logger(device_id=handler.device_id, port_no=port_no)
-        self.log.debug('function-entry')
 
         self._enabled = False
         self._valid = True
@@ -63,14 +62,11 @@ class PonPort(object):
 
     @staticmethod
     def create(handler, port_no):
-        log = structlog.get_logger(device_id=handler.device_id, port_no=port_no)
-        log.debug('function-entry')
         port = PonPort(handler, port_no)
 
         return port
 
     def _start(self):
-        self.log.debug('function-entry')
         self._cancel_deferred()
 
         self._admin_state = AdminState.ENABLED
@@ -78,7 +74,6 @@ class PonPort(object):
         self._update_adapter_agent()
 
     def _stop(self):
-        self.log.debug('function-entry')
         self._cancel_deferred()
 
         self._admin_state = AdminState.DISABLED
@@ -88,7 +83,6 @@ class PonPort(object):
         # TODO: stop h/w sync
 
     def _cancel_deferred(self):
-        self.log.debug('function-entry')
         d1, self._deferred = self._deferred, None
 
         for d in [d1]:
@@ -99,19 +93,16 @@ class PonPort(object):
                 pass
 
     def delete(self):
-        self.log.debug('function-entry')
         self.enabled = False
         self._valid = False
         self._handler = None
 
     @property
     def enabled(self):
-        self.log.debug('function-entry')
         return self._enabled
 
     @enabled.setter
     def enabled(self, value):
-        self.log.debug('function-entry')
         if self._enabled != value:
             self._enabled = value
 
@@ -122,17 +113,14 @@ class PonPort(object):
 
     @property
     def port_number(self):
-        self.log.debug('function-entry')
         return self._port_number
 
     @property
     def tconts(self):
-        self.log.debug('function-entry')
         return self._tconts
 
     @property
     def gem_ports(self):
-        self.log.debug('function-entry')
         return self._gem_ports
 
     def get_port(self):
@@ -140,7 +128,6 @@ class PonPort(object):
         Get the VOLTHA PORT object for this port
         :return: VOLTHA Port object
         """
-        self.log.debug('function-entry')
 
         self._port = Port(port_no=self.port_number,
                           label='PON port',
@@ -160,7 +147,6 @@ class PonPort(object):
         """
         Update the port status and state in the core
         """
-        self.log.debug('function-entry')
         self.log.debug('update-adapter-agent', admin_state=self._admin_state,
                        oper_status=self._oper_status)
 
@@ -183,7 +169,6 @@ class PonPort(object):
         :param reflow: (boolean) If true, force add (used during h/w resync)
         :return: (deferred)
         """
-        self.log.debug('function-entry', tcont=tcont.alloc_id)
 
         if not self._valid:
             return  # Deleting
@@ -195,7 +180,6 @@ class PonPort(object):
         self._tconts[tcont.alloc_id] = tcont
 
     def update_tcont_td(self, alloc_id, new_td):
-        self.log.debug('function-entry')
 
         tcont = self._tconts.get(alloc_id)
 
@@ -216,7 +200,6 @@ class PonPort(object):
 
     @inlineCallbacks
     def remove_tcont(self, alloc_id, remove_from_hw=True):
-        self.log.debug('function-entry')
 
         tcont = self._tconts.get(alloc_id)
 
@@ -234,13 +217,11 @@ class PonPort(object):
             raise
 
     def gem_port(self, gem_id, direction):
-        self.log.debug('function-entry')
         return self._gem_ports.get((gem_id, direction))
 
     @property
     def gem_ids(self):
         """Get all GEM Port IDs used by this ONU"""
-        self.log.debug('function-entry')
         return sorted([gem_id_and_direction[0] for gem_id_and_direction, gem in self._gem_ports.items()])
 
     def add_gem_port(self, gem_port, reflow=False):
@@ -251,7 +232,6 @@ class PonPort(object):
         :param reflow: (boolean) If true, force add (used during h/w resync)
         :return: (deferred)
         """
-        self.log.debug('function-entry', gem_port=gem_port.gem_id)
 
         if not self._valid:
             return  # Deleting
@@ -274,7 +254,6 @@ class PonPort(object):
         :param remove_from_hw: Remove the GemPort from hardware (remove if True else not)
         :return: deferred
         """
-        self.log.debug('function-entry', gem_id=gem_id)
 
         gem_port = self._gem_ports.get((gem_id, direction))
 
