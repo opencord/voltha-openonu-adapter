@@ -48,7 +48,6 @@ class OnuGemPort(object):
                  handler=None):
 
         self.log = structlog.get_logger(device_id=handler.device_id, uni_id=uni_id, gem_id=gem_id)
-        self.log.debug('function-entry')
 
         self.name = name
         self.gem_id = gem_id
@@ -98,39 +97,32 @@ class OnuGemPort(object):
 
     @property
     def pon_id(self):
-        self.log.debug('function-entry')
         return self._pon_id
 
     @pon_id.setter
     def pon_id(self, pon_id):
-        self.log.debug('function-entry')
         assert self._pon_id is None or self._pon_id == pon_id, 'PON-ID can only be set once'
         self._pon_id = pon_id
 
     @property
     def onu_id(self):
-        self.log.debug('function-entry')
         return self._onu_id
 
     @onu_id.setter
     def onu_id(self, onu_id):
-        self.log.debug('function-entry', onu_id=onu_id)
         assert self._onu_id is None or self._onu_id == onu_id, 'ONU-ID can only be set once'
         self._onu_id = onu_id
 
     @property
     def alloc_id(self):
-        self.log.debug('function-entry')
         return self._alloc_id
 
     @property
     def direction(self):
-        self.log.debug('function-entry')
         return self._direction
 
     @direction.setter
     def direction(self, direction):
-        self.log.debug('function-entry')
         # GEM Port CTP are configured separately in UPSTREAM and DOWNSTREAM.
         # BIDIRECTIONAL is not supported.
         assert direction == "UPSTREAM" or direction == "DOWNSTREAM" or \
@@ -146,17 +138,14 @@ class OnuGemPort(object):
 
     @property
     def tcont(self):
-        self.log.debug('function-entry')
         tcont_item = self._handler.pon_port.tconts.get(self.alloc_id)
         return tcont_item
 
     @property
     def omci_transport(self):
-        self.log.debug('function-entry')
         return self._omci_transport
 
     def to_dict(self):
-        self.log.debug('function-entry')
         return {
             'port-id': self.gem_id,
             'alloc-id': self.alloc_id,
@@ -166,22 +155,18 @@ class OnuGemPort(object):
 
     @property
     def entity_id(self):
-        self.log.debug('function-entry')
         return self._entity_id
 
     @entity_id.setter
     def entity_id(self, value):
-        self.log.debug('function-entry')
         self._entity_id = value
 
     @property
     def encryption(self):
-        self.log.debug('function-entry')
         return self._encryption
 
     @encryption.setter
     def encryption(self, value):
-        self.log.debug('function-entry')
         # FIXME The encryption should come as boolean by default
         value = eval(value)
         assert isinstance(value, bool), 'encryption is a boolean'
@@ -191,12 +176,10 @@ class OnuGemPort(object):
 
     @property
     def discard_config(self):
-        self.log.debug('function-entry')
         return self._discard_config
 
     @discard_config.setter
     def discard_config(self, discard_config):
-        self.log.debug('function-entry')
         assert isinstance(discard_config, dict), "discard_config not dict"
         assert 'max_probability' in discard_config, "max_probability missing"
         assert 'max_threshold' in discard_config, "max_threshold missing"
@@ -205,12 +188,10 @@ class OnuGemPort(object):
 
     @property
     def discard_policy(self):
-        self.log.debug('function-entry')
         return self._discard_policy
 
     @discard_policy.setter
     def discard_policy(self, discard_policy):
-        self.log.debug('function-entry')
         dp = ("TailDrop", "WTailDrop", "RED", "WRED")
         assert (isinstance(discard_policy, str))
         assert (discard_policy in dp)
@@ -218,12 +199,10 @@ class OnuGemPort(object):
 
     @property
     def max_q_size(self):
-        self.log.debug('function-entry')
         return self._max_q_size
 
     @max_q_size.setter
     def max_q_size(self, max_q_size):
-        self.log.debug('function-entry')
         if isinstance(max_q_size, str):
             assert (max_q_size == "auto")
         else:
@@ -233,12 +212,10 @@ class OnuGemPort(object):
 
     @property
     def pbit_map(self):
-        self.log.debug('function-entry')
         return self._pbit_map
 
     @pbit_map.setter
     def pbit_map(self, pbit_map):
-        self.log.debug('function-entry')
         assert (isinstance(pbit_map, str))
         assert (len(pbit_map[2:]) == 8)  # Example format of pbit_map: "0b00000101"
         try:
@@ -251,12 +228,10 @@ class OnuGemPort(object):
 
     @property
     def scheduling_policy(self):
-        self.log.debug('function-entry')
         return self._scheduling_policy
 
     @scheduling_policy.setter
     def scheduling_policy(self, scheduling_policy):
-        self.log.debug('function-entry')
         sp = ("WRR", "StrictPriority")
         assert (isinstance(scheduling_policy, str))
         assert (scheduling_policy in sp)
@@ -264,8 +239,6 @@ class OnuGemPort(object):
 
     @staticmethod
     def create(handler, gem_port):
-        log = structlog.get_logger(gem_port=gem_port)
-        log.debug('function-entry', gem_port=gem_port)
 
         return OnuGemPort(gem_id=gem_port['gemport_id'],
                           uni_id=gem_port['uni_id'],
@@ -344,7 +317,6 @@ class OnuGemPort(object):
 
     @inlineCallbacks
     def remove_from_hardware(self, omci):
-        self.log.debug('function-entry', omci=omci)
         self.log.debug('remove-from-hardware', gem_id=self.gem_id)
 
         try:
@@ -370,7 +342,6 @@ class OnuGemPort(object):
         returnValue(results)
 
     def check_status_and_state(self, results, operation=''):
-        self.log.debug('function-entry')
         omci_msg = results.fields['omci_message'].fields
         status = omci_msg['success_code']
         error_mask = omci_msg.get('parameter_error_attributes_mask', 'n/a')

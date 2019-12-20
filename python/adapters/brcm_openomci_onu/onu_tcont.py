@@ -40,7 +40,6 @@ class OnuTCont(object):
     def __init__(self, handler, uni_id, alloc_id, q_sched_policy, traffic_descriptor):
 
         self.log = structlog.get_logger(device_id=handler.device_id, uni_id=uni_id, alloc_id=alloc_id)
-        self.log.debug('function-entry')
 
         self.uni_id = uni_id
         self.alloc_id = alloc_id
@@ -60,12 +59,10 @@ class OnuTCont(object):
 
     @property
     def entity_id(self):
-        self.log.debug('function-entry')
         return self._entity_id
 
     @property
     def q_sched_policy(self):
-        self.log.debug('function-entry')
         return self._q_sched_policy
 
     @q_sched_policy.setter
@@ -78,8 +75,6 @@ class OnuTCont(object):
 
     @staticmethod
     def create(handler, tcont, td):
-        log = structlog.get_logger(tcont=tcont, td=td)
-        log.debug('function-entry', tcont=tcont)
 
         return OnuTCont(handler,
                         tcont['uni_id'],
@@ -112,7 +107,6 @@ class OnuTCont(object):
 
     @inlineCallbacks
     def remove_from_hardware(self, omci):
-        self.log.debug('function-entry', omci=omci)
         self.log.debug('remove-from-hardware', tcont_entity_id=self.entity_id)
 
         # Release tcont by setting alloc_id=0xFFFF
@@ -138,7 +132,6 @@ class OnuTCont(object):
         returnValue(results)
 
     def check_status_and_state(self, results, operation=''):
-        self.log.debug('function-entry')
         omci_msg = results.fields['omci_message'].fields
         status = omci_msg['success_code']
         error_mask = omci_msg.get('parameter_error_attributes_mask', 'n/a')

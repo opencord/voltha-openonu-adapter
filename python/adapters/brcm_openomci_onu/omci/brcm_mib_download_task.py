@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import structlog
 from twisted.internet import reactor
 from twisted.internet.defer import inlineCallbacks, returnValue, TimeoutError, failure
 from pyvoltha.adapters.extensions.omci.omci_me import PptpEthernetUniFrame, GalEthernetProfileFrame, \
@@ -65,10 +64,6 @@ class BrcmMibDownloadTask(Task):
         :param omci_agent: (OmciAdapterAgent) OMCI Adapter agent
         :param device_id: (str) ONU Device ID
         """
-
-        self.log = structlog.get_logger(device_id=handler.device_id)
-        self.log.debug('function-entry')
-
         super(BrcmMibDownloadTask, self).__init__(BrcmMibDownloadTask.name,
                                                   omci_agent,
                                                   handler.device_id,
@@ -102,7 +97,6 @@ class BrcmMibDownloadTask(Task):
         self._free_dl_prior_q_entity_ids = set()
 
     def cancel_deferred(self):
-        self.log.debug('function-entry')
         super(BrcmMibDownloadTask, self).cancel_deferred()
 
         d, self._local_deferred = self._local_deferred, None
@@ -116,7 +110,6 @@ class BrcmMibDownloadTask(Task):
         """
         Start the MIB Download
         """
-        self.log.debug('function-entry')
         super(BrcmMibDownloadTask, self).start()
         self._local_deferred = reactor.callLater(0, self.perform_mib_download)
 
@@ -124,9 +117,6 @@ class BrcmMibDownloadTask(Task):
         """
         Shutdown MIB Synchronization tasks
         """
-        self.log.debug('function-entry')
-        self.log.debug('stopping')
-
         self.cancel_deferred()
         super(BrcmMibDownloadTask, self).stop()
 
@@ -139,7 +129,6 @@ class BrcmMibDownloadTask(Task):
         :param operation: (str) what operation was being performed
         :return: True if successful, False if the entity existed (already created)
         """
-        self.log.debug('function-entry')
 
         omci_msg = results.fields['omci_message'].fields
         status = omci_msg['success_code']
@@ -170,7 +159,6 @@ class BrcmMibDownloadTask(Task):
         and other characteristics are done as needed.
         """
         try:
-            self.log.debug('function-entry')
             self.log.info('perform-download')
 
             if self._handler.enabled and len(self._handler.uni_ports) > 0:
@@ -207,7 +195,6 @@ class BrcmMibDownloadTask(Task):
 
     @inlineCallbacks
     def perform_initial_bridge_setup(self):
-        self.log.debug('function-entry')
 
         omci_cc = self._onu_device.omci_cc
         try:
@@ -240,7 +227,6 @@ class BrcmMibDownloadTask(Task):
 
     @inlineCallbacks
     def perform_uni_initial_bridge_setup(self, uni_port):
-        self.log.debug('function-entry')
         omci_cc = self._onu_device.omci_cc
         frame = None
         try:

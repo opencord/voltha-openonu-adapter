@@ -52,14 +52,20 @@ class BrcmVlanFilterTask(Task):
         :param tp_id: (int) TP ID for the flow
         :param priority: (int) OpenOMCI Task priority (0..255) 255 is the highest
         """
-
-        self.log = structlog.get_logger(device_id=handler.device_id, uni_port=uni_port.port_number)
-
         super(BrcmVlanFilterTask, self).__init__(BrcmVlanFilterTask.name,
                                                  omci_agent,
                                                  handler.device_id,
                                                  priority=priority,
                                                  exclusive=True)
+
+        self.log = structlog.get_logger(device_id=handler.device_id,
+                                        name=BrcmVlanFilterTask.name,
+                                        task_id=self._task_id,
+                                        entity_id=uni_port.entity_id,
+                                        uni_id=uni_port.uni_id,
+                                        uni_port=uni_port.port_number,
+                                        set_vlan_id=set_vlan_id)
+
         self._device = omci_agent.get_device(handler.device_id)
         self._uni_port = uni_port
         self._set_vlan_id = set_vlan_id

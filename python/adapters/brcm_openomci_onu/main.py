@@ -21,13 +21,13 @@ from __future__ import absolute_import
 import argparse
 import os
 import time
-import logging
+import types
 
 import arrow
 import yaml
 import socketserver
+import configparser
 
-from packaging.version import Version
 from simplejson import dumps
 from twisted.internet.defer import inlineCallbacks, returnValue
 from twisted.internet.task import LoopingCall
@@ -52,7 +52,7 @@ from brcm_openomci_onu_adapter import BrcmOpenomciOnuAdapter
 from probe import Probe
 
 defs = dict(
-    version_file='./VERSION',
+    build_info_file='./BUILDINFO',
     config=os.environ.get('CONFIG', './openonu.yml'),
     container_name_regex=os.environ.get('CONTAINER_NUMBER_EXTRACTOR', '^.*\.(['
                                                                       '0-9]+)\..*$'),
@@ -237,7 +237,6 @@ def parse_args():
                         default=defs['event_topic'],
                         help=_help)
 
-
     _help = '<hostname>:<port> for liveness and readiness probes (default: %s)' % defs['probe']
     parser.add_argument(
         '-P', '--probe', dest='probe', action='store',
@@ -265,11 +264,31 @@ def load_config(args):
     return config
 
 
+def get_build_info():
+    path = defs['build_info_file']
+    if not path.startswith('/'):
+        dir = os.path.dirname(os.path.abspath(__file__))
+        path = os.path.join(dir, path)
+    path = os.path.abspath(path)
+    build_info = configparser.ConfigParser()
+    build_info.read(path)
+    results = types.SimpleNamespace(
+        version=build_info.get('buildinfo', 'version', fallback='unknown'),
+        vcs_ref=build_info.get('buildinfo', 'vcs_ref', fallback='unknown'),
+        vcs_dirty=build_info.get('buildinfo', 'vcs_dirty', fallback='unknown'),
+        build_time=build_info.get('buildinfo', 'build_time', fallback='unknown')
+    )
+    return results
+
+
 def print_banner(log):
-   log.info('                                                    ')
-   log.info('               OpenOnu Adapter                      ')
-   log.info('                                                    ')
-   log.info('(to stop: press Ctrl-C)')
+    log.info('       ___________ _____ _   _ _____ _   _ _   _       ')
+    log.info('      |  _  | ___ \  ___| \ | |  _  | \ | | | | |      ')
+    log.info('      | | | | |_/ / |__ |  \| | | | |  \| | | | |      ')
+    log.info('      | | | |  __/|  __|| . ` | | | | . ` | | | |      ')
+    log.info('      \ \_/ / |   | |___| |\  \ \_/ / |\  | |_| |      ')
+    log.info('       \___/\_|   \____/\_| \_/\___/\_| \_/\___/       ')
+    log.info('                                                       ')
 
 
 @implementer(IComponent)
@@ -298,8 +317,8 @@ class Main(object):
         self.log.info('container-number-extractor',
                       regex=args.container_name_regex)
 
-        self.adapter_version = self.get_version()
-        self.log.info('OpenONU-Adapter-Version', version=self.adapter_version)
+        self.build_info = get_build_info()
+        self.log.info('OpenONU-Adapter-Version', build_version=self.build_info)
 
         if not args.no_banner:
             print_banner(self.log)
@@ -318,23 +337,6 @@ class Main(object):
         if not args.no_heartbeat:
             self.start_heartbeat()
             self.start_kafka_cluster_heartbeat(self.instance_id)
-
-    def get_version(self):
-        path = defs['version_file']
-        if not path.startswith('/'):
-            dir = os.path.dirname(os.path.abspath(__file__))
-            path = os.path.join(dir, path)
-
-        path = os.path.abspath(path)
-        version_file = open(path, 'r')
-        v = version_file.read()
-
-        # Use Version to validate the version string - exception will be raised
-        # if the version is invalid
-        Version(v)
-
-        version_file.close()
-        return v
 
     def start(self):
         self.start_reactor()  # will not return except Keyboard interrupt
@@ -392,7 +394,8 @@ class Main(object):
 
             self.adapter = BrcmOpenomciOnuAdapter(
                 core_proxy=self.core_proxy, adapter_proxy=self.adapter_proxy,
-                config=config)
+                config=config,
+                build_info=self.build_info)
 
             self.adapter.start()
 

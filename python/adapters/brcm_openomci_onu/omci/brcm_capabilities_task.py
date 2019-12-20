@@ -14,7 +14,6 @@
 # limitations under the License.
 
 from __future__ import absolute_import
-import structlog
 from pyvoltha.adapters.extensions.omci.tasks.onu_capabilities_task import OnuCapabilitiesTask
 from twisted.internet.defer import failure
 
@@ -44,9 +43,6 @@ class BrcmCapabilitiesTask(OnuCapabilitiesTask):
         :param omci_agent: (OmciAdapterAgent) OMCI Adapter agent
         :param device_id: (str) ONU Device ID
         """
-        self.log = structlog.get_logger(device_id=device_id)
-        self.log.debug('function-entry')
-
         super(BrcmCapabilitiesTask, self).__init__(omci_agent, device_id)
         self._omci_managed = False      # TODO: Look up capabilities/model number
 
@@ -59,7 +55,6 @@ class BrcmCapabilitiesTask(OnuCapabilitiesTask):
 
         :return: (set of ints)
         """
-        self.log.debug('function-entry')
 
         if self._omci_managed:
             return super(BrcmCapabilitiesTask, self).supported_managed_entities
@@ -83,7 +78,6 @@ class BrcmCapabilitiesTask(OnuCapabilitiesTask):
 
         :return: (set of EntityOperations)
         """
-        self.log.debug('function-entry')
 
         if self._omci_managed:
             return super(BrcmCapabilitiesTask, self).supported_message_types
@@ -127,7 +121,6 @@ class BrcmCapabilitiesTask(OnuCapabilitiesTask):
         Then a loop is entered and get-next commands are sent for each sequence
         requested.
         """
-        self.log.debug('function-entry')
 
         self.log.info('perform-get')
 
