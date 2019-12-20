@@ -18,14 +18,25 @@ import structlog
 from twisted.internet.defer import inlineCallbacks, returnValue
 from pyvoltha.adapters.extensions.omci.omci_me import TcontFrame
 from pyvoltha.adapters.extensions.omci.omci_defs import ReasonCodes
+from pyvoltha.adapters.extensions.omci.onu_configuration import OMCCVersion
 
 RC = ReasonCodes
 
 
 class OnuTCont(object):
+    G988_OMCC_VERSIONS = [OMCCVersion.G_988_2010_Base,
+                          OMCCVersion.G_988_2011_Amd_1_Base,
+                          OMCCVersion.G_988_2012_Amd_2_Base,
+                          OMCCVersion.G_988_2012_Base,
+                          OMCCVersion.G_988_2010,
+                          OMCCVersion.G_988_2011_Amd_1,
+                          OMCCVersion.G_988_2012_Amd_2,
+                          OMCCVersion.G_988_2012,
+                          OMCCVersion.G_988_2014_Amd_1]
     """
     Broadcom ONU specific implementation
     """
+
     def __init__(self, handler, uni_id, alloc_id, q_sched_policy, traffic_descriptor):
 
         self.log = structlog.get_logger(device_id=handler.device_id, uni_id=uni_id, alloc_id=alloc_id)
@@ -57,7 +68,6 @@ class OnuTCont(object):
         self.log.debug('function-entry')
         return self._q_sched_policy
 
-
     @q_sched_policy.setter
     def q_sched_policy(self, q_sched_policy):
         sp = ('Null', 'WRR', 'StrictPriority')
@@ -87,7 +97,7 @@ class OnuTCont(object):
         try:
             # FIXME: self.q_sched_policy seems to be READ-ONLY
             # Ideally the READ-ONLY or NOT attribute is available from ONU-2G ME
-            #msg = TcontFrame(self.entity_id, self.alloc_id, self.q_sched_policy)
+            # msg = TcontFrame(self.entity_id, self.alloc_id, self.q_sched_policy)
             msg = TcontFrame(self.entity_id, self.alloc_id)
             frame = msg.set()
             self.log.debug('openomci-msg', omci_msg=msg)
@@ -109,12 +119,18 @@ class OnuTCont(object):
         # TODO: magic number, create a named variable
 
         try:
-            msg = TcontFrame(self.entity_id, 0xFF)
+            initial_alloc_id_value = 0xFF
+
+            onu_device = self._handler.onu_omci_device
+            omcc_version = onu_device.configuration.omcc_version
+            if omcc_version in OnuTCont.G988_OMCC_VERSIONS:
+                initial_alloc_id_value = 0xFFFF
+
+            msg = TcontFrame(self.entity_id, initial_alloc_id_value)
             frame = msg.set()
             self.log.debug('openomci-msg', omci_msg=msg)
             results = yield omci.send(frame)
             self.check_status_and_state(results, 'delete-tcont')
-
         except Exception as e:
             self.log.exception('tcont-delete', e=e)
             raise
