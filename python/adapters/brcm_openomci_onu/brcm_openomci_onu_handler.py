@@ -175,6 +175,10 @@ class BrcmOpenomciOnuHandler(object):
     def pon_port(self):
         return self._pon
 
+    @property
+    def onu_omci_device(self):
+        return self._onu_omci_device
+
     def receive_message(self, msg):
         if self.omci_cc is not None:
             self.omci_cc.receive_message(msg)
@@ -428,7 +432,8 @@ class BrcmOpenomciOnuHandler(object):
                               uni_id=uni_id)
                 filter_info = self._queued_vlan_filter_task[uni_id]
                 reactor.callLater(0, self._add_vlan_filter_task, filter_info.get("device"),
-                                  uni_id, filter_info.get("uni_port"), filter_info.get("set_vlan_vid"))
+                                  uni_id, filter_info.get("uni_port"), filter_info.get("set_vlan_vid"),
+                                  filter_info.get("tp_id"))
                 # Now remove the entry from the dictionary
                 self._queued_vlan_filter_task[uni_id].clear()
                 self.log.debug("executed-queued-vlan-filter-task",
@@ -627,7 +632,7 @@ class BrcmOpenomciOnuHandler(object):
                 yield self.core_proxy.device_reason_update(self.device_id, 'tech-profile-config-delete-success')
 
             @inlineCallbacks
-            def failure(_reason, _uni_id, _tp_table_id, _tcont, _gem_port):
+            def failure(_reason):
                 self.log.warn('tech-profile-delete-failure-retrying',
                               _reason=_reason)
                 yield self.core_proxy.device_reason_update(self.device_id,
@@ -637,6 +642,13 @@ class BrcmOpenomciOnuHandler(object):
                 self._deferred.addCallbacks(success, failure)
 
             self.log.info('deleting-tech-profile-configuration')
+
+            if tcont is None and gem_port is None:
+                if alloc_id is not None:
+                    self.log.error("tcont-info-corresponding-to-alloc-id-not-found", alloc_id=alloc_id)
+                if gem_port_id is not None:
+                    self.log.error("gem-port-info-corresponding-to-gem-port-id-not-found", gem_port_id=gem_port_id)
+                return
 
             self._tp_service_specific_task[uni_id][tp_path] = \
                 BrcmTpDeleteTask(self.omci_agent, self, uni_id, tp_table_id,
@@ -695,6 +707,15 @@ class BrcmOpenomciOnuHandler(object):
 
             self.log.debug('bulk-flow-update', device_id=device.id, flow=flow)
             try:
+                write_metadata = fd.get_write_metadata(flow)
+                if write_metadata is None:
+                    self.log.error("do-not-process-flow-without-write-metadata")
+                    return
+
+                # extract tp id from flow
+                tp_id = (write_metadata >> 32) & 0xFFFF
+                self.log.info("tp-id-in-flow", tp_id=tp_id)
+
                 _in_port = fd.get_in_port(flow)
                 assert _in_port is not None
 
@@ -814,30 +835,30 @@ class BrcmOpenomciOnuHandler(object):
                 if _set_vlan_vid is None or _set_vlan_vid == 0:
                     self.log.warn('ignoring-flow-that-does-not-set-vlanid')
                 else:
-                    self.log.info('set-vlanid', uni_id=uni_id, uni_port=uni_port, set_vlan_vid=_set_vlan_vid)
-                    self._add_vlan_filter_task(device, uni_id, uni_port, _set_vlan_vid)
+                    self.log.info('set-vlanid', uni_id=uni_id, uni_port=uni_port, set_vlan_vid=_set_vlan_vid, tp_id=tp_id)
+                    self._add_vlan_filter_task(device, uni_id, uni_port, _set_vlan_vid, tp_id)
             except Exception as e:
                 self.log.exception('failed-to-install-flow', e=e, flow=flow)
 
-    def _add_vlan_filter_task(self, device, uni_id, uni_port, _set_vlan_vid):
+    def _add_vlan_filter_task(self, device, uni_id, uni_port, _set_vlan_vid, tp_id):
         assert uni_port is not None
         if uni_id in self._tech_profile_download_done and self._tech_profile_download_done[uni_id] != {}:
             @inlineCallbacks
             def success(_results):
-                self.log.info('vlan-tagging-success', uni_port=uni_port, vlan=_set_vlan_vid)
+                self.log.info('vlan-tagging-success', uni_port=uni_port, vlan=_set_vlan_vid, tp_id=tp_id)
                 yield self.core_proxy.device_reason_update(self.device_id, 'omci-flows-pushed')
                 self._vlan_filter_task = None
 
             @inlineCallbacks
             def failure(_reason):
-                self.log.warn('vlan-tagging-failure', uni_port=uni_port, vlan=_set_vlan_vid)
+                self.log.warn('vlan-tagging-failure', uni_port=uni_port, vlan=_set_vlan_vid, tp_id=tp_id)
                 yield self.core_proxy.device_reason_update(self.device_id, 'omci-flows-failed-retrying')
                 self._vlan_filter_task = reactor.callLater(_STARTUP_RETRY_WAIT,
                                                            self._add_vlan_filter_task, device, uni_port.port_number,
-                                                           uni_port, _set_vlan_vid)
+                                                           uni_port, _set_vlan_vid, tp_id)
 
             self.log.info('setting-vlan-tag')
-            self._vlan_filter_task = BrcmVlanFilterTask(self.omci_agent, self, uni_port, _set_vlan_vid)
+            self._vlan_filter_task = BrcmVlanFilterTask(self.omci_agent, self, uni_port, _set_vlan_vid, tp_id)
             self._deferred = self._onu_omci_device.task_runner.queue_task(self._vlan_filter_task)
             self._deferred.addCallbacks(success, failure)
         else:
@@ -846,7 +867,8 @@ class BrcmOpenomciOnuHandler(object):
             self._queued_vlan_filter_task[uni_id] = {"device": device,
                                                      "uni_id": uni_id,
                                                      "uni_port": uni_port,
-                                                     "set_vlan_vid": _set_vlan_vid}
+                                                     "set_vlan_vid": _set_vlan_vid,
+                                                     "tp_id": tp_id}
 
     def get_tx_id(self):
         self.log.debug('get-tx-id')
