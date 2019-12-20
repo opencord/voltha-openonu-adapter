@@ -114,8 +114,8 @@ class BrcmVlanFilterTask(Task):
             #            - MacBridgePortConfigurationData for the ANI/PON side
             #
 
+
             # Delete bridge ani side vlan filter
-            # TODO: check if its in our local mib first before blindly deleting
             eid = self._mac_bridge_port_ani_entity_id + self._uni_port.entity_id + self._tp_id  # Entity ID
             msg = VlanTaggingFilterDataFrame(eid)
             frame = msg.delete()
@@ -124,8 +124,8 @@ class BrcmVlanFilterTask(Task):
             results = yield self._device.omci_cc.send(frame)
             self.check_status_and_state(results, 'flow-delete-vlan-tagging-filter-data')
 
+
             # Re-Create bridge ani side vlan filter
-            # TODO: check if its in our local mib first before blindly recreating
             forward_operation = 0x10  # VID investigation
             # When the PUSH VLAN is RESERVED_VLAN (4095), let ONU be transparent
             if self._set_vlan_id == RESERVED_TRANSPARENT_VLAN:
@@ -142,14 +142,58 @@ class BrcmVlanFilterTask(Task):
             results = yield self._device.omci_cc.send(frame)
             self.check_status_and_state(results, 'flow-create-vlan-tagging-filter-data')
 
+
             ################################################################################
             # Create Extended VLAN Tagging Operation config (UNI-side)
             #
-            #  EntityID relates to the VLAN TCIS
+            #  EntityID relates to the VLAN TCIS later used int vlan filter task.  This only
+            #  sets up the inital MIB entry as it relates to port config, it does not set vlan
+            #  that is saved for the vlan filter task
+            #
             #  References:
-            #            - VLAN TCIS from previously created VLAN Tagging filter data
             #            - PPTP Ethernet or VEIP UNI
             #
+
+
+            # Delete uni side evto
+            msg = ExtendedVlanTaggingOperationConfigurationDataFrame(
+                self._mac_bridge_service_profile_entity_id + self._uni_port.mac_bridge_port_num,
+            )
+            frame = msg.delete()
+            self.log.debug('openomci-msg', omci_msg=msg)
+            results = yield self._device.omci_cc.send(frame)
+            self.check_status_and_state(results, 'delete-extended-vlan-tagging-operation-configuration-data')
+
+
+            # Re-Create uni side evto
+            # default to PPTP
+            association_type = 2
+            if self._uni_port.type.value == UniType.VEIP.value:
+                association_type = 10
+            elif self._uni_port.type.value == UniType.PPTP.value:
+                association_type = 2
+
+            attributes = dict(
+                association_type=association_type,             # Assoc Type, PPTP/VEIP Ethernet UNI
+                associated_me_pointer=self._uni_port.entity_id,      # Assoc ME, PPTP/VEIP Entity Id
+
+                # See VOL-1311 - Need to set table during create to avoid exception
+                # trying to read back table during post-create-read-missing-attributes
+                # But, because this is a R/W attribute. Some ONU may not accept the
+                # value during create. It is repeated again in a set below.
+                input_tpid=self._input_tpid,    # input TPID
+                output_tpid=self._output_tpid,  # output TPID
+            )
+
+            msg = ExtendedVlanTaggingOperationConfigurationDataFrame(
+                self._mac_bridge_service_profile_entity_id + self._uni_port.mac_bridge_port_num,  # Bridge Entity ID
+                attributes=attributes
+            )
+
+            frame = msg.create()
+            self.log.debug('openomci-msg', omci_msg=msg)
+            results = yield self._device.omci_cc.send(frame)
+            self.check_status_and_state(results, 'create-extended-vlan-tagging-operation-configuration-data')
 
             attributes = dict(
                 # Specifies the TPIDs in use and that operations in the downstream direction are
