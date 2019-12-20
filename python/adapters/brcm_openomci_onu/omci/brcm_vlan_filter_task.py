@@ -41,7 +41,7 @@ class BrcmVlanFilterTask(Task):
     task_priority = 200
     name = "Broadcom VLAN Filter/Tagging Task"
 
-    def __init__(self, omci_agent, handler, uni_port, set_vlan_id, priority=task_priority):
+    def __init__(self, omci_agent, handler, uni_port, set_vlan_id, tp_id, priority=task_priority):
         """
         Class initialization
 
@@ -49,6 +49,7 @@ class BrcmVlanFilterTask(Task):
         :param handler: (BrcmOpenomciOnuHandler) ONU Device Handler Instance
         :param uni_port: (UniPort) Object instance representing the uni port and its settings
         :param set_vlan_id: (int) VLAN to filter for and set
+        :param tp_id: (int) TP ID for the flow
         :param priority: (int) OpenOMCI Task priority (0..255) 255 is the highest
         """
 
@@ -62,6 +63,7 @@ class BrcmVlanFilterTask(Task):
         self._device = omci_agent.get_device(handler.device_id)
         self._uni_port = uni_port
         self._set_vlan_id = set_vlan_id
+        self._tp_id = tp_id
         self._results = None
         self._local_deferred = None
         self._config = self._device.configuration
@@ -114,7 +116,7 @@ class BrcmVlanFilterTask(Task):
 
             # Delete bridge ani side vlan filter
             # TODO: check if its in our local mib first before blindly deleting
-            eid = self._mac_bridge_port_ani_entity_id + self._uni_port.entity_id  # Entity ID
+            eid = self._mac_bridge_port_ani_entity_id + self._uni_port.entity_id + self._tp_id  # Entity ID
             msg = VlanTaggingFilterDataFrame(eid)
             frame = msg.delete()
             self.log.debug('openomci-msg', omci_msg=msg)
