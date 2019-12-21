@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "365568b5_c3c63856",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_vlan_filter_task.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2019-12-21T22:48:04Z",
+      "side": 1,
+      "message": "this needs to be the same entity id as the mac bridge port configuration data entity id for the uni.  See G.988 section 9.3.11:\n\nManaged entity ID: This attribute uniquely identifies each instance of this ME. Through an\nidentical ID, this ME is implicitly linked to an instance of the MAC bridge port\nconfiguration data ME. (R, set-by-create) (mandatory) (2 bytes)\n\nThe Mac bridge port being referred to is created during initial mib download before a tech profile is known, hence the Entity ID calculated there does not include the TP id. \n\nEither this ID calculation cannot include the TP id in creating the eid, or the mac bridge port used must not be created until this task when the TP id is known.",
+      "range": {
+        "startLine": 119,
+        "startChar": 18,
+        "endLine": 119,
+        "endChar": 94
+      },
+      "revId": "802c6e5721114623ea4a41b8ef67300752e49fcf",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    }
+  ]
+}
