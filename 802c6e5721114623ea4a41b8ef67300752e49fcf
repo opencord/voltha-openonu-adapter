@@ -22,6 +22,30 @@
       "revId": "802c6e5721114623ea4a41b8ef67300752e49fcf",
       "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fb1e91fa_2c8502c4",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_vlan_filter_task.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1000127
+      },
+      "writtenOn": "2019-12-23T05:44:32Z",
+      "side": 1,
+      "message": "Yes you right. I had recently moved creation of ANI Mac Bridge Ports to TP Setup task. See _setup__8021p_mapper__ani_mac_bridge_port function. Since ANI mac bridge ports entity ID contain the TP ID info, this also needed a change.",
+      "parentUuid": "365568b5_c3c63856",
+      "range": {
+        "startLine": 119,
+        "startChar": 18,
+        "endLine": 119,
+        "endChar": 94
+      },
+      "revId": "802c6e5721114623ea4a41b8ef67300752e49fcf",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
     }
   ]
 }
