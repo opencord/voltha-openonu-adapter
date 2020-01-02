@@ -571,6 +571,14 @@ class BrcmOpenomciOnuHandler(object):
 
     def delete_tech_profile(self, uni_id, tp_path, alloc_id=None, gem_port_id=None):
         try:
+            if not uni_id in self._tech_profile_download_done:
+                self.log.warn("tp-key-is-not-present", uni_id=uni_id)
+                return
+
+            if not tp_path in self._tech_profile_download_done[uni_id]:
+                self.log.warn("tp-path-is-not-present", tp_path=tp_path)
+                return
+
             if self._tech_profile_download_done[uni_id][tp_path] is not True:
                 self.log.error("tp-download-is-not-done-in-order-to-process-tp-delete")
                 return
