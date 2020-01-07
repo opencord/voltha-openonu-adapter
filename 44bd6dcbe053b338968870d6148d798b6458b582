@@ -33,6 +33,24 @@
       "revId": "44bd6dcbe053b338968870d6148d798b6458b582",
       "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a1d27c93_85d8b8a7",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_vlan_filter_task.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2020-01-07T11:42:08Z",
+      "side": 1,
+      "message": "Yes this probably is a problem if we want to keep some EVTO match/action keys but delete others for the same UNI.  Likely rather than deleting the entire ME we can just send 8 bytes of 0xFF for the action to clear the individual entries.    \n\nWhen those workflows are implemented in the ONU this task will likely have to be re-written or new tasks created to represent the various vlan behaviors.  \n\nWhats concerning is that just overwriting entries (like we did before) in EVTO is not enough.  The whole ME having to be deleted and recreated for this to work seems like an ONU bug.",
+      "parentUuid": "4d9594f1_7aeab539",
+      "revId": "44bd6dcbe053b338968870d6148d798b6458b582",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
     }
   ]
 }
