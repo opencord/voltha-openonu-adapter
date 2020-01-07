@@ -73,6 +73,24 @@
     },
     {
       "key": {
+        "uuid": "23f1a703_6de3bda2",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_vlan_filter_task.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2020-01-07T14:47:39Z",
+      "side": 1,
+      "message": "Not that MBP, the one created for the UNI in brcm_mib_download_task.py, line 300:\n\n            msg \u003d MacBridgePortConfigurationDataFrame(\n                self._mac_bridge_port_ani_entity_id + uni_port.entity_id,  # Entity ID\n                bridge_id_pointer\u003dself._mac_bridge_service_profile_entity_id + uni_port.mac_bridge_port_num,  # Bridge Entity ID\n                port_num\u003duni_port.mac_bridge_port_num,   # Port ID\n                tp_type\u003dtp_type,                         # PPTP Ethernet or VEIP UNI\n                tp_pointer\u003duni_port.entity_id            # Ethernet UNI ID\n            \n\nThe VlanTaggingFilterOperation entity id must match the one used above.   note the tp_pointer/tp_type is for a UNI.  While the tp_type in the ANI MBP is for the IEEE mapper.",
+      "parentUuid": "4418ece3_48256f57",
+      "revId": "44bd6dcbe053b338968870d6148d798b6458b582",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4d9594f1_7aeab539",
         "filename": "python/adapters/brcm_openomci_onu/omci/brcm_vlan_filter_task.py",
         "patchSetId": 3
