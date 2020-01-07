@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "3b6adc9d_086d4c11",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_vlan_filter_task.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2020-01-07T12:17:41Z",
+      "side": 1,
+      "message": "The problem is the VlanTaggingFilterOperation Entity ID must be the same value as the MacBridgePort Entity ID for the UNI itself.  The MBP is created at onu initialization before we know of any TP instance.   \n\nIf the tp id is included as part the of the VlanTaggingOperation entity id then the creation of the  MacBridgePort for the UNI must be removed from mib_download and added here so it can contain the tp id.\n\nFor clarity sake this behavior for entity ids is *not* the same as the EVTO entity id (below).  That can be whatever and does not have to match any other ID.",
+      "parentUuid": "df87b436_435cda6f",
+      "revId": "44bd6dcbe053b338968870d6148d798b6458b582",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4d9594f1_7aeab539",
         "filename": "python/adapters/brcm_openomci_onu/omci/brcm_vlan_filter_task.py",
         "patchSetId": 3
