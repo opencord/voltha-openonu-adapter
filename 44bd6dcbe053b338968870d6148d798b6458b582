@@ -91,6 +91,24 @@
     },
     {
       "key": {
+        "uuid": "87889120_39e6c34d",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_vlan_filter_task.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1000127
+      },
+      "writtenOn": "2020-01-07T15:19:22Z",
+      "side": 1,
+      "message": "Yes. I agree with your point. The MBP associated with ANI/PON side should have element of tp_id in its entity-id, because we create one MBP per tp-id. The MBP associated with UNI should not have tp-id element in its entity-id and is created once only.. \nThis needs to be ensured.",
+      "parentUuid": "23f1a703_6de3bda2",
+      "revId": "44bd6dcbe053b338968870d6148d798b6458b582",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4d9594f1_7aeab539",
         "filename": "python/adapters/brcm_openomci_onu/omci/brcm_vlan_filter_task.py",
         "patchSetId": 3
