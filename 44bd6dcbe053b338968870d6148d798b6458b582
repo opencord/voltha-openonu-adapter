@@ -55,6 +55,24 @@
     },
     {
       "key": {
+        "uuid": "4418ece3_48256f57",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_vlan_filter_task.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1000127
+      },
+      "writtenOn": "2020-01-07T13:27:27Z",
+      "side": 1,
+      "message": "The MBP creation for ANI side has already moved to brcm_tp_setup_task.py. Check function _setup__8021p_mapper__ani_mac_bridge_port",
+      "parentUuid": "1f5963b7_3b4920eb",
+      "revId": "44bd6dcbe053b338968870d6148d798b6458b582",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4d9594f1_7aeab539",
         "filename": "python/adapters/brcm_openomci_onu/omci/brcm_vlan_filter_task.py",
         "patchSetId": 3
