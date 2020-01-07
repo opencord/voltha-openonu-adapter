@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4d9594f1_7aeab539",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_vlan_filter_task.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1000127
+      },
+      "writtenOn": "2020-01-07T10:12:17Z",
+      "side": 1,
+      "message": "Isn\u0027t this a problem if we need to do multiple VLAN match-action in the EVTO table? We are deleting the old entity altogether and re-create again. \nFor AT\u0026T workflow this may not be an issue.",
+      "revId": "44bd6dcbe053b338968870d6148d798b6458b582",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    }
+  ]
+}
