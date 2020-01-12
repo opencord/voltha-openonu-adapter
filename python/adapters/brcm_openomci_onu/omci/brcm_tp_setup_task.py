@@ -21,7 +21,8 @@ from pyvoltha.adapters.extensions.omci.omci_me import Ont2G, OmciNullPointer, Pr
     Ieee8021pMapperServiceProfileFrame, MacBridgePortConfigurationDataFrame
 from pyvoltha.adapters.extensions.omci.tasks.task import Task
 from pyvoltha.adapters.extensions.omci.omci_defs import EntityOperations, ReasonCodes
-from pyvoltha.adapters.extensions.omci.omci_entities import OntG, Tcont, PriorityQueueG, Ieee8021pMapperServiceProfile
+from pyvoltha.adapters.extensions.omci.omci_entities import OntG, Tcont, PriorityQueueG, Ieee8021pMapperServiceProfile, \
+    GemPortNetworkCtp
 
 OP = EntityOperations
 RC = ReasonCodes
@@ -222,9 +223,7 @@ class BrcmTpSetupTask(Task):
                     results = yield tcont.add_to_hardware(omci_cc, free_entity_id)
                     self.check_status_and_state(results, 'new-tcont-added')
                 else:
-                    # likely already added given entity_id is set, but no harm in doing it again
-                    results = yield tcont.add_to_hardware(omci_cc, tcont.entity_id)
-                    self.check_status_and_state(results, 'existing-tcont-added')
+                    self.log.debug('tcont-already-assigned', tcont_entity_id=tcont.entity_id, alloc_id=tcont.alloc_id)
 
             ################################################################################
             # GEMS  (GemPortNetworkCtp and GemInterworkingTp)
@@ -333,7 +332,14 @@ class BrcmTpSetupTask(Task):
                     assert ul_prior_q_entity_id is not None and \
                            dl_prior_q_entity_id is not None
 
-                    # TODO: Need to restore on failure.  Need to check status/results
+                    existing = self._onu_device.query_mib(GemPortNetworkCtp.class_id, gem_port.entity_id)
+                    self.log.debug('looking-for-gemport-before-create', existing=existing,
+                                   class_id=GemPortNetworkCtp.class_id,
+                                   entity_id=gem_port.entity_id)
+                    if existing:
+                        results = yield gem_port.remove_from_hardware(omci_cc)
+                        self.check_status_and_state(results, 'remove-existing-gem-port')
+
                     results = yield gem_port.add_to_hardware(omci_cc,
                                                              tcont.entity_id,
                                                              self._ieee_mapper_service_profile_entity_id +
