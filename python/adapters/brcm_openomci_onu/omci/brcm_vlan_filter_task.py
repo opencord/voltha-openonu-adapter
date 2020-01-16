@@ -124,25 +124,6 @@ class BrcmVlanFilterTask(Task):
             results = yield self._device.omci_cc.send(frame)
             self.check_status_and_state(results, 'flow-delete-vlan-tagging-filter-data')
 
-
-            # Re-Create bridge ani side vlan filter
-            forward_operation = 0x10  # VID investigation
-            # When the PUSH VLAN is RESERVED_VLAN (4095), let ONU be transparent
-            if self._set_vlan_id == RESERVED_TRANSPARENT_VLAN:
-                forward_operation = 0x00  # no investigation, ONU transparent
-
-            msg = VlanTaggingFilterDataFrame(
-                eid,
-                vlan_tcis=[self._set_vlan_id],  # VLAN IDs
-                forward_operation=forward_operation
-            )
-            frame = msg.create()
-            self.log.debug('openomci-msg', omci_msg=msg)
-            self.strobe_watchdog()
-            results = yield self._device.omci_cc.send(frame)
-            self.check_status_and_state(results, 'flow-create-vlan-tagging-filter-data')
-
-
             ################################################################################
             # Create Extended VLAN Tagging Operation config (UNI-side)
             #
@@ -214,9 +195,11 @@ class BrcmVlanFilterTask(Task):
             results = yield self._device.omci_cc.send(frame)
             self.check_status_and_state(results, 'set-extended-vlan-tagging-operation-configuration-data')
 
+            # Onu-Transparent
             if self._set_vlan_id == RESERVED_TRANSPARENT_VLAN:
                 # Transparently send any single tagged packet.
-                # Any other specific rules will take priority over this
+                # As the onu is to be transparent, no need to create VlanTaggingFilterData ME.
+                # Any other specific rules will take priority over this, so not setting any other vlan specific rules
                 attributes = dict(
                     received_frame_vlan_tagging_operation_table=
                     VlanTaggingOperation(
@@ -236,7 +219,32 @@ class BrcmVlanFilterTask(Task):
                         treatment_inner_tpid_de=4
                     )
                 )
+
+                msg = ExtendedVlanTaggingOperationConfigurationDataFrame(
+                    self._mac_bridge_service_profile_entity_id + self._uni_port.mac_bridge_port_num,  # Bridge Entity ID
+                    attributes=attributes
+                )
+
+                frame = msg.set()
+                self.log.debug('openomci-msg', omci_msg=msg)
+                self.strobe_watchdog()
+                results = yield self._device.omci_cc.send(frame)
+                self.check_status_and_state(results, 'set-evto-table-transparent-vlan')
+
             else:
+                # Re-Create bridge ani side vlan filter
+                forward_operation = 0x10  # VID investigation
+
+                msg = VlanTaggingFilterDataFrame(
+                    eid,
+                    vlan_tcis=[self._set_vlan_id],  # VLAN IDs
+                    forward_operation=forward_operation
+                )
+                frame = msg.create()
+                self.log.debug('openomci-msg', omci_msg=msg)
+                self.strobe_watchdog()
+                results = yield self._device.omci_cc.send(frame)
+                self.check_status_and_state(results, 'flow-create-vlan-tagging-filter-data')
                 # Update uni side extended vlan filter
                 # filter for untagged
                 attributes = dict(
@@ -259,50 +267,50 @@ class BrcmVlanFilterTask(Task):
                     )
                 )
 
-            msg = ExtendedVlanTaggingOperationConfigurationDataFrame(
-                self._mac_bridge_service_profile_entity_id + self._uni_port.mac_bridge_port_num,  # Bridge Entity ID
-                attributes=attributes
-            )
-
-            frame = msg.set()
-            self.log.debug('openomci-msg', omci_msg=msg)
-            self.strobe_watchdog()
-            results = yield self._device.omci_cc.send(frame)
-            self.check_status_and_state(results, 'set-evto-table')
-
-            # Update uni side extended vlan filter
-            # filter for vlan 0
-            attributes = dict(
-                received_frame_vlan_tagging_operation_table=
-                VlanTaggingOperation(
-                    filter_outer_priority=15,  # This entry is not a double-tag rule
-                    filter_outer_vid=4096,  # Do not filter on the outer VID value
-                    filter_outer_tpid_de=0,  # Do not filter on the outer TPID field
-
-                    filter_inner_priority=8,  # Filter on inner vlan
-                    filter_inner_vid=0x0,  # Look for vlan 0
-                    filter_inner_tpid_de=0,  # Do not filter on inner TPID field
-                    filter_ether_type=0,  # Do not filter on EtherType
-
-                    treatment_tags_to_remove=1,
-                    treatment_outer_priority=15,
-                    treatment_outer_vid=0,
-                    treatment_outer_tpid_de=0,
-
-                    treatment_inner_priority=8,  # Add an inner tag and insert this value as the priority
-                    treatment_inner_vid=self._set_vlan_id,  # use this value as the VID in the inner VLAN tag
-                    treatment_inner_tpid_de=4,  # set TPID
+                msg = ExtendedVlanTaggingOperationConfigurationDataFrame(
+                    self._mac_bridge_service_profile_entity_id + self._uni_port.mac_bridge_port_num,  # Bridge Entity ID
+                    attributes=attributes
                 )
-            )
-            msg = ExtendedVlanTaggingOperationConfigurationDataFrame(
-                self._mac_bridge_service_profile_entity_id + self._uni_port.mac_bridge_port_num,  # Bridge Entity ID
-                attributes=attributes  # See above
-            )
-            frame = msg.set()
-            self.log.debug('openomci-msg', omci_msg=msg)
-            self.strobe_watchdog()
-            results = yield self._device.omci_cc.send(frame)
-            self.check_status_and_state(results, 'set-evto-table-zero-tagged')
+
+                frame = msg.set()
+                self.log.debug('openomci-msg', omci_msg=msg)
+                self.strobe_watchdog()
+                results = yield self._device.omci_cc.send(frame)
+                self.check_status_and_state(results, 'set-evto-table-untagged')
+
+                # Update uni side extended vlan filter
+                # filter for vlan 0
+                attributes = dict(
+                    received_frame_vlan_tagging_operation_table=
+                    VlanTaggingOperation(
+                        filter_outer_priority=15,  # This entry is not a double-tag rule
+                        filter_outer_vid=4096,  # Do not filter on the outer VID value
+                        filter_outer_tpid_de=0,  # Do not filter on the outer TPID field
+
+                        filter_inner_priority=8,  # Filter on inner vlan
+                        filter_inner_vid=0x0,  # Look for vlan 0
+                        filter_inner_tpid_de=0,  # Do not filter on inner TPID field
+                        filter_ether_type=0,  # Do not filter on EtherType
+
+                        treatment_tags_to_remove=1,
+                        treatment_outer_priority=15,
+                        treatment_outer_vid=0,
+                        treatment_outer_tpid_de=0,
+
+                        treatment_inner_priority=8,  # Add an inner tag and insert this value as the priority
+                        treatment_inner_vid=self._set_vlan_id,  # use this value as the VID in the inner VLAN tag
+                        treatment_inner_tpid_de=4,  # set TPID
+                    )
+                )
+                msg = ExtendedVlanTaggingOperationConfigurationDataFrame(
+                    self._mac_bridge_service_profile_entity_id + self._uni_port.mac_bridge_port_num,  # Bridge Entity ID
+                    attributes=attributes  # See above
+                )
+                frame = msg.set()
+                self.log.debug('openomci-msg', omci_msg=msg)
+                self.strobe_watchdog()
+                results = yield self._device.omci_cc.send(frame)
+                self.check_status_and_state(results, 'set-evto-table-zero-tagged')
 
             self.deferred.callback(self)
 
