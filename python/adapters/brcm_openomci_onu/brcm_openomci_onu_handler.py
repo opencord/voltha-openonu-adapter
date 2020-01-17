@@ -316,7 +316,8 @@ class BrcmOpenomciOnuHandler(object):
             self._init_pon_state()
 
             # need to restart state machines on vcore restart.  there is no indication to do it for us.
-            self._onu_omci_device.start()
+            self.adapter.startup_queue.add_to_queue(self._onu_omci_device, device)
+            # self._onu_omci_device.start()
             yield self.core_proxy.device_reason_update(self.device_id, "restarting-openomci")
 
             # TODO: this is probably a bit heavy handed
@@ -953,7 +954,8 @@ class BrcmOpenomciOnuHandler(object):
         self.log.debug('starting-openomci-statemachine')
         self._subscribe_to_events()
         onu_device.reason = "starting-openomci"
-        reactor.callLater(1, self._onu_omci_device.start, onu_device)
+        self.adapter.startup_queue.add_to_queue(self.device_id, self._onu_omci_device, onu_device)
+        # reactor.callLater(1, self._onu_omci_device.start, onu_device)
         yield self.core_proxy.device_reason_update(self.device_id, onu_device.reason)
         self._heartbeat.enabled = True
 
@@ -1167,6 +1169,7 @@ class BrcmOpenomciOnuHandler(object):
 
                     # Start up device_info load
                     self.log.debug('running-mib-sync')
+                    self.adapter.startup_queue.remove_from_queue(self.device_id)
                     reactor.callLater(0, self._mib_in_sync)
 
             except Exception as e:
@@ -1254,7 +1257,7 @@ class BrcmOpenomciOnuHandler(object):
 
             except Exception as e:
                 self.log.exception('device-info-load', e=e)
-                self._deferred = reactor.callLater(_STARTUP_RETRY_WAIT, self._mib_in_sync)
+                reactor.callLater(_STARTUP_RETRY_WAIT, self._mib_in_sync)
 
         else:
             self.log.info('device-info-already-loaded', in_sync=in_sync, already_loaded=self._dev_info_loaded)
@@ -1277,7 +1280,7 @@ class BrcmOpenomciOnuHandler(object):
                 def failure(_reason):
                     self.log.warn('mib-download-failure-retrying', _reason=_reason)
                     yield self.core_proxy.device_reason_update(self.device_id, 'initial-mib-download-failure-retrying')
-                    self._deferred = reactor.callLater(_STARTUP_RETRY_WAIT, self._mib_in_sync)
+                    reactor.callLater(_STARTUP_RETRY_WAIT, self._mib_in_sync)
 
                 # start by locking all the unis till mib sync and initial mib is downloaded
                 # this way we can capture the port down/up events when we are ready
