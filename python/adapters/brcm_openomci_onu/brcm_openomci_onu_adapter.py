@@ -39,6 +39,7 @@ from pyvoltha.adapters.extensions.omci.openomci_agent import OpenOMCIAgent, Open
 from pyvoltha.adapters.extensions.omci.database.mib_db_dict import MibDbVolatileDict
 
 from brcm_openomci_onu_handler import BrcmOpenomciOnuHandler
+from brcm_openomci_startup_queue import BrcmOpenomciStartupQueue
 from omci.brcm_capabilities_task import BrcmCapabilitiesTask
 from copy import deepcopy
 
@@ -72,6 +73,8 @@ class BrcmOpenomciOnuAdapter(object):
         )
         self.devices_handlers = dict()
         self.device_handler_class = BrcmOpenomciOnuHandler
+
+        self.startup_queue = BrcmOpenomciStartupQueue(10, 10)
 
         # Customize OpenOMCI for Broadcom ONUs
         self.broadcom_omci = deepcopy(OpenOmciAgentDefaults)
