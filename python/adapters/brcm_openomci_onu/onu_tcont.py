@@ -37,7 +37,7 @@ class OnuTCont(object):
     Broadcom ONU specific implementation
     """
 
-    def __init__(self, handler, uni_id, alloc_id, q_sched_policy, traffic_descriptor):
+    def __init__(self, handler, uni_id, alloc_id, q_sched_policy):
 
         self.log = structlog.get_logger(device_id=handler.device_id, uni_id=uni_id, alloc_id=alloc_id)
 
@@ -45,14 +45,13 @@ class OnuTCont(object):
         self.alloc_id = alloc_id
         self._q_sched_policy = 0
         self.q_sched_policy = q_sched_policy
-        self.traffic_descriptor = traffic_descriptor
 
         self._handler = handler
         self._entity_id = None
 
     def __str__(self):
-        return "OnuTCont - uni_id: {}, entity_id {}, alloc-id: {}, q_sched_policy: {}, traffic_descriptor: {}".format(
-            self.uni_id, self._entity_id, self.alloc_id, self.q_sched_policy, self.traffic_descriptor)
+        return "OnuTCont - uni_id: {}, entity_id: {}, alloc-id: {}, q_sched_policy: {}".format(
+            self.uni_id, self._entity_id, self.alloc_id, self.q_sched_policy)
 
     def __repr__(self):
         return str(self)
@@ -74,13 +73,12 @@ class OnuTCont(object):
             self._q_sched_policy = 0
 
     @staticmethod
-    def create(handler, tcont, td):
+    def create(handler, tcont):
 
         return OnuTCont(handler,
                         tcont['uni_id'],
                         tcont['alloc-id'],
-                        tcont['q_sched_policy'],
-                        td
+                        tcont['q_sched_policy']
                         )
 
     @inlineCallbacks

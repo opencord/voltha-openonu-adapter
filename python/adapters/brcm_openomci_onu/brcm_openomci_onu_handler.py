@@ -62,7 +62,6 @@ from onu_gem_port import OnuGemPort
 from onu_tcont import OnuTCont
 from pon_port import PonPort
 from uni_port import UniPort, UniType
-from onu_traffic_descriptor import OnuTrafficDescriptor
 from pyvoltha.common.tech_profile.tech_profile import TechProfile
 from pyvoltha.adapters.extensions.omci.tasks.omci_test_request import OmciTestRequest
 from pyvoltha.adapters.extensions.omci.omci_entities import AniG
@@ -378,16 +377,7 @@ class BrcmOpenomciOnuHandler(object):
         tcontdict['q_sched_policy'] = q_sched_policy
         tcontdict['uni_id'] = uni_id
 
-        # TODO: Not sure what to do with any of this...
-        tddata = dict()
-        tddata['name'] = 'not-sure-td-profile'
-        tddata['fixed-bandwidth'] = "not-sure-fixed"
-        tddata['assured-bandwidth'] = "not-sure-assured"
-        tddata['maximum-bandwidth'] = "not-sure-max"
-        tddata['additional-bw-eligibility-indicator'] = "not-sure-additional"
-
-        td = OnuTrafficDescriptor.create(tddata)
-        tcont = OnuTCont.create(self, tcont=tcontdict, td=td)
+        tcont = OnuTCont.create(self, tcont=tcontdict)
 
         self._pon.add_tcont(tcont)
 
