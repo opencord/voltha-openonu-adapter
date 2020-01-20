@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a8e3171a_8e129e98",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_adapter.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2020-01-20T22:46:56Z",
+      "side": 1,
+      "message": "lower case \"Enable\" and \"Disable\" to be consistent with other functions.\n\nAlso see other commit, i think the names should be \"disable_port\" and \"enable_port\"",
+      "range": {
+        "startLine": 174,
+        "startChar": 8,
+        "endLine": 174,
+        "endChar": 25
+      },
+      "revId": "6e1f69ca4f465e1f691c075c044acea8e021a7c2",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    }
+  ]
+}
