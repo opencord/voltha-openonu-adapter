@@ -171,6 +171,12 @@ class BrcmOpenomciOnuAdapter(object):
     def revert_image_update(self, device, request):
         raise NotImplementedError()
 
+    def enable_port(self, device_id, port):
+        raise NotImplementedError()
+
+    def disable_port(self, device_id, port):
+        raise NotImplementedError()
+
     def self_test_device(self, device):
         """
         This is called to Self a device based on a NBI call.
