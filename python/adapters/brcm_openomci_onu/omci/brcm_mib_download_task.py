@@ -15,9 +15,8 @@
 
 from twisted.internet import reactor
 from twisted.internet.defer import inlineCallbacks, returnValue, TimeoutError, failure
-from pyvoltha.adapters.extensions.omci.omci_me import PptpEthernetUniFrame, GalEthernetProfileFrame, \
-    MacBridgePortConfigurationDataFrame, MacBridgeServiceProfileFrame, Ieee8021pMapperServiceProfileFrame, \
-    VeipUniFrame, ExtendedVlanTaggingOperationConfigurationDataFrame
+from pyvoltha.adapters.extensions.omci.omci_me import GalEthernetProfileFrame, \
+    MacBridgePortConfigurationDataFrame, MacBridgeServiceProfileFrame
 from pyvoltha.adapters.extensions.omci.tasks.task import Task
 from pyvoltha.adapters.extensions.omci.omci_defs import EntityOperations, ReasonCodes
 from uni_port import UniType
@@ -160,9 +159,6 @@ class BrcmMibDownloadTask(Task):
         """
         try:
             self.log.info('perform-download')
-
-            if self._handler.enabled and len(self._handler.uni_ports) > 0:
-                yield self._handler.core_proxy.device_reason_update(self.device_id, 'performing-initial-mib-download')
 
             try:
                 # Lock the UNI ports to prevent any alarms during initial configuration
