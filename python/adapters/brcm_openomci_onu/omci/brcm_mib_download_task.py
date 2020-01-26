@@ -141,8 +141,8 @@ class BrcmMibDownloadTask(Task):
                        error_mask=error_mask, failed_mask=failed_mask,
                        unsupported_mask=unsupported_mask)
 
+        self.strobe_watchdog()
         if status == RC.Success:
-            self.strobe_watchdog()
             return True
 
         elif status == RC.InstanceExists:
@@ -161,37 +161,17 @@ class BrcmMibDownloadTask(Task):
         try:
             self.log.info('perform-download')
 
-            if self._handler.enabled and len(self._handler.uni_ports) > 0:
-                yield self._handler.core_proxy.device_reason_update(self.device_id, 'performing-initial-mib-download')
+            # Provision the initial bridge configuration
+            yield self.perform_initial_bridge_setup()
 
-            try:
-                # Lock the UNI ports to prevent any alarms during initial configuration
-                # of the ONU
-                self.strobe_watchdog()
-
+            for uni_port in self._handler.uni_ports:
                 # Provision the initial bridge configuration
-                yield self.perform_initial_bridge_setup()
+                yield self.perform_uni_initial_bridge_setup(uni_port)
 
-                for uni_port in self._handler.uni_ports:
-                    # Provision the initial bridge configuration
-                    yield self.perform_uni_initial_bridge_setup(uni_port)
-
-                self.deferred.callback('initial-download-success')
-
-            except TimeoutError as e:
-                self.log.error('initial-download-failure', e=e)
-                self.deferred.errback(failure.Failure(e))
-
-            except Exception as e:
-                self.log.exception('initial-download-failure', e=e)
-                self.deferred.errback(failure.Failure(e))
-
-            else:
-                e = MibResourcesFailure('Required resources are not available',
-                                        len(self._handler.uni_ports))
-                self.deferred.errback(failure.Failure(e))
-        except BaseException as e:
-            self.log.debug('cannot-start-mib-download', exception=e)
+            self.deferred.callback('initial-download-success')
+        except Exception as e:
+            self.log.error('initial-download-failure', e=e)
+            self.deferred.errback(failure.Failure(e))
 
     @inlineCallbacks
     def perform_initial_bridge_setup(self):

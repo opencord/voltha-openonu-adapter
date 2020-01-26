@@ -81,6 +81,7 @@ class BrcmUniLockTask(Task):
         super(BrcmUniLockTask, self).start()
         self._local_deferred = reactor.callLater(0, self.perform_lock)
 
+    @inlineCallbacks
     def perform_lock(self):
         """
         Perform the lock/unlock
@@ -99,29 +100,29 @@ class BrcmUniLockTask(Task):
                 for entity_id in pptp_list:
                     msg = PptpEthernetUniFrame(entity_id,
                                                attributes=dict(administrative_state=state))
-                    self._send_omci_msg(msg)
+                    yield self._send_omci_msg(msg)
 
                 for entity_id in veip_list:
                     msg = VeipUniFrame(entity_id,
                                        attributes=dict(administrative_state=state))
-                    self._send_omci_msg(msg)
+                    yield self._send_omci_msg(msg)
 
                 msg = OntGFrame(attributes={'administrative_state': state})
-                self._send_omci_msg(msg)
+                yield self._send_omci_msg(msg)
             else:
                 # ontg must be unlocked first, then unis
                 msg = OntGFrame(attributes={'administrative_state': state})
-                self._send_omci_msg(msg)
+                yield self._send_omci_msg(msg)
 
                 for entity_id in pptp_list:
                     msg = PptpEthernetUniFrame(entity_id,
                                                attributes=dict(administrative_state=state))
-                    self._send_omci_msg(msg)
+                    yield self._send_omci_msg(msg)
 
                 for entity_id in veip_list:
                     msg = VeipUniFrame(entity_id,
                                        attributes=dict(administrative_state=state))
-                    self._send_omci_msg(msg)
+                    yield self._send_omci_msg(msg)
 
             self.deferred.callback('setting-uni-lock-state-finished')
 
