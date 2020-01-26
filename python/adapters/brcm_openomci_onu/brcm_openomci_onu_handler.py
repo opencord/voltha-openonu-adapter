@@ -23,6 +23,7 @@ import six
 import arrow
 import structlog
 import json
+import random
 
 from collections import OrderedDict
 
@@ -70,7 +71,7 @@ from pyvoltha.adapters.extensions.omci.omci_defs import EntityOperations, Reason
 OP = EntityOperations
 RC = ReasonCodes
 
-_STARTUP_RETRY_WAIT = 20
+_STARTUP_RETRY_WAIT = 10
 
 
 class BrcmOpenomciOnuHandler(object):
@@ -90,7 +91,10 @@ class BrcmOpenomciOnuHandler(object):
         self.tx_id = 0
         self._enabled = False
         self.events = None
-        self.pm_metrics = None
+        self._pm_metrics = None
+        self._pm_metrics_started = False
+        self._test_request = None
+        self._test_request_started = False
         self._omcc_version = OMCCVersion.Unknown
         self._total_tcont_count = 0  # From ANI-G ME
         self._qos_flexibility = 0  # From ONT2_G ME
@@ -264,11 +268,11 @@ class BrcmOpenomciOnuHandler(object):
                 OnuOmciPmMetrics.OMCI_DEV_KEY: self._onu_omci_device
             }
             self.log.debug('create-pm-metrics', device_id=device.id, serial_number=device.serial_number)
-            self.pm_metrics = OnuPmMetrics(self.events, self.core_proxy, self.device_id,
+            self._pm_metrics = OnuPmMetrics(self.events, self.core_proxy, self.device_id,
                                            self.logical_device_id, device.serial_number,
                                            grouped=True, freq_override=False, **kwargs)
-            pm_config = self.pm_metrics.make_proto()
-            self._onu_omci_device.set_pm_config(self.pm_metrics.omci_pm.openomci_interval_pm)
+            pm_config = self._pm_metrics.make_proto()
+            self._onu_omci_device.set_pm_config(self._pm_metrics.omci_pm.openomci_interval_pm)
             self.log.info("initial-pm-config", device_id=device.id, serial_number=device.serial_number)
             yield self.core_proxy.device_pm_config_update(pm_config, init=True)
 
@@ -276,22 +280,19 @@ class BrcmOpenomciOnuHandler(object):
             self._onu_omci_device.alarm_synchronizer.set_alarm_params(mgr=self.events,
                                                                       ani_ports=[self._pon])
 
-            # Start collecting stats from the device after a brief pause
-            reactor.callLater(10, self.pm_metrics.start_collector)
-
             # Code to Run OMCI Test Action
             kwargs_omci_test_action = {
                 OmciTestRequest.DEFAULT_FREQUENCY_KEY:
                     OmciTestRequest.DEFAULT_COLLECTION_FREQUENCY
             }
             serial_number = device.serial_number
-            test_request = OmciTestRequest(self.core_proxy,
+            self._test_request = OmciTestRequest(self.core_proxy,
                                            self.omci_agent, self.device_id,
                                            AniG, serial_number,
                                            self.logical_device_id,
                                            exclusive=False,
                                            **kwargs_omci_test_action)
-            reactor.callLater(60, test_request.start_collector)
+
             self.enabled = True
         else:
             self.log.info('onu-already-activated')
@@ -491,8 +492,9 @@ class BrcmOpenomciOnuHandler(object):
                                                                'tech-profile-config-download-failure-retrying')
                     if tp_path in self._tp_service_specific_task[uni_id]:
                         del self._tp_service_specific_task[uni_id][tp_path]
-                    self._deferred = reactor.callLater(_STARTUP_RETRY_WAIT, self.load_and_configure_tech_profile,
-                                                       uni_id, tp_path)
+                    retry = _STARTUP_RETRY_WAIT * (random.randint(1,5))
+                    reactor.callLater(retry, self.load_and_configure_tech_profile,
+                                      uni_id, tp_path)
 
                 self.log.info('downloading-tech-profile-configuration')
                 # Extract the current set of TCONT and GEM Ports from the Handler's pon_port that are
@@ -562,8 +564,9 @@ class BrcmOpenomciOnuHandler(object):
                     for gp in new_gems:
                         self.pon_port.remove_gem_id(gp.gem_id, gp.direction, False)
 
-                    self._deferred = reactor.callLater(_STARTUP_RETRY_WAIT, self.load_and_configure_tech_profile,
-                                                       uni_id, tp_path)
+                    retry = _STARTUP_RETRY_WAIT * (random.randint(1,5))
+                    reactor.callLater(retry, self.load_and_configure_tech_profile,
+                                      uni_id, tp_path)
 
                 self._tp_service_specific_task[uni_id][tp_path] = \
                     BrcmTpSetupTask(self.omci_agent, self, uni_id, [], new_gems, int(tp_path.split("/")[1]))
@@ -634,9 +637,8 @@ class BrcmOpenomciOnuHandler(object):
                               _reason=_reason)
                 yield self.core_proxy.device_reason_update(self.device_id,
                                                            'tech-profile-config-delete-failure-retrying')
-                self._deferred = \
-                    self._onu_omci_device.task_runner.queue_task(self._tp_service_specific_task[uni_id][tp_path])
-                self._deferred.addCallbacks(success, failure)
+                retry = _STARTUP_RETRY_WAIT * (random.randint(1, 5))
+                reactor.callLater(retry, self.delete_tech_profile, uni_id, tp_path, alloc_id, gem_port_id)
 
             self.log.info('deleting-tech-profile-configuration')
 
@@ -661,7 +663,7 @@ class BrcmOpenomciOnuHandler(object):
     def update_pm_config(self, device, pm_config):
         # TODO: This has not been tested
         self.log.info('update_pm_config', pm_config=pm_config)
-        self.pm_metrics.update(pm_config)
+        self._pm_metrics.update(pm_config)
 
     # Calling this assumes the onu is active/ready and had at least an initial mib downloaded.   This gets called from
     # flow decomposition that ultimately comes from onos
@@ -849,9 +851,10 @@ class BrcmOpenomciOnuHandler(object):
             def failure(_reason):
                 self.log.warn('vlan-tagging-failure', uni_port=uni_port, vlan=_set_vlan_vid, tp_id=tp_id)
                 yield self.core_proxy.device_reason_update(self.device_id, 'omci-flows-failed-retrying')
-                self._vlan_filter_task = reactor.callLater(_STARTUP_RETRY_WAIT,
-                                                           self._add_vlan_filter_task, device, uni_port.port_number,
-                                                           uni_port, _set_vlan_vid, tp_id)
+                retry = _STARTUP_RETRY_WAIT * (random.randint(1,5))
+                reactor.callLater(retry,
+                                  self._add_vlan_filter_task, device, uni_port.port_number,
+                                  uni_port, _set_vlan_vid, tp_id)
 
             self.log.info('setting-vlan-tag')
             self._vlan_filter_task = BrcmVlanFilterTask(self.omci_agent, self, uni_port, _set_vlan_vid, tp_id)
@@ -1227,11 +1230,24 @@ class BrcmOpenomciOnuHandler(object):
                     self._mib_download_task = None
                     yield self.onu_active_event()
 
+                    # Start collecting stats from the device after a brief pause
+                    if not self._pm_metrics_started:
+                        self._pm_metrics_started = True
+                        pmstart = _STARTUP_RETRY_WAIT * (random.randint(1, 5))
+                        reactor.callLater(pmstart, self._pm_metrics.start_collector)
+
+                    # Start test requests after a brief pause
+                    if not self._test_request_started:
+                        self._test_request_started = True
+                        tststart = _STARTUP_RETRY_WAIT * (random.randint(1, 5))
+                        reactor.callLater(tststart, self._test_request.start_collector)
+
                 @inlineCallbacks
                 def failure(_reason):
                     self.log.warn('mib-download-failure-retrying', _reason=_reason)
                     yield self.core_proxy.device_reason_update(self.device_id, 'initial-mib-download-failure-retrying')
-                    self._deferred = reactor.callLater(_STARTUP_RETRY_WAIT, self._mib_in_sync)
+                    retry = _STARTUP_RETRY_WAIT * (random.randint(1,5))
+                    reactor.callLater(retry, self._mib_in_sync)
 
                 # start by locking all the unis till mib sync and initial mib is downloaded
                 # this way we can capture the port down/up events when we are ready
