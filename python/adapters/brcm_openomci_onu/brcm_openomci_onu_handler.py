@@ -70,6 +70,7 @@ from pyvoltha.common.tech_profile.tech_profile import TechProfile
 from pyvoltha.adapters.extensions.omci.tasks.omci_test_request import OmciTestRequest
 from pyvoltha.adapters.extensions.omci.omci_entities import AniG
 from pyvoltha.adapters.extensions.omci.omci_defs import EntityOperations, ReasonCodes
+from voltha_protos.voltha_pb2 import TestResponse
 
 OP = EntityOperations
 RC = ReasonCodes
@@ -1772,3 +1773,27 @@ class BrcmOpenomciOnuHandler(object):
         # tp_path is of the format  <technology>/<table_id>/<uni_port_name>
         tp_id = int(tp_path.split(_PATH_SEPERATOR)[1])
         return tp_id
+
+    def start_omci_test_action(self, device, uuid):
+        """
+
+        :param device:
+        :return:
+        """
+        # Code to Run OMCI Test Action
+        self.log.info('Omci-test-action-request-On', request=device.id)
+        kwargs_omci_test_action = {
+            OmciTestRequest.DEFAULT_FREQUENCY_KEY:
+                OmciTestRequest.DEFAULT_COLLECTION_FREQUENCY
+        }
+        serial_number = device.serial_number
+        if device.connect_status != ConnectStatus.REACHABLE or device.admin_state != AdminState.ENABLED:
+            return (TestResponse(result=TestResponse.FAILURE))
+        test_request = OmciTestRequest(self.core_proxy,
+                                       self.omci_agent, self.device_id, AniG,
+                                       serial_number,
+                                       self.logical_device_id, exclusive=False,
+                                       uuid=uuid,
+                                       **kwargs_omci_test_action)
+        test_request.perform_test_omci()
+        return (TestResponse(result=TestResponse.SUCCESS))
