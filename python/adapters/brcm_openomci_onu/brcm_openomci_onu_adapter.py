@@ -279,3 +279,14 @@ class BrcmOpenomciOnuAdapter(object):
             handler = self.devices_handlers[device.id]
             if handler is not None:
                 handler.remove_interface(data)
+
+    def start_omci_test(self, device, uuid):
+        """
+
+        :param device:
+        :return:
+        """
+        self.log.info('Omci-test-action-request-On', request=device)
+        handler = self.devices_handlers[device.id]
+        result = handler.start_omci_test_action(device, uuid)
+        return result
