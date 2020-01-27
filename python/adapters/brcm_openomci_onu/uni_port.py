@@ -66,7 +66,6 @@ class UniPort(object):
     def _start(self):
         self._cancel_deferred()
         self._admin_state = AdminState.ENABLED
-        self._oper_status = OperStatus.ACTIVATING
 
     def _stop(self):
         self._cancel_deferred()
