@@ -277,3 +277,14 @@ class BrcmOpenomciOnuAdapter(object):
                       to_topic=msg.header.to_topic, to_device_id=msg.header.to_device_id)
             handler = self.devices_handlers[msg.header.to_device_id]
             handler.process_inter_adapter_message(msg)
+
+    def start_omci_test(self, device, uuid):
+        """
+
+        :param device:
+        :return:
+        """
+        self.log.info('Omci-test-action-request-On', request=device)
+        handler = self.devices_handlers[device.id]
+        result = handler.start_omci_test_action(device, uuid)
+        return result
