@@ -64,16 +64,16 @@ test: docker-build
 local-protos:
 	mkdir -p local_imports
 ifdef LOCAL_PROTOS
-	rm -f local_imports/voltha-protos/dist
 	mkdir -p local_imports/voltha-protos/dist
+	rm -f local_imports/voltha-protos/dist/*.tar.gz
 	cp ${LOCAL_PROTOS}/dist/*.tar.gz local_imports/voltha-protos/dist/
 endif
 
 local-pyvoltha:
 	mkdir -p local_imports
 ifdef LOCAL_PYVOLTHA
-	rm -f local_imports/pyvoltha/dist
 	mkdir -p local_imports/pyvoltha/dist
+	rm -f local_imports/pyvoltha/dist/*.tar.gz
 	cp ${LOCAL_PYVOLTHA}/dist/*.tar.gz local_imports/pyvoltha/dist/
 endif
 
