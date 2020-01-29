@@ -1,0 +1,7 @@
+Code-Review+2: Matteo Scandolo <teo@opennetworking.org>
+Verified+1: Jenkins Jenkins <do-not-reply@opencord.org>
+Submitted-by: Matt Jeanneret <mj3580@att.com>
+Submitted-at: Wed, 29 Jan 2020 18:33:17 +0000
+Reviewed-on: https://gerrit.opencord.org/17240
+Project: voltha-openonu-adapter
+Branch: refs/heads/master
