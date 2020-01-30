@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "58eba1e0_d5093740",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_adapter.py",
+        "patchSetId": 6
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2020-01-30T14:54:39Z",
+      "side": 1,
+      "message": "This function signature does not match what the core will call or what pyvoltha\u0027s adapter facade will call:\n\nreturn (True, self.adapter.enable_port(device_id, port))\n\nEven though this is all untyped, device should probably change to device_id to be clear.",
+      "range": {
+        "startLine": 174,
+        "startChar": 8,
+        "endLine": 174,
+        "endChar": 39
+      },
+      "revId": "43f0c44ebce6f5fedcb367b4d3900ef31be13970",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "25c07993_544d8176",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_adapter.py",
+        "patchSetId": 6
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2020-01-30T14:54:39Z",
+      "side": 1,
+      "message": "same here as above",
+      "range": {
+        "startLine": 177,
+        "startChar": 27,
+        "endLine": 177,
+        "endChar": 33
+      },
+      "revId": "43f0c44ebce6f5fedcb367b4d3900ef31be13970",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    }
+  ]
+}
