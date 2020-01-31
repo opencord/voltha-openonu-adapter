@@ -471,24 +471,24 @@ class BrcmOpenomciOnuHandler(object):
                 @inlineCallbacks
                 def success(_results):
                     self.log.info("tech-profile-config-done-successfully")
-                    yield self.core_proxy.device_reason_update(self.device_id, 'tech-profile-config-download-success')
                     if tp_path in self._tp_service_specific_task[uni_id]:
                         del self._tp_service_specific_task[uni_id][tp_path]
                     self._tech_profile_download_done[uni_id][tp_path] = True
                     # Now execute any vlan filter tasks that were queued for later
                     self._execute_queued_vlan_filter_tasks(uni_id)
+                    yield self.core_proxy.device_reason_update(self.device_id, 'tech-profile-config-download-success')
 
                 @inlineCallbacks
                 def failure(_reason):
                     self.log.warn('tech-profile-config-failure-retrying',
                                   _reason=_reason)
-                    yield self.core_proxy.device_reason_update(self.device_id,
-                                                               'tech-profile-config-download-failure-retrying')
                     if tp_path in self._tp_service_specific_task[uni_id]:
                         del self._tp_service_specific_task[uni_id][tp_path]
                     retry = _STARTUP_RETRY_WAIT * (random.randint(1,5))
                     reactor.callLater(retry, self.load_and_configure_tech_profile,
                                       uni_id, tp_path)
+                    yield self.core_proxy.device_reason_update(self.device_id,
+                                                               'tech-profile-config-download-failure-retrying')
 
                 self.log.info('downloading-tech-profile-configuration')
                 # Extract the current set of TCONT and GEM Ports from the Handler's pon_port that are
@@ -629,10 +629,10 @@ class BrcmOpenomciOnuHandler(object):
             def failure(_reason):
                 self.log.warn('tech-profile-delete-failure-retrying',
                               _reason=_reason)
-                yield self.core_proxy.device_reason_update(self.device_id,
-                                                           'tech-profile-config-delete-failure-retrying')
                 retry = _STARTUP_RETRY_WAIT * (random.randint(1, 5))
                 reactor.callLater(retry, self.delete_tech_profile, uni_id, tp_path, alloc_id, gem_port_id)
+                yield self.core_proxy.device_reason_update(self.device_id,
+                                                           'tech-profile-config-delete-failure-retrying')
 
             self.log.info('deleting-tech-profile-configuration')
 
@@ -838,17 +838,17 @@ class BrcmOpenomciOnuHandler(object):
             @inlineCallbacks
             def success(_results):
                 self.log.info('vlan-tagging-success', uni_port=uni_port, vlan=_set_vlan_vid, tp_id=tp_id)
-                yield self.core_proxy.device_reason_update(self.device_id, 'omci-flows-pushed')
                 self._vlan_filter_task = None
+                yield self.core_proxy.device_reason_update(self.device_id, 'omci-flows-pushed')
 
             @inlineCallbacks
             def failure(_reason):
                 self.log.warn('vlan-tagging-failure', uni_port=uni_port, vlan=_set_vlan_vid, tp_id=tp_id)
-                yield self.core_proxy.device_reason_update(self.device_id, 'omci-flows-failed-retrying')
                 retry = _STARTUP_RETRY_WAIT * (random.randint(1,5))
                 reactor.callLater(retry,
                                   self._add_vlan_filter_task, device, uni_port.port_number,
                                   uni_port, _set_vlan_vid, tp_id)
+                yield self.core_proxy.device_reason_update(self.device_id, 'omci-flows-failed-retrying')
 
             self.log.info('setting-vlan-tag')
             self._vlan_filter_task = BrcmVlanFilterTask(self.omci_agent, self, uni_port, _set_vlan_vid, tp_id)
@@ -1216,9 +1216,9 @@ class BrcmOpenomciOnuHandler(object):
                 @inlineCallbacks
                 def failure(_reason):
                     self.log.warn('mib-download-failure-retrying', _reason=_reason)
-                    yield self.core_proxy.device_reason_update(self.device_id, 'initial-mib-download-failure-retrying')
                     retry = _STARTUP_RETRY_WAIT * (random.randint(1,5))
                     reactor.callLater(retry, self._mib_in_sync)
+                    yield self.core_proxy.device_reason_update(self.device_id, 'initial-mib-download-failure-retrying')
 
                 # start by locking all the unis till mib sync and initial mib is downloaded
                 # this way we can capture the port down/up events when we are ready
