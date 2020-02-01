@@ -264,24 +264,3 @@ class BrcmOpenomciOnuAdapter(object):
                       to_topic=msg.header.to_topic, to_device_id=msg.header.to_device_id)
             handler = self.devices_handlers[msg.header.to_device_id]
             handler.process_inter_adapter_message(msg)
-
-    def create_interface(self, device, data):
-        self.log.debug('create-interface', device_id=device.id)
-        if device.id in self.devices_handlers:
-            handler = self.devices_handlers[device.id]
-            if handler is not None:
-                handler.create_interface(data)
-
-    def update_interface(self, device, data):
-        self.log.debug('update-interface', device_id=device.id)
-        if device.id in self.devices_handlers:
-            handler = self.devices_handlers[device.id]
-            if handler is not None:
-                handler.update_interface(data)
-
-    def remove_interface(self, device, data):
-        self.log.debug('remove-interface', device_id=device.id)
-        if device.id in self.devices_handlers:
-            handler = self.devices_handlers[device.id]
-            if handler is not None:
-                handler.remove_interface(data)
