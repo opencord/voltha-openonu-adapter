@@ -82,13 +82,9 @@ class BrcmOpenomciOnuHandler(object):
         self.adapter = adapter
         self.core_proxy = adapter.core_proxy
         self.adapter_proxy = adapter.adapter_proxy
-        self.parent_adapter = None
         self.parent_id = None
         self.device_id = device_id
-        self.incoming_messages = DeferredQueue()
-        self.event_messages = DeferredQueue()
         self.proxy_address = None
-        self.tx_id = 0
         self._enabled = False
         self.events = None
         self._pm_metrics = None
@@ -103,7 +99,6 @@ class BrcmOpenomciOnuHandler(object):
         self._unis = dict()  # Port # -> UniPort
 
         self._pon = None
-        # TODO: probably shouldnt be hardcoded, determine from olt maybe?
         self._pon_port_number = 100
         self.logical_device_id = None
 
@@ -360,13 +355,12 @@ class BrcmOpenomciOnuHandler(object):
 
     def delete(self, device):
         self.log.info('delete-onu', device_id=device.id, serial_number=device.serial_number)
-        if self.parent_adapter:
-            try:
-                self.parent_adapter.delete_child_device(self.parent_id, device)
-            except AttributeError:
-                self.log.debug('parent-device-delete-child-not-implemented')
-        else:
-            self.log.debug("parent-adapter-not-available")
+
+        self._deferred.cancel()
+        self._test_request.stop_collector()
+        self._pm_metrics.stop_collector()
+        self.log.debug('removing-openomci-statemachine')
+        self.omci_agent.remove_device(device.id, cleanup=True)
 
     def _create_tconts(self, uni_id, us_scheduler):
         alloc_id = us_scheduler['alloc_id']
@@ -869,11 +863,6 @@ class BrcmOpenomciOnuHandler(object):
                                                      "set_vlan_vid": _set_vlan_vid,
                                                      "tp_id": tp_id}
 
-    def get_tx_id(self):
-        self.log.debug('get-tx-id')
-        self.tx_id += 1
-        return self.tx_id
-
     def process_inter_adapter_message(self, request):
         self.log.debug('process-inter-adapter-message', type=request.header.type, from_topic=request.header.from_topic,
                        to_topic=request.header.to_topic, to_device_id=request.header.to_device_id)
@@ -949,8 +938,7 @@ class BrcmOpenomciOnuHandler(object):
         yield self.core_proxy.device_reason_update(self.device_id, onu_device.reason)
         self._heartbeat.enabled = True
 
-    # Currently called each time there is an onu "down" indication from the olt handler
-    # TODO: possibly other reasons to "update" from the olt?
+    # Called each time there is an onu "down" indication from the olt handler
     @inlineCallbacks
     def update_interface(self, onu_indication):
         self.log.info('update-interface', onu_id=onu_indication.onu_id,
@@ -972,23 +960,6 @@ class BrcmOpenomciOnuHandler(object):
                                                       connect_status=ConnectStatus.UNREACHABLE)
         else:
             self.log.debug('not-changing-openomci-statemachine')
-
-    # Not currently called by olt or anything else
-    @inlineCallbacks
-    def remove_interface(self, data):
-        self.log.info('remove-interface', data=data)
-
-        self.log.debug('stopping-openomci-statemachine')
-        reactor.callLater(0, self._onu_omci_device.stop)
-
-        # Let TP download happen again
-        for uni_id in self._tp_service_specific_task:
-            self._tp_service_specific_task[uni_id].clear()
-        for uni_id in self._tech_profile_download_done:
-            self._tech_profile_download_done[uni_id].clear()
-
-        yield self.disable_ports(lock_ports=False)
-        yield self.core_proxy.device_reason_update(self.device_id, "stopping-openomci")
 
     @inlineCallbacks
     def disable(self, device):
