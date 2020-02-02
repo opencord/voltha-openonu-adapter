@@ -22,6 +22,29 @@
       "revId": "f182253eb00f6426461e534a6d2f9779ae8ab9b7",
       "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1acd17e1_90de4135",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_adapter.py",
+        "patchSetId": 9
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2020-02-02T18:27:55Z",
+      "side": 1,
+      "message": "also the reason the sanity test fails.  Cannot use a semicolon.\n\n Traceback (most recent call last):\n   File \"/voltha/adapters/brcm_openomci_onu/main.py\", line 51, in \u003cmodule\u003e\n     from brcm_openomci_onu_adapter import BrcmOpenomciOnuAdapter\n   File \"/voltha/adapters/brcm_openomci_onu/brcm_openomci_onu_adapter.py\", line 174\n     def enable_port(self, device_id, port);\n                                           ^\n SyntaxError: invalid syntax",
+      "range": {
+        "startLine": 174,
+        "startChar": 4,
+        "endLine": 174,
+        "endChar": 43
+      },
+      "revId": "f182253eb00f6426461e534a6d2f9779ae8ab9b7",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
     }
   ]
 }
