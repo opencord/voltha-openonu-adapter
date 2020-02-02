@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa52719f_84a97f2b",
+        "filename": "VERSION",
+        "patchSetId": 9
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2020-02-02T18:20:10Z",
+      "side": 1,
+      "message": "Lets go with 2.3.1-dev.  We will release 2.3.1 after a few more changes come in.",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 5
+      },
+      "revId": "f182253eb00f6426461e534a6d2f9779ae8ab9b7",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    }
+  ]
+}
