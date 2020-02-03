@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "300ab5e6_fd963582",
+        "filename": "VERSION",
+        "patchSetId": 9
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000635
+      },
+      "writtenOn": "2020-02-03T06:13:22Z",
+      "side": 1,
+      "message": "Thank you, Matt. Changes are done as suggested.",
+      "parentUuid": "fa52719f_84a97f2b",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 5
+      },
+      "revId": "f182253eb00f6426461e534a6d2f9779ae8ab9b7",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1acd17e1_90de4135",
         "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_adapter.py",
         "patchSetId": 9
