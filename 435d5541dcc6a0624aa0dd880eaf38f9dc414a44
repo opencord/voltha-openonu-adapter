@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "678c7a4b_918842bb",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_tp_delete_task.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 272,
+      "author": {
+        "id": 1000218
+      },
+      "writtenOn": "2020-02-06T21:22:47Z",
+      "side": 1,
+      "message": "Is tp_delete task correct place to delete the UNI KPIs? Does this mean  if a service of subscriber is removed, then the  KPIs for UNI will be removed. Is that the case?",
+      "revId": "435d5541dcc6a0624aa0dd880eaf38f9dc414a44",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    }
+  ]
+}
