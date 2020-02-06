@@ -16,7 +16,8 @@
 from __future__ import absolute_import
 import structlog
 from twisted.internet.defer import inlineCallbacks, returnValue
-from pyvoltha.adapters.extensions.omci.omci_me import GemInterworkingTpFrame, GemPortNetworkCtpFrame
+from pyvoltha.adapters.extensions.omci.omci_me import (GemInterworkingTpFrame, GemPortNetworkCtpFrame,
+GemPortNetworkCtpMonitoringHistoryDataFrame)
 from pyvoltha.adapters.extensions.omci.omci_defs import ReasonCodes
 
 RC = ReasonCodes
@@ -313,6 +314,29 @@ class OnuGemPort(object):
             self.log.exception('interworking-create', e=e)
             raise
 
+        try:
+            attributes = {
+                'threshold_data_1_2_id': 0,
+                'transmitted_gem_frames': 0,
+                'received_gem_frames': 0,
+                'received_payload_bytes': 0,
+                'transmitted_payload_bytes': 0,
+                'encryption_key_errors': 0
+            }
+            # TODO: magic numbers here
+            msg = GemPortNetworkCtpMonitoringHistoryDataFrame(
+                self.entity_id,  # same entity id as GEM port
+                attributes=attributes
+            )
+            frame = msg.create()
+            self.log.debug('openomci-msg', omci_msg=msg)
+            results = yield omci.send(frame)
+            self.check_status_and_state(results, 'create-gem-network-ctp-data-monitor-me')
+
+        except Exception as e:
+            self.log.exception('gem-network-ctp-data-monitor-create', e=e)
+            raise
+
         returnValue(results)
 
     @inlineCallbacks
@@ -337,6 +361,16 @@ class OnuGemPort(object):
             self.check_status_and_state(results, 'delete-gem-interworking-tp')
         except Exception as e:
             self.log.exception('gemport-delete', e=e)
+            raise
+
+        try:
+            msg = GemPortNetworkCtpMonitoringHistoryDataFrame(self.entity_id, attributes=None)
+            frame = msg.delete()
+            self.log.debug('openomci-msg', omci_msg=msg)
+            results = yield omci.send(frame)
+            self.check_status_and_state(results, 'delete-gem-network-ctp-data-monitor-me')
+        except Exception as e:
+            self.log.exception('gem-data-monitor-me-delete', e=e)
             raise
 
         returnValue(results)

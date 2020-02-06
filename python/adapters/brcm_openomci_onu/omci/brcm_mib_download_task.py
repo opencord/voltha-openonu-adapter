@@ -17,7 +17,9 @@ from twisted.internet import reactor
 from twisted.internet.defer import inlineCallbacks, returnValue, TimeoutError, failure
 from pyvoltha.adapters.extensions.omci.omci_me import PptpEthernetUniFrame, GalEthernetProfileFrame, \
     MacBridgePortConfigurationDataFrame, MacBridgeServiceProfileFrame, Ieee8021pMapperServiceProfileFrame, \
-    VeipUniFrame, ExtendedVlanTaggingOperationConfigurationDataFrame
+    VeipUniFrame, ExtendedVlanTaggingOperationConfigurationDataFrame, \
+    EthernetFrameDownstreamPerformanceMonitoringHistoryDataFrame, \
+    EthernetFrameUpstreamPerformanceMonitoringHistoryDataFrame
 from pyvoltha.adapters.extensions.omci.tasks.task import Task
 from pyvoltha.adapters.extensions.omci.omci_defs import EntityOperations, ReasonCodes
 from uni_port import UniType
@@ -269,6 +271,78 @@ class BrcmMibDownloadTask(Task):
             self.log.debug('openomci-msg', omci_msg=msg)
             results = yield omci_cc.send(frame)
             self.check_status_and_state(results, 'create-mac-bridge-port-configuration-data-uni-port')
+
+            ################################################################################
+            # UNI Specific                                                                 #
+            ################################################################################
+            # Ethernet Frame Upstream Performance Monitoring ME
+            #
+            #  EntityID will be referenced by:
+            #            - Nothing
+            #  References:
+            #            - Nothing
+
+            attributes = {
+                'threshold_data_1_2_id': 0,
+                'drop_events': 0,
+                'octets': 0,
+                'packets': 0,
+                'broadcast_packets': 0,
+                'multicast_packets': 0,
+                'crc_errored_packets': 0,
+                'undersize_packets': 0,
+                'oversize_packets': 0,
+                '64_octets': 0,
+                '65_to_127_octets': 0,
+                '128_to_255_octets': 0,
+                '256_to_511_octets': 0,
+                '512_to_1023_octets': 0,
+                '1024_to_1518_octets': 0
+            }
+            msg = EthernetFrameUpstreamPerformanceMonitoringHistoryDataFrame(
+                uni_port.entity_id,
+                attributes
+            )
+            frame = msg.create()
+            self.log.debug('openomci-msg', omci_msg=msg)
+            results = yield omci_cc.send(frame)
+            self.check_status_and_state(results, 'create-ethernet-us-data-monitor-me')
+
+            ################################################################################
+            # UNI Specific                                                                 #
+            ################################################################################
+            # Ethernet Frame Downstream Performance Monitoring ME
+            #
+            #  EntityID will be referenced by:
+            #            - Nothing
+            #  References:
+            #            - Nothing
+
+            attributes = {
+                'threshold_data_1_2_id': 0,
+                'drop_events': 0,
+                'octets': 0,
+                'packets': 0,
+                'broadcast_packets': 0,
+                'multicast_packets': 0,
+                'crc_errored_packets': 0,
+                'undersize_packets': 0,
+                'oversize_packets': 0,
+                '64_octets': 0,
+                '65_to_127_octets': 0,
+                '128_to_255_octets': 0,
+                '256_to_511_octets': 0,
+                '512_to_1023_octets': 0,
+                '1024_to_1518_octets': 0
+            }
+            msg = EthernetFrameDownstreamPerformanceMonitoringHistoryDataFrame(
+                uni_port.entity_id,
+                attributes
+            )
+            frame = msg.create()
+            self.log.debug('openomci-msg', omci_msg=msg)
+            results = yield omci_cc.send(frame)
+            self.check_status_and_state(results, 'create-ethernet-ds-data-monitor-me')
 
         except TimeoutError as e:
             self.log.warn('rx-timeout-inital-per-uni-setup', e=e)

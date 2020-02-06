@@ -18,7 +18,9 @@ import structlog
 from twisted.internet import reactor
 from twisted.internet.defer import inlineCallbacks, TimeoutError, failure
 from pyvoltha.adapters.extensions.omci.omci_me import Ont2G, OmciNullPointer, PriorityQueueFrame, \
-    Ieee8021pMapperServiceProfileFrame, MacBridgePortConfigurationDataFrame
+    Ieee8021pMapperServiceProfileFrame, MacBridgePortConfigurationDataFrame, \
+    EthernetFrameUpstreamPerformanceMonitoringHistoryDataFrame, \
+    EthernetFrameDownstreamPerformanceMonitoringHistoryDataFrame
 from pyvoltha.adapters.extensions.omci.tasks.task import Task
 from pyvoltha.adapters.extensions.omci.omci_defs import EntityOperations, ReasonCodes
 from pyvoltha.adapters.extensions.omci.omci_entities import OntG, Tcont, PriorityQueueG
@@ -258,6 +260,32 @@ class BrcmTpDeleteTask(Task):
             self.log.debug('openomci-msg', omci_msg=msg)
             results = yield omci_cc.send(frame)
             self.check_status_and_state(results, 'delete-mac-bridge-port-configuration-data-8021p-mapper')
+
+            ################################################################################
+            # Delete EthernetFrameUpstreamPerformanceMonitoringHistoryData
+            ################################################################################
+            # TODO: magic. make a static variable for tp_type
+            msg = EthernetFrameUpstreamPerformanceMonitoringHistoryDataFrame(
+                self._uni_port.entity_id,  # Entity ID
+                attributes=None
+            )
+            frame = msg.delete()
+            self.log.debug('openomci-msg', omci_msg=msg)
+            results = yield omci_cc.send(frame)
+            self.check_status_and_state(results, 'delete-ethernet-us-data-monitor-me')
+
+            ################################################################################
+            # Delete EthernetFrameDownstreamPerformanceMonitoringHistoryData
+            ################################################################################
+            # TODO: magic. make a static variable for tp_type
+            msg = EthernetFrameDownstreamPerformanceMonitoringHistoryDataFrame(
+                self._uni_port.entity_id,  # Entity ID
+                attributes=None
+            )
+            frame = msg.delete()
+            self.log.debug('openomci-msg', omci_msg=msg)
+            results = yield omci_cc.send(frame)
+            self.check_status_and_state(results, 'delete-ethernet-ds-data-monitor-me')
 
         except TimeoutError as e:
             self.log.warn('rx-timeout-8021p-ani-port-delete', e=e)
