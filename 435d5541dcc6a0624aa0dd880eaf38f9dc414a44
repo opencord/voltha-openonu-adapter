@@ -34,6 +34,24 @@
       "revId": "435d5541dcc6a0624aa0dd880eaf38f9dc414a44",
       "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e9263e6f_2c66164a",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_tp_delete_task.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 272,
+      "author": {
+        "id": 1000218
+      },
+      "writtenOn": "2020-02-07T18:07:29Z",
+      "side": 1,
+      "message": "But tp_delete runs when the related service of subscriber is unprovisioned, not during subscriber removal. If subscriber has more than one service and we remove one of his services, then we remove MEs , but subscriber is still there with his remaining services. I think these MEs shoul be deleted in case all the services of the uni are removed.",
+      "parentUuid": "289645d5_f6a254e0",
+      "revId": "435d5541dcc6a0624aa0dd880eaf38f9dc414a44",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
     }
   ]
 }
