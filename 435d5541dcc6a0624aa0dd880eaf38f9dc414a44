@@ -16,6 +16,24 @@
       "revId": "435d5541dcc6a0624aa0dd880eaf38f9dc414a44",
       "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "289645d5_f6a254e0",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_tp_delete_task.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 272,
+      "author": {
+        "id": 1000472
+      },
+      "writtenOn": "2020-02-07T10:23:32Z",
+      "side": 1,
+      "message": "Yes. While provisioning a subscriber will create these ME\u0027s and while removing subscriber will remove them.",
+      "parentUuid": "678c7a4b_918842bb",
+      "revId": "435d5541dcc6a0624aa0dd880eaf38f9dc414a44",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
     }
   ]
 }
