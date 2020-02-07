@@ -52,6 +52,24 @@
       "revId": "435d5541dcc6a0624aa0dd880eaf38f9dc414a44",
       "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "990ebb29_de5f4649",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_tp_delete_task.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 272,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2020-02-07T18:23:40Z",
+      "side": 1,
+      "message": "Have a look at the openomci library state  machines, performance_intervals.py and the add_pm_me() function.  There is already an established pattern for setting up PM ME, but i dont think anything outside the library is using it yet.  \n\nIt looks to be event driven based on other ME being setup.  We may just need to let the library do more of the work.",
+      "parentUuid": "e9263e6f_2c66164a",
+      "revId": "435d5541dcc6a0624aa0dd880eaf38f9dc414a44",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
     }
   ]
 }
