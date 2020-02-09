@@ -2,6 +2,52 @@
   "comments": [
     {
       "key": {
+        "uuid": "97c72683_2efc0e88",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_mib_download_task.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 300,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2020-02-09T21:53:58Z",
+      "side": 1,
+      "message": "many of these you should not set as they are Read only per the specification.  See note in pyvoltha commit.  You should only the the SBC attributes filled in.\n\nits possible some onu omci implementations will error out when they receive a create() with these attributes set.",
+      "range": {
+        "startLine": 288,
+        "startChar": 0,
+        "endLine": 300,
+        "endChar": 40
+      },
+      "revId": "435d5541dcc6a0624aa0dd880eaf38f9dc414a44",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6d0323a1_7cf28256",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_mib_download_task.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 336,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2020-02-09T21:53:58Z",
+      "side": 1,
+      "message": "same for these",
+      "range": {
+        "startLine": 323,
+        "startChar": 1,
+        "endLine": 336,
+        "endChar": 40
+      },
+      "revId": "435d5541dcc6a0624aa0dd880eaf38f9dc414a44",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "678c7a4b_918842bb",
         "filename": "python/adapters/brcm_openomci_onu/omci/brcm_tp_delete_task.py",
         "patchSetId": 1
@@ -67,6 +113,24 @@
       "side": 1,
       "message": "Have a look at the openomci library state  machines, performance_intervals.py and the add_pm_me() function.  There is already an established pattern for setting up PM ME, but i dont think anything outside the library is using it yet.  \n\nIt looks to be event driven based on other ME being setup.  We may just need to let the library do more of the work.",
       "parentUuid": "e9263e6f_2c66164a",
+      "revId": "435d5541dcc6a0624aa0dd880eaf38f9dc414a44",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f413dea6_bb547cbc",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_tp_delete_task.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 272,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2020-02-09T21:53:58Z",
+      "side": 1,
+      "message": "Also given these are created during the initial-mib-download stage they should not be deleted here.\n\nThere are other ME created during initial-mib-download that do not get deleted for the life of the ONU, and these could be the same.\n\nIf we truly want to delete these ME then we may need to create a separate openomci task to do this and have the delete performed as part of some explicit \"remove monitoring\" action.\n\nBut honestly i dont really see a need to delete the monitoring ME, just like we dont delete UNI MacBridge entries.",
+      "parentUuid": "990ebb29_de5f4649",
       "revId": "435d5541dcc6a0624aa0dd880eaf38f9dc414a44",
       "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
       "unresolved": false
