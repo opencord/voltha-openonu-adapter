@@ -22,6 +22,30 @@
       "revId": "c1f0b26f170cfcad295b4419f8096eb97960613b",
       "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cbb537cb_1539f3c9",
+        "filename": "python/requirements.txt",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000016
+      },
+      "writtenOn": "2020-02-12T23:46:07Z",
+      "side": 1,
+      "message": "yeah, will do once the protos are in.",
+      "parentUuid": "d4e3906b_6128c1a8",
+      "range": {
+        "startLine": 1,
+        "startChar": 15,
+        "endLine": 1,
+        "endChar": 19
+      },
+      "revId": "c1f0b26f170cfcad295b4419f8096eb97960613b",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
     }
   ]
 }
