@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d4e3906b_6128c1a8",
+        "filename": "python/requirements.txt",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2020-02-12T11:58:09Z",
+      "side": 1,
+      "message": "when the time comes we can use this commit to bump protos to match pyvoltha.",
+      "range": {
+        "startLine": 1,
+        "startChar": 15,
+        "endLine": 1,
+        "endChar": 19
+      },
+      "revId": "c1f0b26f170cfcad295b4419f8096eb97960613b",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    }
+  ]
+}
