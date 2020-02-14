@@ -1007,40 +1007,45 @@ class BrcmOpenomciOnuHandler(object):
     def disable_ports(self, lock_ports=True):
         self.log.info('disable-ports', device_id=self.device_id)
 
-        bus = self._onu_omci_device.event_bus
-        bus.unsubscribe(self._port_state_subscription)
-        self._port_state_subscription = None
-
-        # Disable all ports on that device
+        # TODO: for now only support the first UNI given no requirement for multiple uni yet. Also needed to reduce flow
+        #  load on the core
         for port in self.uni_ports:
-            port.operstatus = OperStatus.UNKNOWN
-            self.log.info('disable-port', device_id=self.device_id, port=port)
+            if port.mac_bridge_port_num == 1:
+                port.operstatus = OperStatus.UNKNOWN
+                self.log.info('disable-port', device_id=self.device_id, port=port)
+                yield self.core_proxy.port_state_update(self.device_id, Port.ETHERNET_UNI, port.port_number, port.operstatus)
 
         if lock_ports is True:
             self.lock_ports(lock=True)
-
-        yield self.core_proxy.ports_state_update(self.device_id, OperStatus.UNKNOWN)
 
     @inlineCallbacks
     def enable_ports(self):
         self.log.info('enable-ports', device_id=self.device_id)
 
-        # Listen for UNI link state alarms and set the oper_state based on that rather than assuming all UNI are up
-        bus = self._onu_omci_device.event_bus
-        topic = OnuDeviceEntry.event_bus_topic(self.device_id,
-                                               OnuDeviceEvents.PortEvent)
-        self._port_state_subscription = bus.subscribe(topic, self.port_state_handler)
         self.lock_ports(lock=False)
 
-        # TODO: Currently the only VEIP capable ONU i can test with does not send UNI link state alarms
-        #  or set operational-state per OMCI spec.  So i have know way of "knowing" if the port is up.
-        #  Given this i assume its always up for now.  Maybe a software upgrade will fix my onu...
+        # TODO: for now only support the first UNI given no requirement for multiple uni yet. Also needed to reduce flow
+        #  load on the core
+        # Given by default all unis are initially active according to omci alarming, we must mimic this.
         for port in self.uni_ports:
-            if port.type.value == UniType.VEIP.value:
+            if port.mac_bridge_port_num == 1:
                 port.operstatus = OperStatus.ACTIVE
-                self.log.warn('force-showing-veip-link-up', device_id=self.device_id, port=port)
+                self.log.info('enable-port', device_id=self.device_id, port=port)
                 yield self.core_proxy.port_state_update(self.device_id, Port.ETHERNET_UNI, port.port_number, port.operstatus)
 
+
+    # TODO: Normally we would want any uni ethernet link down or uni ethernet link up alarms to register in the core,
+    #  but practically olt provisioning cannot handle the churn of links up, down, then up again typical on startup.
+    #
+    # Basically the link state sequence:
+    # 1) per omci default alarm state, all unis are initially up (no link down alarms received yet)
+    # 2) a link state down alarm is received for all uni, given the lock command, and also because most unis have nothing plugged in
+    # 3) a link state up alarm is received for the uni plugged in.
+    #
+    # Given the olt (BAL) has to provision all uni, de-provision all uni, and re-provision one uni in quick succession
+    # and cannot (bug?), we have to skip this and leave uni ports as assumed active.  Also all the link state activity
+    # would have a ripple effect through the core to the controller as well.  And is it really worth it?
+    '''
     @inlineCallbacks
     def port_state_handler(self, _topic, msg):
         self.log.info("port-state-change", _topic=_topic, msg=msg)
@@ -1062,23 +1067,30 @@ class BrcmOpenomciOnuHandler(object):
             self.log.info('link-down', device_id=self.device_id, port=uni_port)
 
         yield self.core_proxy.port_state_update(self.device_id, Port.ETHERNET_UNI, uni_port.port_number, uni_port.operstatus)
+    '''
 
     # Called just before openomci state machine is started.  These listen for events from selected state machines,
     # most importantly, mib in sync.  Which ultimately leads to downloading the mib
     def _subscribe_to_events(self):
         self.log.debug('subscribe-to-events')
 
-        # OMCI MIB Database sync status
         bus = self._onu_omci_device.event_bus
+
+        # OMCI MIB Database sync status
         topic = OnuDeviceEntry.event_bus_topic(self.device_id,
                                                OnuDeviceEvents.MibDatabaseSyncEvent)
         self._in_sync_subscription = bus.subscribe(topic, self.in_sync_handler)
 
         # OMCI Capabilities
-        bus = self._onu_omci_device.event_bus
         topic = OnuDeviceEntry.event_bus_topic(self.device_id,
                                                OnuDeviceEvents.OmciCapabilitiesEvent)
         self._capabilities_subscription = bus.subscribe(topic, self.capabilties_handler)
+
+        # TODO: these alarms seem to be unreliable depending on the environment
+        # Listen for UNI link state alarms and set the oper_state based on that rather than assuming all UNI are up
+        #topic = OnuDeviceEntry.event_bus_topic(self.device_id,
+        #                                       OnuDeviceEvents.PortEvent)
+        #self._port_state_subscription = bus.subscribe(topic, self.port_state_handler)
 
     # Called when the mib is in sync
     def in_sync_handler(self, _topic, msg):
