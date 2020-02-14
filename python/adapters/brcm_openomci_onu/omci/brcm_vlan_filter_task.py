@@ -23,11 +23,11 @@ from pyvoltha.adapters.extensions.omci.omci_defs import ReasonCodes, EntityOpera
 from pyvoltha.adapters.extensions.omci.omci_me import \
     VlanTaggingOperation, VlanTaggingFilterDataFrame, ExtendedVlanTaggingOperationConfigurationDataFrame
 from uni_port import UniType
+from uni_port import RESERVED_TRANSPARENT_VLAN
 from pon_port import DEFAULT_TPID
 
 RC = ReasonCodes
 OP = EntityOperations
-RESERVED_TRANSPARENT_VLAN = 4095
 
 
 class BrcmVlanFilterException(Exception):

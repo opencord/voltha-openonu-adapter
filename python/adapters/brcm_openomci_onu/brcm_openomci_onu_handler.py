@@ -63,6 +63,7 @@ from onu_gem_port import OnuGemPort
 from onu_tcont import OnuTCont
 from pon_port import PonPort
 from uni_port import UniPort, UniType
+from uni_port import RESERVED_TRANSPARENT_VLAN
 from pyvoltha.common.tech_profile.tech_profile import TechProfile
 from pyvoltha.adapters.extensions.omci.tasks.omci_test_request import OmciTestRequest
 from pyvoltha.adapters.extensions.omci.omci_entities import AniG
@@ -787,7 +788,10 @@ class BrcmOpenomciOnuHandler(object):
                             self.log.debug('field-type-tunnel-id')
 
                         elif field.type == fd.VLAN_VID:
-                            _vlan_vid = field.vlan_vid & 0xfff
+                            if field.vlan_vid == RESERVED_TRANSPARENT_VLAN and field.vlan_vid_mask == RESERVED_TRANSPARENT_VLAN:
+                                _vlan_vid = RESERVED_TRANSPARENT_VLAN
+                            else:
+                                _vlan_vid = field.vlan_vid & 0xfff
                             self.log.debug('field-type-vlan-vid',
                                            vlan=_vlan_vid)
 
@@ -865,10 +869,22 @@ class BrcmOpenomciOnuHandler(object):
                             self.log.error('unsupported-action-type',
                                            action_type=action.type, in_port=_in_port)
 
-                    if _set_vlan_vid is None or _set_vlan_vid == 0:
-                        self.log.warn('ignorning-flow-that-does-not-set-vlanid')
+                    # OMCI set vlan task can only filter and set on vlan header attributes.  Any other openflow
+                    # supported match and action criteria cannot be handled by omci and must be ignored.
+                    if (_set_vlan_vid is None or _set_vlan_vid == 0) and _vlan_vid != RESERVED_TRANSPARENT_VLAN:
+                        self.log.warn('ignoring-flow-that-does-not-set-vlanid', set_vlan_vid=_set_vlan_vid)
+                    elif (_set_vlan_vid is None or _set_vlan_vid == 0) and _vlan_vid == RESERVED_TRANSPARENT_VLAN:
+                        self.log.info('set-vlanid-any', uni_id=uni_id, uni_port=uni_port,
+                                                   _set_vlan_vid=_vlan_vid,
+                                                   _set_vlan_pcp=_set_vlan_pcp, match_vlan=_vlan_vid,
+                                                   tp_id=tp_id)
+                        self._add_vlan_filter_task(device, uni_id=uni_id, uni_port=uni_port,
+                                                   _set_vlan_vid=_vlan_vid,
+                                                   _set_vlan_pcp=_set_vlan_pcp, match_vlan=_vlan_vid,
+                                                   tp_id=tp_id)
                     else:
-                        self.log.info('set-vlanid', uni_id=uni_id, uni_port=uni_port, set_vlan_vid=_set_vlan_vid, vlan_vid=_vlan_vid,tp_id=tp_id)
+                        self.log.info('set-vlanid', uni_id=uni_id, uni_port=uni_port, match_vlan=_vlan_vid,
+                                      set_vlan_vid=_set_vlan_vid, _set_vlan_pcp=_set_vlan_pcp, ethType=_type)
                         self._add_vlan_filter_task(device, uni_id=uni_id, uni_port=uni_port,
                                                    _set_vlan_vid=_set_vlan_vid,
                                                    _set_vlan_pcp=_set_vlan_pcp, match_vlan=_vlan_vid,
@@ -963,7 +979,10 @@ class BrcmOpenomciOnuHandler(object):
                                        in_port=_port)
 
                     elif field.type == fd.VLAN_VID:
-                        _vlan_vid = field.vlan_vid & 0xfff
+                        if field.vlan_vid == RESERVED_TRANSPARENT_VLAN and field.vlan_vid_mask == RESERVED_TRANSPARENT_VLAN:
+                            _vlan_vid = RESERVED_TRANSPARENT_VLAN
+                        else:
+                            _vlan_vid = field.vlan_vid & 0xfff
                         self.log.debug('field-type-vlan-vid',
                                        vlan=_vlan_vid)
 
@@ -1001,6 +1020,7 @@ class BrcmOpenomciOnuHandler(object):
                         _tunnel_id = field.tunnel_id
                         self.log.debug('field-type-tunnel-id',
                                        tunnel_id=_tunnel_id)
+
 
                     else:
                         raise NotImplementedError('field.type={}'.format(
@@ -1048,13 +1068,24 @@ class BrcmOpenomciOnuHandler(object):
 
                 # OMCI set vlan task can only filter and set on vlan header attributes.  Any other openflow
                 # supported match and action criteria cannot be handled by omci and must be ignored.
-                if _set_vlan_vid is None or _set_vlan_vid == 0:
-                    self.log.warn('ignoring-flow-that-does-not-set-vlanid')
+                if (_set_vlan_vid is None or _set_vlan_vid == 0) and _vlan_vid != RESERVED_TRANSPARENT_VLAN:
+                    self.log.warn('ignoring-flow-that-does-not-set-vlanid', set_vlan_vid=_set_vlan_vid)
+                elif (_set_vlan_vid is None or _set_vlan_vid == 0) and _vlan_vid == RESERVED_TRANSPARENT_VLAN:
+                    self.log.info('set-vlanid-any', uni_id=uni_id, uni_port=uni_port,
+                                                   _set_vlan_vid=_vlan_vid,
+                                                   _set_vlan_pcp=_set_vlan_pcp, match_vlan=_vlan_vid,
+                                                   tp_id=tp_id)
+                    self._add_vlan_filter_task(device, uni_id=uni_id, uni_port=uni_port,
+                                               _set_vlan_vid=_vlan_vid,
+                                               _set_vlan_pcp=_set_vlan_pcp, match_vlan=_vlan_vid,
+                                               tp_id=tp_id)
                 else:
-                    self.log.info('set-vlanid', uni_id=uni_id, uni_port=uni_port, match_vlan=_vlan_vid, set_vlan_vid=_set_vlan_vid, _set_vlan_pcp=_set_vlan_pcp, ethType=_type)
-                    self._add_vlan_filter_task(device, uni_id,
-                                              uni_port=uni_port, match_vlan=_vlan_vid,
-                                              _set_vlan_vid=_set_vlan_vid, _set_vlan_pcp=_set_vlan_pcp, tp_id=tp_id)
+                    self.log.info('set-vlanid', uni_id=uni_id, uni_port=uni_port, match_vlan=_vlan_vid,
+                                  set_vlan_vid=_set_vlan_vid, _set_vlan_pcp=_set_vlan_pcp, ethType=_type)
+                    self._add_vlan_filter_task(device, uni_id=uni_id, uni_port=uni_port,
+                                               _set_vlan_vid=_set_vlan_vid,
+                                               _set_vlan_pcp=_set_vlan_pcp, match_vlan=_vlan_vid,
+                                               tp_id=tp_id)
             except Exception as e:
                 self.log.exception('failed-to-install-flow', e=e, flow=flow)
 

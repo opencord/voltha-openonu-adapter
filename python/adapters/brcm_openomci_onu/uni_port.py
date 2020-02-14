@@ -27,6 +27,9 @@ class UniType(Enum):
     VEIP = 'VirtualEthernetInterfacePoint'
     # TODO: Add others as they become supported
 
+# ReservedVlan Transparent Vlan (Masked Vlan, VLAN_ANY in ONOS Flows)
+
+RESERVED_TRANSPARENT_VLAN = 4096
 
 class UniPort(object):
     """Wraps southbound-port(s) support for ONU"""
