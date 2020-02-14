@@ -27,7 +27,10 @@ from pon_port import DEFAULT_TPID
 
 RC = ReasonCodes
 OP = EntityOperations
-RESERVED_TRANSPARENT_VLAN = 4095
+
+# ReservedVlan Transparent Vlan (Masked Vlan, VLAN_ANY in ONOS Flows)
+
+RESERVED_TRANSPARENT_VLAN = 4096
 
 
 class BrcmVlanFilterException(Exception):
@@ -113,7 +116,7 @@ class BrcmVlanFilterTask(Task):
         """
         Perform the vlan tagging
         """
-        self.log.debug('vlan-filter-tagging-task', device_id=self._device._device_id, uni_port=self._uni_port, set_vlan_id=self._set_vlan_id, \
+        self.log.info('vlan-filter-tagging-task', device_id=self._device._device_id, uni_port=self._uni_port, set_vlan_id=self._set_vlan_id, \
             set_vlan_pcp=self._set_vlan_pcp, match_vlan=self._match_vlan, tp_id=self._tp_id, add_tag=self._add_tag)
 
         try:
