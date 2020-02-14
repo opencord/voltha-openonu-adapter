@@ -963,7 +963,10 @@ class BrcmOpenomciOnuHandler(object):
                                        in_port=_port)
 
                     elif field.type == fd.VLAN_VID:
-                        _vlan_vid = field.vlan_vid & 0xfff
+                        if field.vlan_vid == 4096 and field.vlan_vid_mask == 4096:
+                            _vlan_vid = 4096
+                        else:
+                            _vlan_vid = field.vlan_vid & 0xfff
                         self.log.debug('field-type-vlan-vid',
                                        vlan=_vlan_vid)
 
@@ -1001,6 +1004,7 @@ class BrcmOpenomciOnuHandler(object):
                         _tunnel_id = field.tunnel_id
                         self.log.debug('field-type-tunnel-id',
                                        tunnel_id=_tunnel_id)
+
 
                     else:
                         raise NotImplementedError('field.type={}'.format(
@@ -1048,8 +1052,12 @@ class BrcmOpenomciOnuHandler(object):
 
                 # OMCI set vlan task can only filter and set on vlan header attributes.  Any other openflow
                 # supported match and action criteria cannot be handled by omci and must be ignored.
-                if _set_vlan_vid is None or _set_vlan_vid == 0:
-                    self.log.warn('ignoring-flow-that-does-not-set-vlanid')
+                if (_set_vlan_vid is None or _set_vlan_vid == 0) and _vlan_vid != 4096:
+                    self.log.warn('ignoring-flow-that-does-not-set-vlanid', set_vlan_vid=_set_vlan_vid)
+                elif (_set_vlan_vid is None or _set_vlan_vid == 0) and _vlan_vid == 4096:
+                    self.log.info('set-vlanid-masked', uni_id=uni_id, uni_port=uni_port, set_vlan_vid=_vlan_vid,
+                                  tp_id=tp_id)
+                    self._add_vlan_filter_task(device, uni_id, uni_port, _vlan_vid, tp_id)
                 else:
                     self.log.info('set-vlanid', uni_id=uni_id, uni_port=uni_port, match_vlan=_vlan_vid, set_vlan_vid=_set_vlan_vid, _set_vlan_pcp=_set_vlan_pcp, ethType=_type)
                     self._add_vlan_filter_task(device, uni_id,
