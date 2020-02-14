@@ -27,7 +27,10 @@ from pon_port import DEFAULT_TPID
 
 RC = ReasonCodes
 OP = EntityOperations
-RESERVED_TRANSPARENT_VLAN = 4095
+
+# ReservedVlan Transparent Vlan (Masked Vlan, VLAN_ANY in ONOS Flows)
+
+RESERVED_TRANSPARENT_VLAN = 4096
 
 
 class BrcmVlanFilterException(Exception):
