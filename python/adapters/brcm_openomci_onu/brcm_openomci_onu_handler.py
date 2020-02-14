@@ -40,6 +40,7 @@ import pyvoltha.common.openflow.utils as fd
 from pyvoltha.common.utils.registry import registry
 from pyvoltha.adapters.common.frameio.frameio import hexify
 from pyvoltha.common.utils.nethelpers import mac_str_to_tuple
+from pyvoltha.common.utils.asleep import asleep
 from pyvoltha.common.config.config_backend import ConsulStore
 from pyvoltha.common.config.config_backend import EtcdStore
 from voltha_protos.logical_device_pb2 import LogicalPort
@@ -956,7 +957,7 @@ class BrcmOpenomciOnuHandler(object):
 
             yield self.disable_ports(lock_ports=False)
             yield self.core_proxy.device_reason_update(self.device_id, "stopping-openomci")
-            yield self.core_proxy.device_state_update(self.device_id, oper_status=OperStatus.DISCOVERED,
+            yield self.core_proxy.device_state_update(self.device_id, oper_status=OperStatus.UNKNOWN,
                                                       connect_status=ConnectStatus.UNREACHABLE)
         else:
             self.log.debug('not-changing-openomci-statemachine')
@@ -1007,10 +1008,6 @@ class BrcmOpenomciOnuHandler(object):
     def disable_ports(self, lock_ports=True):
         self.log.info('disable-ports', device_id=self.device_id)
 
-        bus = self._onu_omci_device.event_bus
-        bus.unsubscribe(self._port_state_subscription)
-        self._port_state_subscription = None
-
         # Disable all ports on that device
         for port in self.uni_ports:
             port.operstatus = OperStatus.UNKNOWN
@@ -1025,11 +1022,6 @@ class BrcmOpenomciOnuHandler(object):
     def enable_ports(self):
         self.log.info('enable-ports', device_id=self.device_id)
 
-        # Listen for UNI link state alarms and set the oper_state based on that rather than assuming all UNI are up
-        bus = self._onu_omci_device.event_bus
-        topic = OnuDeviceEntry.event_bus_topic(self.device_id,
-                                               OnuDeviceEvents.PortEvent)
-        self._port_state_subscription = bus.subscribe(topic, self.port_state_handler)
         self.lock_ports(lock=False)
 
         # TODO: Currently the only VEIP capable ONU i can test with does not send UNI link state alarms
@@ -1068,17 +1060,22 @@ class BrcmOpenomciOnuHandler(object):
     def _subscribe_to_events(self):
         self.log.debug('subscribe-to-events')
 
-        # OMCI MIB Database sync status
         bus = self._onu_omci_device.event_bus
+
+        # OMCI MIB Database sync status
         topic = OnuDeviceEntry.event_bus_topic(self.device_id,
                                                OnuDeviceEvents.MibDatabaseSyncEvent)
         self._in_sync_subscription = bus.subscribe(topic, self.in_sync_handler)
 
         # OMCI Capabilities
-        bus = self._onu_omci_device.event_bus
         topic = OnuDeviceEntry.event_bus_topic(self.device_id,
                                                OnuDeviceEvents.OmciCapabilitiesEvent)
         self._capabilities_subscription = bus.subscribe(topic, self.capabilties_handler)
+
+        # Listen for UNI link state alarms and set the oper_state based on that rather than assuming all UNI are up
+        topic = OnuDeviceEntry.event_bus_topic(self.device_id,
+                                               OnuDeviceEvents.PortEvent)
+        self._port_state_subscription = bus.subscribe(topic, self.port_state_handler)
 
     # Called when the mib is in sync
     def in_sync_handler(self, _topic, msg):
@@ -1197,8 +1194,14 @@ class BrcmOpenomciOnuHandler(object):
                                                               oper_status=OperStatus.ACTIVE,
                                                               connect_status=ConnectStatus.REACHABLE)
                     yield self.core_proxy.device_reason_update(self.device_id, 'initial-mib-downloaded')
-                    yield self.enable_ports()
                     self._mib_download_task = None
+
+                    # Lock the ports and wait some time to unlock them.  This is needed to capture
+                    # port down/port up events needed to kick off provisioning.  Otherwise there is no "alarm"
+                    # for a port up event and we have no way of knowing its up.
+                    self.lock_ports(lock=True)
+                    yield asleep(5)
+                    yield self.enable_ports()
                     yield self.onu_active_event()
 
                     # Start collecting stats from the device after a brief pause
@@ -1219,10 +1222,6 @@ class BrcmOpenomciOnuHandler(object):
                     retry = _STARTUP_RETRY_WAIT * (random.randint(1,5))
                     reactor.callLater(retry, self._mib_in_sync)
                     yield self.core_proxy.device_reason_update(self.device_id, 'initial-mib-download-failure-retrying')
-
-                # start by locking all the unis till mib sync and initial mib is downloaded
-                # this way we can capture the port down/up events when we are ready
-                self.lock_ports(lock=True)
 
                 # Download an initial mib that creates simple bridge that can pass EAP.  On success (above) finally set
                 # the device to active/reachable.   This then opens up the handler to openflow pushes from outside
