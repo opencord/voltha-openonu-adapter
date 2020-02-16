@@ -16,7 +16,8 @@
 from __future__ import absolute_import
 import structlog
 from twisted.internet.defer import inlineCallbacks, returnValue
-from pyvoltha.adapters.extensions.omci.omci_me import GemInterworkingTpFrame, GemPortNetworkCtpFrame
+from pyvoltha.adapters.extensions.omci.omci_me import GemInterworkingTpFrame, GemPortNetworkCtpFrame, MulticastGemInterworkingTPFrame
+from pyvoltha.adapters.extensions.omci.omci_entities import IPv4MulticastAddressTable
 from pyvoltha.adapters.extensions.omci.omci_defs import ReasonCodes
 
 RC = ReasonCodes
@@ -272,6 +273,7 @@ class OnuGemPort(object):
 
         try:
             direction = "downstream" if self.multicast else "bi-directional"
+            entity_id = self.gem_id if self.multicast else self.entity_id
             assert not self.multicast, 'MCAST is not supported yet'
 
             attributes = dict()
@@ -294,16 +296,30 @@ class OnuGemPort(object):
             raise
 
         try:
-            # TODO: magic numbers here
-            msg = GemInterworkingTpFrame(
-                self.entity_id,  # same entity id as GEM port
-                gem_port_network_ctp_pointer=self.entity_id,
-                interworking_option=5,  # IEEE 802.1
-                service_profile_pointer=ieee_mapper_service_profile_entity_id,
-                interworking_tp_pointer=0x0,
-                pptp_counter=1,
-                gal_profile_pointer=gal_enet_profile_entity_id
-            )
+            if self.multicast:
+                # 224.0.0.0 - 239.255.255.255 is valid multicast ip range
+                mcast_ip_list= IPv4MulticastAddressTable( gem_port_id=self.gem_id,
+                                                          secondary_key=0,
+                                                          multicast_ip_range_start="224.0.0.0",
+                                                          multicast_ip_range_stop="239.255.255.255")
+                msg = MulticastGemInterworkingTPFrame(
+                      self.gem_id,
+                      gem_port_network_ctp_pointer=self.gem_id,
+                      interworking_option=0,  # Mac Bridge
+                      service_profile_pointer=0,
+                      gal_profile_pointer=gal_enet_profile_entity_id,
+                      ipv4_multicast_address_table= mcast_ip_list
+                    )
+            else:
+                msg = GemInterworkingTpFrame(
+                    self.entity_id,  # same entity id as GEM port
+                    gem_port_network_ctp_pointer=self.entity_id,
+                    interworking_option=5,  # IEEE 802.1
+                    service_profile_pointer=ieee_mapper_service_profile_entity_id,
+                    interworking_tp_pointer=0x0,
+                    pptp_counter=1,
+                    gal_profile_pointer=gal_enet_profile_entity_id
+                )
             frame = msg.create()
             self.log.debug('openomci-msg', omci_msg=msg)
             results = yield omci.send(frame)
