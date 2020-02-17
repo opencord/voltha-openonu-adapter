@@ -16,6 +16,63 @@
       "revId": "a801db02744865b68d8d4a9c4b6065bc847b20ff",
       "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4a8a57a0_06bbc6ea",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_mcast_task.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1000127
+      },
+      "writtenOn": "2020-02-17T06:51:53Z",
+      "side": 1,
+      "message": "tcont value is being set in the next for loop. I am not sure if this code snippet is needed.",
+      "range": {
+        "startLine": 115,
+        "startChar": 0,
+        "endLine": 117,
+        "endChar": 35
+      },
+      "revId": "a801db02744865b68d8d4a9c4b6065bc847b20ff",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f9c0996a_631f297a",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_mcast_task.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1000127
+      },
+      "writtenOn": "2020-02-17T06:51:53Z",
+      "side": 1,
+      "message": "This is an optional parameter and for multicast this may be irrelevant. I hope setting this is not causing any trouble.\nIn add_to_hardware function, you may choose to not set this parameter in case of multicast.",
+      "revId": "a801db02744865b68d8d4a9c4b6065bc847b20ff",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2cd7f2fe_bf12ddd3",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_mcast_task.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1000127
+      },
+      "writtenOn": "2020-02-17T06:51:53Z",
+      "side": 1,
+      "message": "This seems to be an unused function",
+      "revId": "a801db02744865b68d8d4a9c4b6065bc847b20ff",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
     }
   ]
 }
