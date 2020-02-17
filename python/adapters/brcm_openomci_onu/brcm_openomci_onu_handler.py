@@ -924,6 +924,12 @@ class BrcmOpenomciOnuHandler(object):
     def create_interface(self, onu_indication):
         self.log.info('create-interface', onu_id=onu_indication.onu_id,
                        serial_number=onu_indication.serial_number)
+
+        # Ignore if onu_indication is received for an already running ONU
+        if self._onu_omci_device is not None and self._onu_omci_device.active:
+            self.log.warn('received-onu-indication-for-active-onu', onu_indication=onu_indication)
+            return
+
         self._onu_indication = onu_indication
 
         yield self.core_proxy.device_state_update(self.device_id, oper_status=OperStatus.ACTIVATING,
