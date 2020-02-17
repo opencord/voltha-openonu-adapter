@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4d33c1ef_fc18ee68",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_mcast_task.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000127
+      },
+      "writtenOn": "2020-02-17T06:20:28Z",
+      "side": 1,
+      "message": "Need license plate",
+      "revId": "a801db02744865b68d8d4a9c4b6065bc847b20ff",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    }
+  ]
+}
