@@ -41,7 +41,9 @@ class BrcmVlanFilterTask(Task):
     task_priority = 200
     name = "Broadcom VLAN Filter/Tagging Task"
 
-    def __init__(self, omci_agent, handler, uni_port, set_vlan_id, tp_id, priority=task_priority):
+    def __init__(self, omci_agent, handler, uni_port, set_vlan_id,
+                 match_vlan=0, set_vlan_pcp=8, add_tag=True,
+                 priority=task_priority, tp_id=0):
         """
         Class initialization
 
