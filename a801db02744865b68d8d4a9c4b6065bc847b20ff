@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "d0504936_9ca80c51",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_mcast_task.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000513
+      },
+      "writtenOn": "2020-02-18T17:23:26Z",
+      "side": 1,
+      "message": "Yeah, I\u0027ll say. And I added it now.",
+      "parentUuid": "4d33c1ef_fc18ee68",
+      "revId": "a801db02744865b68d8d4a9c4b6065bc847b20ff",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4a8a57a0_06bbc6ea",
         "filename": "python/adapters/brcm_openomci_onu/omci/brcm_mcast_task.py",
         "patchSetId": 1
@@ -30,6 +48,30 @@
       "writtenOn": "2020-02-17T06:51:53Z",
       "side": 1,
       "message": "tcont value is being set in the next for loop. I am not sure if this code snippet is needed.",
+      "range": {
+        "startLine": 115,
+        "startChar": 0,
+        "endLine": 117,
+        "endChar": 35
+      },
+      "revId": "a801db02744865b68d8d4a9c4b6065bc847b20ff",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c9c32c6d_ac6ed409",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_mcast_task.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1000513
+      },
+      "writtenOn": "2020-02-18T17:23:26Z",
+      "side": 1,
+      "message": "I think we need this tcont value. Because of GEM port CTP. And We don\u0027t want to create new TCONT for multicast. Multicast GEM Interworking TP should associate a GEM port CTP and a GEM port CTP should associate a TCONT.",
+      "parentUuid": "4a8a57a0_06bbc6ea",
       "range": {
         "startLine": 115,
         "startChar": 0,
@@ -59,6 +101,24 @@
     },
     {
       "key": {
+        "uuid": "86c8262b_d88d680d",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_mcast_task.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1000513
+      },
+      "writtenOn": "2020-02-18T17:23:26Z",
+      "side": 1,
+      "message": "Yeah, I know multicast gem doesn\u0027t need to upstream priority Q. But this parameter is a must for add_to_hardware method.",
+      "parentUuid": "f9c0996a_631f297a",
+      "revId": "a801db02744865b68d8d4a9c4b6065bc847b20ff",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2cd7f2fe_bf12ddd3",
         "filename": "python/adapters/brcm_openomci_onu/omci/brcm_mcast_task.py",
         "patchSetId": 1
@@ -70,6 +130,24 @@
       "writtenOn": "2020-02-17T06:51:53Z",
       "side": 1,
       "message": "This seems to be an unused function",
+      "revId": "a801db02744865b68d8d4a9c4b6065bc847b20ff",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "153b673c_30edc2e4",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_mcast_task.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1000513
+      },
+      "writtenOn": "2020-02-18T17:23:26Z",
+      "side": 1,
+      "message": "Yeah, I\u0027ll say.I\u0027m removing this method.",
+      "parentUuid": "2cd7f2fe_bf12ddd3",
       "revId": "a801db02744865b68d8d4a9c4b6065bc847b20ff",
       "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
       "unresolved": false
