@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7ab7152f_01dc47c2",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_adapter.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2020-02-19T03:13:28Z",
+      "side": 1,
+      "message": "there was some arguments needed to make incremental vs bulk flow updates work in the new core.  I cant recall if an adapter can do both at the same time.  given that this may need to go away.  a bit of research may be needed.",
+      "range": {
+        "startLine": 56,
+        "startChar": 12,
+        "endLine": 56,
+        "endChar": 41
+      },
+      "revId": "d932617b803c842e686246b681347b434d5770e9",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c304301d_c012fc64",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 481,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2020-02-19T03:13:28Z",
+      "side": 1,
+      "message": "curious about the motivation for this, did you see any noticeable results?  \n\nultimately this function results in all the spawned threads adding their respective tasks to the same task runner queue for a device, which will truly run the tasks in the order they are received (given same priority)",
+      "range": {
+        "startLine": 481,
+        "startChar": 20,
+        "endLine": 481,
+        "endChar": 40
+      },
+      "revId": "d932617b803c842e686246b681347b434d5770e9",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "abddb201_d0a37180",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 886,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2020-02-19T03:13:28Z",
+      "side": 1,
+      "message": "From an openflow flow point of view this is the match vlan correct?  It seems the word \"default\" just implies how its being interpreted.  In omci we could match on any actual value 1-4095, 0 (priority tagged), ANY, or None (untagged) and all would be valid.\n\nWould it make sense to be explicit in that regard with the argument naming?",
+      "range": {
+        "startLine": 886,
+        "startChar": 80,
+        "endLine": 886,
+        "endChar": 102
+      },
+      "revId": "d932617b803c842e686246b681347b434d5770e9",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "199742bc_a06aafc2",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 895,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2020-02-19T03:13:28Z",
+      "side": 1,
+      "message": "Given the move to incremental flow update would it be possible to do away with bulk altogether?  openolt made this move when it was migrated to golang.  I dont see any reason why cannot do the same here given this addition.",
+      "range": {
+        "startLine": 895,
+        "startChar": 8,
+        "endLine": 895,
+        "endChar": 25
+      },
+      "revId": "d932617b803c842e686246b681347b434d5770e9",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d632622e_84dc824e",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_vlan_filter_task.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2020-02-19T03:13:28Z",
+      "side": 1,
+      "message": "see other comment, its unclear what default means.  especially if its zero.  Maybe the the name \"match_vlan\"",
+      "range": {
+        "startLine": 45,
+        "startChar": 17,
+        "endLine": 45,
+        "endChar": 31
+      },
+      "revId": "d932617b803c842e686246b681347b434d5770e9",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    }
+  ]
+}
