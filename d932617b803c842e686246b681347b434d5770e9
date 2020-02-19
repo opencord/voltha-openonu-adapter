@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "661e5f5c_70d89091",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_adapter.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1000218
+      },
+      "writtenOn": "2020-02-19T04:57:23Z",
+      "side": 1,
+      "message": "I didn\u0027t changed this to accepts_add_remove_flow_updates\u003dTrue because I din\u0027t want to change the AT\u0026T workflow now. Adding the methods makes it available for anybody to use it easily with a parameter change here(For TT we use incremental one). We may think to make this parameter configurable in the future, or change to one of these approaches for all.",
+      "parentUuid": "7ab7152f_01dc47c2",
+      "range": {
+        "startLine": 56,
+        "startChar": 12,
+        "endLine": 56,
+        "endChar": 41
+      },
+      "revId": "d932617b803c842e686246b681347b434d5770e9",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c304301d_c012fc64",
         "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
         "patchSetId": 4
@@ -71,6 +95,30 @@
     },
     {
       "key": {
+        "uuid": "6e9c9300_0fce0f99",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 886,
+      "author": {
+        "id": 1000218
+      },
+      "writtenOn": "2020-02-19T04:57:23Z",
+      "side": 1,
+      "message": "Agree, I\u0027ll change it.",
+      "parentUuid": "abddb201_d0a37180",
+      "range": {
+        "startLine": 886,
+        "startChar": 80,
+        "endLine": 886,
+        "endChar": 102
+      },
+      "revId": "d932617b803c842e686246b681347b434d5770e9",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "199742bc_a06aafc2",
         "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
         "patchSetId": 4
@@ -94,6 +142,30 @@
     },
     {
       "key": {
+        "uuid": "e4e536d4_d4c04d95",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 895,
+      "author": {
+        "id": 1000218
+      },
+      "writtenOn": "2020-02-19T04:57:23Z",
+      "side": 1,
+      "message": "If this makes sense for all, then imho this can be done in another patch because ATT workflow should be tested carefully after this change. Doing all in one patch may be harder.",
+      "parentUuid": "199742bc_a06aafc2",
+      "range": {
+        "startLine": 895,
+        "startChar": 8,
+        "endLine": 895,
+        "endChar": 25
+      },
+      "revId": "d932617b803c842e686246b681347b434d5770e9",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d632622e_84dc824e",
         "filename": "python/adapters/brcm_openomci_onu/omci/brcm_vlan_filter_task.py",
         "patchSetId": 4
@@ -105,6 +177,30 @@
       "writtenOn": "2020-02-19T03:13:28Z",
       "side": 1,
       "message": "see other comment, its unclear what default means.  especially if its zero.  Maybe the the name \"match_vlan\"",
+      "range": {
+        "startLine": 45,
+        "startChar": 17,
+        "endLine": 45,
+        "endChar": 31
+      },
+      "revId": "d932617b803c842e686246b681347b434d5770e9",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4f72d80b_f327d45d",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_vlan_filter_task.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1000218
+      },
+      "writtenOn": "2020-02-19T04:57:23Z",
+      "side": 1,
+      "message": "Sure, will do.",
+      "parentUuid": "d632622e_84dc824e",
       "range": {
         "startLine": 45,
         "startChar": 17,
