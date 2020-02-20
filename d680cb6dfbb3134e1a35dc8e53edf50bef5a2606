@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "1539dad1_50365b43",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_adapter.py",
+        "patchSetId": 6
+      },
+      "lineNbr": 231,
+      "author": {
+        "id": 1000218
+      },
+      "writtenOn": "2020-02-20T19:17:57Z",
+      "side": 1,
+      "message": "In fact length check is done here instead of doing it in the function. There is no reason, of course, doing this. Just an implementation way.",
+      "parentUuid": "1a53705c_c8bbe407",
+      "range": {
+        "startLine": 226,
+        "startChar": 0,
+        "endLine": 231,
+        "endChar": 68
+      },
+      "revId": "d680cb6dfbb3134e1a35dc8e53edf50bef5a2606",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0bd3385b_c87c67c8",
         "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
         "patchSetId": 6
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "5a596642_7bdd34fc",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 6
+      },
+      "lineNbr": 450,
+      "author": {
+        "id": 1000218
+      },
+      "writtenOn": "2020-02-20T19:17:57Z",
+      "side": 1,
+      "message": "Fair. I have a few other patches after that. Let me do it in the next one. Actually I can also take this \"tp_id retrieval from tp_path\"  into a new function. It is used more than once in this class.",
+      "parentUuid": "0bd3385b_c87c67c8",
+      "range": {
+        "startLine": 450,
+        "startChar": 38,
+        "endLine": 450,
+        "endChar": 41
+      },
+      "revId": "d680cb6dfbb3134e1a35dc8e53edf50bef5a2606",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b198d158_b5fe494f",
         "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
         "patchSetId": 6
@@ -59,6 +107,30 @@
       "writtenOn": "2020-02-20T18:57:32Z",
       "side": 1,
       "message": "if the device is not reachable then flows are not removed. when the reachability is restored is there a sync to make sure the device has the correct flows?\n\nsimilar to add_flows as well",
+      "range": {
+        "startLine": 670,
+        "startChar": 8,
+        "endLine": 674,
+        "endChar": 18
+      },
+      "revId": "d680cb6dfbb3134e1a35dc8e53edf50bef5a2606",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8950e96c_48d082b3",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 6
+      },
+      "lineNbr": 674,
+      "author": {
+        "id": 1000218
+      },
+      "writtenOn": "2020-02-20T19:17:57Z",
+      "side": 1,
+      "message": "Good catch. Answer is \"No\". We don\u0027t have such a mechanism yet. Instead, in such cases, we usually use the way to omci-reset the ONU and reconfigure it.",
+      "parentUuid": "b198d158_b5fe494f",
       "range": {
         "startLine": 670,
         "startChar": 8,
