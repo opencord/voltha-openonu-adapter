@@ -140,6 +140,30 @@
       "revId": "d680cb6dfbb3134e1a35dc8e53edf50bef5a2606",
       "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6f1788cd_5366fa10",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 6
+      },
+      "lineNbr": 674,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2020-02-20T19:20:32Z",
+      "side": 1,
+      "message": "please open a JIRA for this so we can track it for a future release if this is not going to be addressed in this patchset or in 2.3 release.",
+      "parentUuid": "8950e96c_48d082b3",
+      "range": {
+        "startLine": 670,
+        "startChar": 8,
+        "endLine": 674,
+        "endChar": 18
+      },
+      "revId": "d680cb6dfbb3134e1a35dc8e53edf50bef5a2606",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
     }
   ]
 }
