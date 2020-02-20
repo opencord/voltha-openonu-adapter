@@ -873,9 +873,7 @@ class BrcmOpenomciOnuHandler(object):
                             self.log.error('unsupported-action-type',
                                            action_type=action.type, in_port=_in_port)
 
-                    if type is not None and _vlan_vid is None:
-                        self.log.warn('ignoring-flow-with-ethType', ethType=_type)
-                    elif _set_vlan_vid is None or _set_vlan_vid == 0:
+                    if _set_vlan_vid is None or _set_vlan_vid == 0:
                         self.log.warn('ignorning-flow-that-does-not-set-vlanid')
                     else:
                         self.log.info('set-vlanid', uni_id=uni_id, uni_port=uni_port, set_vlan_vid=_set_vlan_vid, vlan_vid=_vlan_vid,tp_id=tp_id)
