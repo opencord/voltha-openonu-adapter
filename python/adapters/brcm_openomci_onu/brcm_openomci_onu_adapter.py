@@ -53,7 +53,8 @@ class BrcmOpenomciOnuAdapter(object):
             id=name,
             vendor_ids=['OPEN', 'ALCL', 'BRCM', 'TWSH', 'ALPH', 'ISKT', 'SFAA', 'BBSM', 'SCOM', 'ARPX', 'DACM', 'ERSN', 'HWTC', 'CIGG'],
             adapter=name,
-            accepts_bulk_flow_update=True
+            accepts_bulk_flow_update=False,
+            accepts_add_remove_flow_updates=True
         )
     ]
 
