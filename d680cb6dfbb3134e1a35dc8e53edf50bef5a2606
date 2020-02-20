@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a53705c_c8bbe407",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_adapter.py",
+        "patchSetId": 6
+      },
+      "lineNbr": 231,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2020-02-20T18:57:32Z",
+      "side": 1,
+      "message": "assuming that `remove_onu_flows` and `add_onu_flows` both handle an empty list parameter, why not just call them without the length check? The assumption is that the length check it done in those methods anyway.",
+      "range": {
+        "startLine": 226,
+        "startChar": 0,
+        "endLine": 231,
+        "endChar": 68
+      },
+      "revId": "d680cb6dfbb3134e1a35dc8e53edf50bef5a2606",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0bd3385b_c87c67c8",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 6
+      },
+      "lineNbr": 450,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2020-02-20T18:57:32Z",
+      "side": 1,
+      "message": "should the path separator be declared as a constant somewhere as opposed to repeated as a literal string everywhere?",
+      "range": {
+        "startLine": 450,
+        "startChar": 38,
+        "endLine": 450,
+        "endChar": 41
+      },
+      "revId": "d680cb6dfbb3134e1a35dc8e53edf50bef5a2606",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b198d158_b5fe494f",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 6
+      },
+      "lineNbr": 674,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2020-02-20T18:57:32Z",
+      "side": 1,
+      "message": "if the device is not reachable then flows are not removed. when the reachability is restored is there a sync to make sure the device has the correct flows?\n\nsimilar to add_flows as well",
+      "range": {
+        "startLine": 670,
+        "startChar": 8,
+        "endLine": 674,
+        "endChar": 18
+      },
+      "revId": "d680cb6dfbb3134e1a35dc8e53edf50bef5a2606",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    }
+  ]
+}
