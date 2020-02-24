@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1ef7fe9e_2ea1b19c",
+        "filename": "python/adapters/brcm_openomci_onu/onu_gem_port.py",
+        "patchSetId": 10
+      },
+      "lineNbr": 302,
+      "author": {
+        "id": 1000127
+      },
+      "writtenOn": "2020-02-24T12:08:53Z",
+      "side": 1,
+      "message": "What is this datatype?",
+      "range": {
+        "startLine": 302,
+        "startChar": 72,
+        "endLine": 302,
+        "endChar": 74
+      },
+      "revId": "1e6dfd284bf773aa09fe1eb0b6da605e897c99e6",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    }
+  ]
+}
