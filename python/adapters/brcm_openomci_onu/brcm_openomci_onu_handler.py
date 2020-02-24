@@ -367,7 +367,8 @@ class BrcmOpenomciOnuHandler(object):
         alloc_id = us_scheduler['alloc_id']
         q_sched_policy = us_scheduler['q_sched_policy']
         self.log.debug('create-tcont', us_scheduler=us_scheduler)
-
+        #TODO: revisit for multi tconts support
+        new_tconts = []
         tcontdict = dict()
         tcontdict['alloc-id'] = alloc_id
         tcontdict['q_sched_policy'] = q_sched_policy
@@ -376,8 +377,9 @@ class BrcmOpenomciOnuHandler(object):
         tcont = OnuTCont.create(self, tcont=tcontdict)
 
         self._pon.add_tcont(tcont)
-
+        new_tconts.append(tcont)
         self.log.debug('pon-add-tcont', tcont=tcont)
+        return new_tconts
 
     # Called when there is an olt up indication, providing the gem port id chosen by the olt handler
     def _create_gemports(self, uni_id, gem_ports, alloc_id_ref, direction):
@@ -440,11 +442,17 @@ class BrcmOpenomciOnuHandler(object):
     def _do_tech_profile_configuration(self, uni_id, tp):
         us_scheduler = tp['us_scheduler']
         alloc_id = us_scheduler['alloc_id']
-        self._create_tconts(uni_id, us_scheduler)
+        new_tconts = self._create_tconts(uni_id, us_scheduler)
         upstream_gem_port_attribute_list = tp['upstream_gem_port_attribute_list']
-        self._create_gemports(uni_id, upstream_gem_port_attribute_list, alloc_id, "UPSTREAM")
+        new_upstream_gems = self._create_gemports(uni_id, upstream_gem_port_attribute_list, alloc_id, "UPSTREAM")
         downstream_gem_port_attribute_list = tp['downstream_gem_port_attribute_list']
-        self._create_gemports(uni_id, downstream_gem_port_attribute_list, alloc_id, "DOWNSTREAM")
+        new_downstream_gems = self._create_gemports(uni_id, downstream_gem_port_attribute_list, alloc_id, "DOWNSTREAM")
+
+        new_gems = []
+        new_gems.extend(new_upstream_gems)
+        new_gems.extend(new_downstream_gems)
+
+        return new_tconts, new_gems
 
     def load_and_configure_tech_profile(self, uni_id, tp_path):
         self.log.debug("loading-tech-profile-configuration", uni_id=uni_id, tp_path=tp_path)
@@ -470,11 +478,11 @@ class BrcmOpenomciOnuHandler(object):
                 tp = json.loads(tpstring)
 
                 self.log.debug("tp-instance", tp=tp)
-                self._do_tech_profile_configuration(uni_id, tp)
+                tconts, gem_ports = self._do_tech_profile_configuration(uni_id, tp)
 
                 @inlineCallbacks
                 def success(_results):
-                    self.log.info("tech-profile-config-done-successfully")
+                    self.log.info("tech-profile-config-done-successfully", uni_id=uni_id, tp_id=tp_id)
                     if tp_path in self._tp_service_specific_task[uni_id]:
                         del self._tp_service_specific_task[uni_id][tp_path]
                     self._tech_profile_download_done[uni_id][tp_id] = True
@@ -484,7 +492,7 @@ class BrcmOpenomciOnuHandler(object):
 
                 @inlineCallbacks
                 def failure(_reason):
-                    self.log.warn('tech-profile-config-failure-retrying',
+                    self.log.warn('tech-profile-config-failure-retrying', uni_id=uni_id, tp_id=tp_id,
                                   _reason=_reason)
                     if tp_path in self._tp_service_specific_task[uni_id]:
                         del self._tp_service_specific_task[uni_id][tp_path]
@@ -494,23 +502,7 @@ class BrcmOpenomciOnuHandler(object):
                     yield self.core_proxy.device_reason_update(self.device_id,
                                                                'tech-profile-config-download-failure-retrying')
 
-                self.log.info('downloading-tech-profile-configuration')
-                # Extract the current set of TCONT and GEM Ports from the Handler's pon_port that are
-                # relevant to this task's UNI. It won't change. But, the underlying pon_port may change
-                # due to additional tasks on different UNIs. So, it we cannot use the pon_port after
-                # this initializer
-                tconts = []
-                for tcont in list(self.pon_port.tconts.values()):
-                    if tcont.uni_id is not None and tcont.uni_id != uni_id:
-                        continue
-                    tconts.append(tcont)
-
-                gem_ports = []
-                for gem_port in list(self.pon_port.gem_ports.values()):
-                    if gem_port.uni_id is not None and gem_port.uni_id != uni_id:
-                        continue
-                    gem_ports.append(gem_port)
-
+                self.log.info('downloading-tech-profile-configuration', uni_id=uni_id, tp_id=tp_id,)
                 self.log.debug("tconts-gems-to-install", tconts=tconts, gem_ports=gem_ports)
 
                 self._tp_service_specific_task[uni_id][tp_path] = \
