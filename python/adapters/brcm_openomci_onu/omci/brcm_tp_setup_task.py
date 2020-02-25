@@ -161,7 +161,8 @@ class BrcmTpSetupTask(Task):
 
     @inlineCallbacks
     def perform_service_specific_steps(self):
-        self.log.info('creating-tcont-mapper-gemport-iw')
+        self.log.info('starting-tech-profile-setup', uni_id=self._uni_port.uni_id,
+                        tconts=self._tconts, gem_ports=self._gem_ports, tp_table_id=self._tp_table_id)
 
         omci_cc = self._onu_device.omci_cc
         gem_pq_associativity = dict()
