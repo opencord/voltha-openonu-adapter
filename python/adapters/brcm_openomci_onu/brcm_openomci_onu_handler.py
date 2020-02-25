@@ -425,17 +425,17 @@ class BrcmOpenomciOnuHandler(object):
             if uni_id in self._queued_vlan_filter_task and tp_id in self._queued_vlan_filter_task[uni_id]:
                 self.log.info("executing-queued-vlan-filter-task",
                               uni_id=uni_id, tp_id=tp_id)
-                filter_info = self._queued_vlan_filter_task[uni_id][tp_id]
-                reactor.callLater(0, self._add_vlan_filter_task, filter_info.get("device"),
+                for filter_info in self._queued_vlan_filter_task[uni_id][tp_id]:
+                    reactor.callLater(0, self._add_vlan_filter_task, filter_info.get("device"),
                                   uni_id=uni_id, uni_port=filter_info.get("uni_port"),
                                   match_vlan = filter_info.get("match_vlan"),
                                   _set_vlan_vid= filter_info.get("set_vlan_vid"),
                                   _set_vlan_pcp = filter_info.get("set_vlan_pcp"),
                                   tp_id = filter_info.get("tp_id"))
                 # Now remove the entry from the dictionary
-                self._queued_vlan_filter_task[uni_id].clear()
+                self._queued_vlan_filter_task[uni_id][tp_id].remove(filter_info)
                 self.log.debug("executed-queued-vlan-filter-task",
-                               uni_id=uni_id)
+                               uni_id=uni_id, tp_id=tp_id)
         except Exception as e:
             self.log.error("vlan-filter-configuration-failed", uni_id=uni_id, error=e)
 
@@ -502,7 +502,7 @@ class BrcmOpenomciOnuHandler(object):
                     yield self.core_proxy.device_reason_update(self.device_id,
                                                                'tech-profile-config-download-failure-retrying')
 
-                self.log.info('downloading-tech-profile-configuration', uni_id=uni_id, tp_id=tp_id,)
+                self.log.info('downloading-tech-profile-configuration', uni_id=uni_id, tp_id=tp_id)
                 self.log.debug("tconts-gems-to-install", tconts=tconts, gem_ports=gem_ports)
 
                 self._tp_service_specific_task[uni_id][tp_path] = \
@@ -1089,13 +1089,15 @@ class BrcmOpenomciOnuHandler(object):
                           uni_id=uni_id, tp_id=tp_id)
             if uni_id not in self._queued_vlan_filter_task:
                 self._queued_vlan_filter_task[uni_id] = dict()
-            self._queued_vlan_filter_task[uni_id][tp_id] = {"device": device,
+            if tp_id not in self._queued_vlan_filter_task[uni_id]:
+                self._queued_vlan_filter_task[uni_id][tp_id] = []
+            self._queued_vlan_filter_task[uni_id][tp_id].append({"device": device,
                                                             "uni_id": uni_id,
                                                             "uni_port": uni_port,
                                                             "match_vlan": match_vlan,
                                                             "set_vlan_vid": _set_vlan_vid,
                                                             "set_vlan_pcp": _set_vlan_pcp,
-                                                            "tp_id": tp_id}
+                                                            "tp_id": tp_id})
 
     def get_tp_id_in_flow(self, flow):
         flow_metadata = fd.get_metadata_from_write_metadata ( flow )
