@@ -15,10 +15,12 @@
 # limitations under the License.
 #
 
+ETCD_IP=${DOCKER_HOST_IP:=172.17.0.1}
+
 set -x
-cat ALCL-BVMGR00BRAXS020XA-3FE47059BFHB52-v2.json | etcdctl --endpoints=172.17.0.1:2379 put service/voltha/omci_mibs/templates/ALCL/BVMGR00BRAXS020XA/3FE47059BFHB52
-cat ALCL-BVMGR00BRAXS020XA-3FE47059BFHB21-v2.json | etcdctl --endpoints=172.17.0.1:2379 put service/voltha/omci_mibs/templates/ALCL/BVMGR00BRAXS020XA/3FE47059BFHB21
-cat BRCM-BVM4K00BRA0915-0083-5023_020O02414-v2.json | etcdctl --endpoints=172.17.0.1:2379 put service/voltha/omci_mibs/templates/BRCM/BVM4K00BRA0915-0083/5023_020O02414
-cat BRCM-BVM4K00BRA0915-0083-5023_003GWOV36-VEIP-v1.json | etcdctl --endpoints=172.17.0.1:2379 put service/voltha/omci_mibs/templates/BRCM/BVM4K00BRA0915-0083/5023_003GWOV36
-cat BBSM-12345123451234512345-00000000000001-v1.json | etcdctl --endpoints=172.17.0.1:2379 put service/voltha/omci_mibs/templates/BBSM/12345123451234512345/00000000000001
+cat ALCL-BVMGR00BRAXS020XA-3FE47059BFHB52-v2.json | etcdctl --endpoints=$ETCD_IP:2379 put service/voltha/omci_mibs/templates/ALCL/BVMGR00BRAXS020XA/3FE47059BFHB52
+cat ALCL-BVMGR00BRAXS020XA-3FE47059BFHB21-v2.json | etcdctl --endpoints=$ETCD_IP:2379 put service/voltha/omci_mibs/templates/ALCL/BVMGR00BRAXS020XA/3FE47059BFHB21
+cat BRCM-BVM4K00BRA0915-0083-5023_020O02414-v2.json | etcdctl --endpoints=$ETCD_IP:2379 put service/voltha/omci_mibs/templates/BRCM/BVM4K00BRA0915-0083/5023_020O02414
+cat BRCM-BVM4K00BRA0915-0083-5023_003GWOV36-VEIP-v1.json | etcdctl --endpoints=$ETCD_IP:2379 put service/voltha/omci_mibs/templates/BRCM/BVM4K00BRA0915-0083/5023_003GWOV36
+cat BBSM-12345123451234512345-00000000000001-v1.json | etcdctl --endpoints=$ETCD_IP:2379 put service/voltha/omci_mibs/templates/BBSM/12345123451234512345/00000000000001
 
