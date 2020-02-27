@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cf143308_0cdfab1c",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 1617,
+      "author": {
+        "id": 1000016
+      },
+      "writtenOn": "2020-02-27T21:46:38Z",
+      "side": 1,
+      "message": "I think we only expect OmciTestRequest to run once per call, so I\u0027m not surethat a frequency argument is necessary, unless it\u0027s just part of the PM infrastructure that requires that argument exist.",
+      "range": {
+        "startLine": 1617,
+        "startChar": 12,
+        "endLine": 1617,
+        "endChar": 49
+      },
+      "revId": "ffac104b510c5dc91f5cce7a99ce05f0f8186481",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    }
+  ]
+}
