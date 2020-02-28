@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c1b010a9_46903043",
+        "filename": "VERSION",
+        "patchSetId": 19
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2020-02-28T13:47:12Z",
+      "side": 1,
+      "message": "dont actually need to change the version.  2.3.3-dev is ok and has not released yet.",
+      "range": {
+        "startLine": 1,
+        "startChar": 9,
+        "endLine": 1,
+        "endChar": 9
+      },
+      "revId": "3c3b7b81ed588cad69690403fd8025dd6c16124a",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7e6d24ef_49a2828b",
+        "filename": "python/adapters/brcm_openomci_onu/onu_gem_port.py",
+        "patchSetId": 19
+      },
+      "lineNbr": 276,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2020-02-28T13:47:12Z",
+      "side": 1,
+      "message": "want to double check this on hardware.  should be fine, but its the only place that could affect existing paths.",
+      "range": {
+        "startLine": 276,
+        "startChar": 12,
+        "endLine": 276,
+        "endChar": 73
+      },
+      "revId": "3c3b7b81ed588cad69690403fd8025dd6c16124a",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "92b49bc1_90a32e0f",
+        "filename": "python/adapters/brcm_openomci_onu/onu_gem_port.py",
+        "patchSetId": 19
+      },
+      "lineNbr": 302,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2020-02-28T13:47:12Z",
+      "side": 1,
+      "message": "probably should be 0",
+      "range": {
+        "startLine": 302,
+        "startChar": 72,
+        "endLine": 302,
+        "endChar": 74
+      },
+      "revId": "3c3b7b81ed588cad69690403fd8025dd6c16124a",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    }
+  ]
+}
