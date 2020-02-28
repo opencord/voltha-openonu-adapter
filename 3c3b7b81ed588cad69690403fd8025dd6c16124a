@@ -68,6 +68,30 @@
       "revId": "3c3b7b81ed588cad69690403fd8025dd6c16124a",
       "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "41d52b2c_f8eb7a73",
+        "filename": "python/adapters/brcm_openomci_onu/onu_gem_port.py",
+        "patchSetId": 19
+      },
+      "lineNbr": 302,
+      "author": {
+        "id": 1000513
+      },
+      "writtenOn": "2020-02-28T14:01:20Z",
+      "side": 1,
+      "message": "yeah, I\u0027ll say.",
+      "parentUuid": "92b49bc1_90a32e0f",
+      "range": {
+        "startLine": 302,
+        "startChar": 72,
+        "endLine": 302,
+        "endChar": 74
+      },
+      "revId": "3c3b7b81ed588cad69690403fd8025dd6c16124a",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
     }
   ]
 }
