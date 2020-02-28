@@ -410,7 +410,7 @@ class BrcmOpenomciOnuHandler(object):
             gem_port = OnuGemPort.create(self, gem_port=gemdict)
             new_gem_ports.append(gem_port)
 
-            self._pon.add_gem_port(gem_port)
+            self._pon.add_gem_port(gem_port,True)
 
             self.log.debug('pon-add-gemport', gem_port=gem_port)
 
