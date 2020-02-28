@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "3a7b2c46_62161b3b",
+        "filename": "python/adapters/brcm_openomci_onu/onu_gem_port.py",
+        "patchSetId": 19
+      },
+      "lineNbr": 276,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2020-02-28T14:30:38Z",
+      "side": 1,
+      "message": "i just hardware tested manually.   this is fine.",
+      "parentUuid": "7e6d24ef_49a2828b",
+      "range": {
+        "startLine": 276,
+        "startChar": 12,
+        "endLine": 276,
+        "endChar": 73
+      },
+      "revId": "3c3b7b81ed588cad69690403fd8025dd6c16124a",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "92b49bc1_90a32e0f",
         "filename": "python/adapters/brcm_openomci_onu/onu_gem_port.py",
         "patchSetId": 19
