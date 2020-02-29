@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "30ca3125_bcd7a672",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 875,
+      "author": {
+        "id": 1000218
+      },
+      "writtenOn": "2020-02-29T01:58:58Z",
+      "side": 1,
+      "message": "in VOL-2517, it seems that you have a flow with _vlan_vid\u003d4096 and set_vlan_vid\u003d4096. Is that correct? If this is the case, you don\u0027t need to do any modification here and force set_vlan_vid to vlan_vid.",
+      "range": {
+        "startLine": 873,
+        "startChar": 20,
+        "endLine": 875,
+        "endChar": 61
+      },
+      "revId": "d313e57e6493fc9bf6921c0a6d947f60809ff6aa",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    }
+  ]
+}
