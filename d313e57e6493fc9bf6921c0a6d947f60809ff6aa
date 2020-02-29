@@ -22,6 +22,29 @@
       "revId": "d313e57e6493fc9bf6921c0a6d947f60809ff6aa",
       "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "123cee6f_48a4ace1",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_vlan_filter_task.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 234,
+      "author": {
+        "id": 1000218
+      },
+      "writtenOn": "2020-02-29T02:03:20Z",
+      "side": 1,
+      "message": "Does DT workflow work with that? It sets the vid to 0 which seems wrong to me according to  DT\u0027s workflow.",
+      "range": {
+        "startLine": 234,
+        "startChar": 28,
+        "endLine": 234,
+        "endChar": 50
+      },
+      "revId": "d313e57e6493fc9bf6921c0a6d947f60809ff6aa",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
     }
   ]
 }
