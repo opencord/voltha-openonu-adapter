@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "8deec87a_4d1104e9",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 875,
+      "author": {
+        "id": 1000116
+      },
+      "writtenOn": "2020-03-02T09:02:38Z",
+      "side": 1,
+      "message": "No, the set_vlan_vid is NOT set in the action, only the match has VLAN_ANY(4096), thus the modifications here are needed because_set_vlan_vid will come as NONE",
+      "parentUuid": "30ca3125_bcd7a672",
+      "range": {
+        "startLine": 873,
+        "startChar": 20,
+        "endLine": 875,
+        "endChar": 61
+      },
+      "revId": "d313e57e6493fc9bf6921c0a6d947f60809ff6aa",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "123cee6f_48a4ace1",
         "filename": "python/adapters/brcm_openomci_onu/omci/brcm_vlan_filter_task.py",
         "patchSetId": 4
@@ -36,6 +60,30 @@
       "writtenOn": "2020-02-29T02:03:20Z",
       "side": 1,
       "message": "Does DT workflow work with that? It sets the vid to 0 which seems wrong to me according to  DT\u0027s workflow.",
+      "range": {
+        "startLine": 234,
+        "startChar": 28,
+        "endLine": 234,
+        "endChar": 50
+      },
+      "revId": "d313e57e6493fc9bf6921c0a6d947f60809ff6aa",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "99b871c8_e34839db",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_vlan_filter_task.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 234,
+      "author": {
+        "id": 1000116
+      },
+      "writtenOn": "2020-03-02T09:02:38Z",
+      "side": 1,
+      "message": "This was what was done previously and I did not change it. It seems to work currently for DT.",
+      "parentUuid": "123cee6f_48a4ace1",
       "range": {
         "startLine": 234,
         "startChar": 28,
