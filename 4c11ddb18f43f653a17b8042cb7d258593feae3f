@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fbe67eee_4422dd9b",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 698,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2020-03-03T20:28:14Z",
+      "side": 1,
+      "message": "so the difference is the function that used to be above really looked for the match vlan, where it should instead look for the set vlan and remove that.   makes sense given that\u0027s what add_onu_flows does below.",
+      "range": {
+        "startLine": 698,
+        "startChar": 31,
+        "endLine": 698,
+        "endChar": 58
+      },
+      "revId": "4c11ddb18f43f653a17b8042cb7d258593feae3f",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    }
+  ]
+}
