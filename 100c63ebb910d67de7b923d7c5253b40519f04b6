@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fba2b1fd_74c435a7",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 705,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2020-03-03T19:41:58Z",
+      "side": 1,
+      "message": "this is the only functional difference right?",
+      "range": {
+        "startLine": 696,
+        "startChar": 0,
+        "endLine": 705,
+        "endChar": 89
+      },
+      "revId": "100c63ebb910d67de7b923d7c5253b40519f04b6",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    }
+  ]
+}
