@@ -45,7 +45,7 @@ from pyvoltha.common.config.config_backend import EtcdStore
 from voltha_protos.logical_device_pb2 import LogicalPort
 from voltha_protos.common_pb2 import OperStatus, ConnectStatus, AdminState
 from voltha_protos.device_pb2 import Port
-from voltha_protos.openflow_13_pb2 import OFPXMC_OPENFLOW_BASIC, ofp_port, OFPPS_LIVE,OFPPS_LINK_DOWN,\
+from voltha_protos.openflow_13_pb2 import OFPXMC_OPENFLOW_BASIC, ofp_port, OFPPS_LIVE, OFPPS_LINK_DOWN, \
     OFPPF_FIBER, OFPPF_1GB_FD
 from voltha_protos.inter_container_pb2 import InterAdapterMessageType, \
     InterAdapterOmciMessage, PortCapability, InterAdapterTechProfileDownloadMessage, InterAdapterDeleteGemPortMessage, \
@@ -266,8 +266,8 @@ class BrcmOpenomciOnuHandler(object):
             }
             self.log.debug('create-pm-metrics', device_id=device.id, serial_number=device.serial_number)
             self._pm_metrics = OnuPmMetrics(self.events, self.core_proxy, self.device_id,
-                                           self.logical_device_id, device.serial_number,
-                                           grouped=True, freq_override=False, **kwargs)
+                                            self.logical_device_id, device.serial_number,
+                                            grouped=True, freq_override=False, **kwargs)
             pm_config = self._pm_metrics.make_proto()
             self._onu_omci_device.set_pm_config(self._pm_metrics.omci_pm.openomci_interval_pm)
             self.log.info("initial-pm-config", device_id=device.id, serial_number=device.serial_number)
@@ -284,11 +284,11 @@ class BrcmOpenomciOnuHandler(object):
             }
             serial_number = device.serial_number
             self._test_request = OmciTestRequest(self.core_proxy,
-                                           self.omci_agent, self.device_id,
-                                           AniG, serial_number,
-                                           self.logical_device_id,
-                                           exclusive=False,
-                                           **kwargs_omci_test_action)
+                                                 self.omci_agent, self.device_id,
+                                                 AniG, serial_number,
+                                                 self.logical_device_id,
+                                                 exclusive=False,
+                                                 **kwargs_omci_test_action)
 
             self.enabled = True
         else:
@@ -368,7 +368,7 @@ class BrcmOpenomciOnuHandler(object):
         alloc_id = us_scheduler['alloc_id']
         q_sched_policy = us_scheduler['q_sched_policy']
         self.log.debug('create-tcont', us_scheduler=us_scheduler)
-        #TODO: revisit for multi tconts support
+        # TODO: revisit for multi tconts support
         new_tconts = []
         tcontdict = dict()
         tcontdict['alloc-id'] = alloc_id
@@ -411,7 +411,7 @@ class BrcmOpenomciOnuHandler(object):
             gem_port = OnuGemPort.create(self, gem_port=gemdict)
             new_gem_ports.append(gem_port)
 
-            self._pon.add_gem_port(gem_port,True)
+            self._pon.add_gem_port(gem_port, True)
 
             self.log.debug('pon-add-gemport', gem_port=gem_port)
 
@@ -428,11 +428,11 @@ class BrcmOpenomciOnuHandler(object):
                               uni_id=uni_id, tp_id=tp_id)
                 for filter_info in self._queued_vlan_filter_task[uni_id][tp_id]:
                     reactor.callLater(0, self._add_vlan_filter_task, filter_info.get("device"),
-                                  uni_id=uni_id, uni_port=filter_info.get("uni_port"),
-                                  match_vlan = filter_info.get("match_vlan"),
-                                  _set_vlan_vid= filter_info.get("set_vlan_vid"),
-                                  _set_vlan_pcp = filter_info.get("set_vlan_pcp"),
-                                  tp_id = filter_info.get("tp_id"))
+                                      uni_id=uni_id, uni_port=filter_info.get("uni_port"),
+                                      match_vlan=filter_info.get("match_vlan"),
+                                      _set_vlan_vid=filter_info.get("set_vlan_vid"),
+                                      _set_vlan_pcp=filter_info.get("set_vlan_pcp"),
+                                      tp_id=filter_info.get("tp_id"))
                 # Now remove the entry from the dictionary
                 self._queued_vlan_filter_task[uni_id][tp_id].remove(filter_info)
                 self.log.debug("executed-queued-vlan-filter-task",
@@ -497,7 +497,7 @@ class BrcmOpenomciOnuHandler(object):
                                   _reason=_reason)
                     if tp_path in self._tp_service_specific_task[uni_id]:
                         del self._tp_service_specific_task[uni_id][tp_path]
-                    retry = _STARTUP_RETRY_WAIT * (random.randint(1,5))
+                    retry = _STARTUP_RETRY_WAIT * (random.randint(1, 5))
                     reactor.callLater(retry, self.load_and_configure_tech_profile,
                                       uni_id, tp_path)
                     yield self.core_proxy.device_reason_update(self.device_id,
@@ -555,7 +555,7 @@ class BrcmOpenomciOnuHandler(object):
                     for gp in new_gems:
                         self.pon_port.remove_gem_id(gp.gem_id, gp.direction, False)
 
-                    retry = _STARTUP_RETRY_WAIT * (random.randint(1,5))
+                    retry = _STARTUP_RETRY_WAIT * (random.randint(1, 5))
                     reactor.callLater(retry, self.load_and_configure_tech_profile,
                                       uni_id, tp_path)
 
@@ -577,7 +577,8 @@ class BrcmOpenomciOnuHandler(object):
                 return
 
             if self._tech_profile_download_done[uni_id][tp_table_id] is not True:
-                self.log.error("tp-download-is-not-done-in-order-to-process-tp-delete", uni_id=uni_id, tp_id=tp_table_id)
+                self.log.error("tp-download-is-not-done-in-order-to-process-tp-delete", uni_id=uni_id,
+                               tp_id=tp_table_id)
                 return
 
             if alloc_id is None and gem_port_id is None:
@@ -656,10 +657,9 @@ class BrcmOpenomciOnuHandler(object):
     def remove_onu_flows(self, device, flows):
         self.log.debug('remove_onu_flows', device_id=device.id)
 
-
         # no point in removing omci flows if the device isnt reachable
         if device.connect_status != ConnectStatus.REACHABLE or \
-           device.admin_state != AdminState.ENABLED:
+                device.admin_state != AdminState.ENABLED:
             self.log.warn("device-disabled-or-offline-skipping-remove-flow",
                           admin=device.admin_state, connect=device.connect_status)
             return
@@ -680,7 +680,6 @@ class BrcmOpenomciOnuHandler(object):
                     assert _in_port is not None
 
                     _out_port = fd.get_out_port(flow)  # may be None
-                    _vlan_vid = fd.get_default_vlan(flow)
 
                     if is_downstream(_in_port):
                         self.log.debug('downstream-flow-no-need-to-remove', in_port=_in_port, out_port=_out_port,
@@ -693,6 +692,18 @@ class BrcmOpenomciOnuHandler(object):
                             self.log.debug('The dhcp trap-to-host flow will be discarded', device_id=device.id)
                             return
 
+                        _vlan_vid = 0
+                        # Retrieve the VLAN_VID that needs to be removed from the EVTO rule on the ONU.
+                        for action in fd.get_actions(flow):
+                            if action.type == fd.SET_FIELD:
+                                _field = action.set_field.field.ofb_field
+                                assert (action.set_field.field.oxm_class ==
+                                        OFPXMC_OPENFLOW_BASIC)
+                                if _field.type == fd.VLAN_VID:
+                                    _vlan_vid = _field.vlan_vid & 0xfff
+                                    self.log.debug('vlan-vid-to-remove',
+                                                   _vlan_vid=_vlan_vid, in_port=_in_port)
+
                         uni_port = self.uni_port(_in_port)
                         uni_id = _in_port & 0xF
                     else:
@@ -703,8 +714,8 @@ class BrcmOpenomciOnuHandler(object):
                     tp_id = self.get_tp_id_in_flow(flow)
                     # Deleting flow from ONU.
                     self._remove_vlan_filter_task(device, uni_id, uni_port=uni_port, _set_vlan_vid=_vlan_vid,
-                                              match_vlan=_vlan_vid, tp_id=tp_id)
-                    #TODO:Delete TD task.
+                                                  match_vlan=_vlan_vid, tp_id=tp_id)
+                    # TODO:Delete TD task.
                 except Exception as e:
                     self.log.exception('failed-to-remove-flow', e=e)
 
@@ -719,10 +730,11 @@ class BrcmOpenomciOnuHandler(object):
 
         # no point in pushing omci flows if the device isnt reachable
         if device.connect_status != ConnectStatus.REACHABLE or \
-            device.admin_state != AdminState.ENABLED:
+                device.admin_state != AdminState.ENABLED:
             self.log.warn("device-disabled-or-offline-skipping-flow-update",
                           admin=device.admin_state, connect=device.connect_status)
             return
+
         def is_downstream(port):
             return port == self._pon_port_number
 
@@ -875,9 +887,9 @@ class BrcmOpenomciOnuHandler(object):
                         self.log.warn('ignoring-flow-that-does-not-set-vlanid', set_vlan_vid=_set_vlan_vid)
                     elif (_set_vlan_vid is None or _set_vlan_vid == 0) and _vlan_vid == RESERVED_TRANSPARENT_VLAN:
                         self.log.info('set-vlanid-any', uni_id=uni_id, uni_port=uni_port,
-                                                   _set_vlan_vid=_vlan_vid,
-                                                   _set_vlan_pcp=_set_vlan_pcp, match_vlan=_vlan_vid,
-                                                   tp_id=tp_id)
+                                      _set_vlan_vid=_vlan_vid,
+                                      _set_vlan_pcp=_set_vlan_pcp, match_vlan=_vlan_vid,
+                                      tp_id=tp_id)
                         self._add_vlan_filter_task(device, uni_id=uni_id, uni_port=uni_port,
                                                    _set_vlan_vid=_vlan_vid,
                                                    _set_vlan_pcp=_set_vlan_pcp, match_vlan=_vlan_vid,
@@ -892,7 +904,6 @@ class BrcmOpenomciOnuHandler(object):
 
                 except Exception as e:
                     self.log.exception('failed-to-install-flow', e=e, flow=flow)
-
 
     # Calling this assumes the onu is active/ready and had at least an initial mib downloaded.   This gets called from
     # flow decomposition that ultimately comes from onos
@@ -941,7 +952,7 @@ class BrcmOpenomciOnuHandler(object):
                     return
 
                 # extract tp id from flow
-                tp_id= self.get_tp_id_in_flow(flow)
+                tp_id = self.get_tp_id_in_flow(flow)
                 self.log.debug("tp-id-in-flow", tp_id=tp_id)
 
                 _in_port = fd.get_in_port(flow)
@@ -1072,9 +1083,9 @@ class BrcmOpenomciOnuHandler(object):
                     self.log.warn('ignoring-flow-that-does-not-set-vlanid', set_vlan_vid=_set_vlan_vid)
                 elif (_set_vlan_vid is None or _set_vlan_vid == 0) and _vlan_vid == RESERVED_TRANSPARENT_VLAN:
                     self.log.info('set-vlanid-any', uni_id=uni_id, uni_port=uni_port,
-                                                   _set_vlan_vid=_vlan_vid,
-                                                   _set_vlan_pcp=_set_vlan_pcp, match_vlan=_vlan_vid,
-                                                   tp_id=tp_id)
+                                  _set_vlan_vid=_vlan_vid,
+                                  _set_vlan_pcp=_set_vlan_pcp, match_vlan=_vlan_vid,
+                                  tp_id=tp_id)
                     self._add_vlan_filter_task(device, uni_id=uni_id, uni_port=uni_port,
                                                _set_vlan_vid=_vlan_vid,
                                                _set_vlan_pcp=_set_vlan_pcp, match_vlan=_vlan_vid,
@@ -1090,29 +1101,33 @@ class BrcmOpenomciOnuHandler(object):
                 self.log.exception('failed-to-install-flow', e=e, flow=flow)
 
     def _add_vlan_filter_task(self, device, uni_id, uni_port=None, match_vlan=0,
-                             _set_vlan_vid=None, _set_vlan_pcp=8, tp_id=0):
-        self.log.info('_adding_vlan_filter_task', uni_port=uni_port, uni_id=uni_id, tp_id=tp_id, match_vlan=match_vlan, vlan=_set_vlan_vid, vlan_pcp=_set_vlan_pcp)
+                              _set_vlan_vid=None, _set_vlan_pcp=8, tp_id=0):
+        self.log.info('_adding_vlan_filter_task', uni_port=uni_port, uni_id=uni_id, tp_id=tp_id, match_vlan=match_vlan,
+                      vlan=_set_vlan_vid, vlan_pcp=_set_vlan_pcp)
         assert uni_port is not None
-        if uni_id in self._tech_profile_download_done and tp_id in self._tech_profile_download_done[uni_id] and self._tech_profile_download_done[uni_id][tp_id] is True:
+        if uni_id in self._tech_profile_download_done and tp_id in self._tech_profile_download_done[uni_id] and \
+                self._tech_profile_download_done[uni_id][tp_id] is True:
             @inlineCallbacks
             def success(_results):
-                self.log.info('vlan-tagging-success', uni_port=uni_port, vlan=_set_vlan_vid, tp_id=tp_id, set_vlan_pcp=_set_vlan_pcp)
+                self.log.info('vlan-tagging-success', uni_port=uni_port, vlan=_set_vlan_vid, tp_id=tp_id,
+                              set_vlan_pcp=_set_vlan_pcp)
                 yield self.core_proxy.device_reason_update(self.device_id, 'omci-flows-pushed')
 
             @inlineCallbacks
             def failure(_reason):
                 self.log.warn('vlan-tagging-failure', uni_port=uni_port, vlan=_set_vlan_vid, tp_id=tp_id)
-                retry = _STARTUP_RETRY_WAIT * (random.randint(1,5))
-                reactor.callLater(retry, 
-                                    self._add_vlan_filter_task, device, uni_id, uni_port=uni_port, 
-                                    match_vlan=match_vlan, _set_vlan_vid=_set_vlan_vid, 
-                                    _set_vlan_pcp=_set_vlan_pcp, tp_id=tp_id)
+                retry = _STARTUP_RETRY_WAIT * (random.randint(1, 5))
+                reactor.callLater(retry,
+                                  self._add_vlan_filter_task, device, uni_id, uni_port=uni_port,
+                                  match_vlan=match_vlan, _set_vlan_vid=_set_vlan_vid,
+                                  _set_vlan_pcp=_set_vlan_pcp, tp_id=tp_id)
                 yield self.core_proxy.device_reason_update(self.device_id, 'omci-flows-failed-retrying')
 
-            self.log.info('setting-vlan-tag', uni_port=uni_port, uni_id=uni_id, tp_id=tp_id, match_vlan=match_vlan, vlan=_set_vlan_vid, vlan_pcp=_set_vlan_pcp)
+            self.log.info('setting-vlan-tag', uni_port=uni_port, uni_id=uni_id, tp_id=tp_id, match_vlan=match_vlan,
+                          vlan=_set_vlan_vid, vlan_pcp=_set_vlan_pcp)
             vlan_filter_add_task = BrcmVlanFilterTask(self.omci_agent, self, uni_port, _set_vlan_vid,
-                                                    match_vlan, _set_vlan_pcp, add_tag=True,
-                                                    tp_id=tp_id)
+                                                      match_vlan, _set_vlan_pcp, add_tag=True,
+                                                      tp_id=tp_id)
             self._deferred = self._onu_omci_device.task_runner.queue_task(vlan_filter_add_task)
             self._deferred.addCallbacks(success, failure)
         else:
@@ -1123,21 +1138,22 @@ class BrcmOpenomciOnuHandler(object):
             if tp_id not in self._queued_vlan_filter_task[uni_id]:
                 self._queued_vlan_filter_task[uni_id][tp_id] = []
             self._queued_vlan_filter_task[uni_id][tp_id].append({"device": device,
-                                                            "uni_id": uni_id,
-                                                            "uni_port": uni_port,
-                                                            "match_vlan": match_vlan,
-                                                            "set_vlan_vid": _set_vlan_vid,
-                                                            "set_vlan_pcp": _set_vlan_pcp,
-                                                            "tp_id": tp_id})
+                                                                 "uni_id": uni_id,
+                                                                 "uni_port": uni_port,
+                                                                 "match_vlan": match_vlan,
+                                                                 "set_vlan_vid": _set_vlan_vid,
+                                                                 "set_vlan_pcp": _set_vlan_pcp,
+                                                                 "tp_id": tp_id})
 
     def get_tp_id_in_flow(self, flow):
-        flow_metadata = fd.get_metadata_from_write_metadata ( flow )
-        tp_id = fd.get_tp_id_from_metadata ( flow_metadata )
+        flow_metadata = fd.get_metadata_from_write_metadata(flow)
+        tp_id = fd.get_tp_id_from_metadata(flow_metadata)
         return tp_id
 
     def _remove_vlan_filter_task(self, device, uni_id, uni_port=None, match_vlan=0,
-                             _set_vlan_vid=None, _set_vlan_pcp=8, tp_id=0):
+                                 _set_vlan_vid=None, _set_vlan_pcp=8, tp_id=0):
         assert uni_port is not None
+
         @inlineCallbacks
         def success(_results):
             self.log.info('vlan-untagging-success', _results=_results)
@@ -1147,17 +1163,18 @@ class BrcmOpenomciOnuHandler(object):
         def failure(_reason):
             self.log.warn('vlan-untagging-failure', _reason=_reason)
             yield self.core_proxy.device_reason_update(self.device_id, 'omci-flows-deletion-failed-retrying')
-            retry = _STARTUP_RETRY_WAIT * (random.randint(1,5))
+            retry = _STARTUP_RETRY_WAIT * (random.randint(1, 5))
             reactor.callLater(retry,
-                                            self._remove_vlan_filter_task, device, uni_id,
-                                            add_tag=False, uni_port=uni_port)
+                              self._remove_vlan_filter_task, device, uni_id,
+                              add_tag=False, uni_port=uni_port)
 
         self.log.info("remove_vlan_filter_task", tp_id=tp_id)
         vlan_remove_task = BrcmVlanFilterTask(self.omci_agent, self, uni_port, _set_vlan_vid,
-                                                    match_vlan, _set_vlan_pcp, add_tag=False,
-                                                    tp_id=tp_id)
+                                              match_vlan, _set_vlan_pcp, add_tag=False,
+                                              tp_id=tp_id)
         self._deferred = self._onu_omci_device.task_runner.queue_task(vlan_remove_task)
         self._deferred.addCallbacks(success, failure)
+
     def process_inter_adapter_message(self, request):
         self.log.debug('process-inter-adapter-message', type=request.header.type, from_topic=request.header.from_topic,
                        to_topic=request.header.to_topic, to_device_id=request.header.to_device_id)
@@ -1218,7 +1235,7 @@ class BrcmOpenomciOnuHandler(object):
     @inlineCallbacks
     def create_interface(self, onu_indication):
         self.log.info('create-interface', onu_id=onu_indication.onu_id,
-                       serial_number=onu_indication.serial_number)
+                      serial_number=onu_indication.serial_number)
 
         # Ignore if onu_indication is received for an already running ONU
         if self._onu_omci_device is not None and self._onu_omci_device.active:
@@ -1243,7 +1260,7 @@ class BrcmOpenomciOnuHandler(object):
     @inlineCallbacks
     def update_interface(self, onu_indication):
         self.log.info('update-interface', onu_id=onu_indication.onu_id,
-                       serial_number=onu_indication.serial_number)
+                      serial_number=onu_indication.serial_number)
 
         if onu_indication.oper_state == 'down' or onu_indication.oper_state == "unreachable":
             self.log.debug('stopping-openomci-statemachine', device_id=self.device_id)
@@ -1314,7 +1331,8 @@ class BrcmOpenomciOnuHandler(object):
             if port.mac_bridge_port_num == 1:
                 port.operstatus = OperStatus.UNKNOWN
                 self.log.info('disable-port', device_id=self.device_id, port=port)
-                yield self.core_proxy.port_state_update(self.device_id, Port.ETHERNET_UNI, port.port_number, port.operstatus)
+                yield self.core_proxy.port_state_update(self.device_id, Port.ETHERNET_UNI, port.port_number,
+                                                        port.operstatus)
 
         if lock_ports is True:
             self.lock_ports(lock=True)
@@ -1332,8 +1350,8 @@ class BrcmOpenomciOnuHandler(object):
             if port.mac_bridge_port_num == 1:
                 port.operstatus = OperStatus.ACTIVE
                 self.log.info('enable-port', device_id=self.device_id, port=port)
-                yield self.core_proxy.port_state_update(self.device_id, Port.ETHERNET_UNI, port.port_number, port.operstatus)
-
+                yield self.core_proxy.port_state_update(self.device_id, Port.ETHERNET_UNI, port.port_number,
+                                                        port.operstatus)
 
     # TODO: Normally we would want any uni ethernet link down or uni ethernet link up alarms to register in the core,
     #  but practically olt provisioning cannot handle the churn of links up, down, then up again typical on startup.
@@ -1389,9 +1407,9 @@ class BrcmOpenomciOnuHandler(object):
 
         # TODO: these alarms seem to be unreliable depending on the environment
         # Listen for UNI link state alarms and set the oper_state based on that rather than assuming all UNI are up
-        #topic = OnuDeviceEntry.event_bus_topic(self.device_id,
+        # topic = OnuDeviceEntry.event_bus_topic(self.device_id,
         #                                       OnuDeviceEvents.PortEvent)
-        #self._port_state_subscription = bus.subscribe(topic, self.port_state_handler)
+        # self._port_state_subscription = bus.subscribe(topic, self.port_state_handler)
 
     # Called when the mib is in sync
     def in_sync_handler(self, _topic, msg):
@@ -1529,7 +1547,7 @@ class BrcmOpenomciOnuHandler(object):
                 @inlineCallbacks
                 def failure(_reason):
                     self.log.warn('mib-download-failure-retrying', _reason=_reason)
-                    retry = _STARTUP_RETRY_WAIT * (random.randint(1,5))
+                    retry = _STARTUP_RETRY_WAIT * (random.randint(1, 5))
                     reactor.callLater(retry, self._mib_in_sync)
                     yield self.core_proxy.device_reason_update(self.device_id, 'initial-mib-download-failure-retrying')
 
@@ -1632,5 +1650,5 @@ class BrcmOpenomciOnuHandler(object):
 
     def extract_tp_id_from_path(self, tp_path):
         # tp_path is of the format  <technology>/<table_id>/<uni_port_name>
-        tp_id = int ( tp_path.split ( _PATH_SEPERATOR)[1] )
+        tp_id = int(tp_path.split(_PATH_SEPERATOR)[1])
         return tp_id
