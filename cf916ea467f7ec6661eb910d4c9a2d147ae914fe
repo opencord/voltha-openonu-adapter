@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "186e70ba_a2cc1934",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 683,
+      "author": {
+        "id": 1000127
+      },
+      "writtenOn": "2020-03-03T20:06:02Z",
+      "side": 0,
+      "message": "@matt: This line was removed too.",
+      "revId": "cf916ea467f7ec6661eb910d4c9a2d147ae914fe",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    }
+  ]
+}
