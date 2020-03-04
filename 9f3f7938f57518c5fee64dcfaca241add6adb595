@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "80ce3a4c_73e42ae9",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1000218
+      },
+      "writtenOn": "2020-03-04T19:31:08Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7435b145_41775544",
+      "revId": "9f3f7938f57518c5fee64dcfaca241add6adb595",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bb24fe32_fe924d26",
         "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2020-03-04T18:38:02Z",
       "side": 1,
       "message": "This seemed to be dictionary of dictionary from the code, and not what is mentioned in the comments here.",
+      "revId": "9f3f7938f57518c5fee64dcfaca241add6adb595",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "edf3dd9f_0fc99355",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1000218
+      },
+      "writtenOn": "2020-03-04T19:31:08Z",
+      "side": 1,
+      "message": "The aim here is to keep set_vlan of each service(tech-profile). So no need to keep them per UNI. Code changed accordingly.",
+      "parentUuid": "bb24fe32_fe924d26",
       "revId": "9f3f7938f57518c5fee64dcfaca241add6adb595",
       "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "3eda72da_035d5e4b",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 490,
+      "author": {
+        "id": 1000218
+      },
+      "writtenOn": "2020-03-04T19:31:08Z",
+      "side": 1,
+      "message": "This is to cache tp definition, not tp_instance per UNI. i.e th queried value is \"service/voltha/technology_profiles/xgs-pon/64\" .",
+      "parentUuid": "a76f125b_796f51d1",
+      "revId": "9f3f7938f57518c5fee64dcfaca241add6adb595",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1bd45bc1_82babf9f",
         "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
         "patchSetId": 4
@@ -64,6 +118,30 @@
       "writtenOn": "2020-03-04T18:38:02Z",
       "side": 1,
       "message": "Do we need all the logs at info level here? Also you may want to align with the existing log formats (hyphen separated)",
+      "range": {
+        "startLine": 506,
+        "startChar": 0,
+        "endLine": 510,
+        "endChar": 114
+      },
+      "revId": "9f3f7938f57518c5fee64dcfaca241add6adb595",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d46179e9_27efac66",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 510,
+      "author": {
+        "id": 1000218
+      },
+      "writtenOn": "2020-03-04T19:31:08Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1bd45bc1_82babf9f",
       "range": {
         "startLine": 506,
         "startChar": 0,
@@ -99,6 +177,30 @@
     },
     {
       "key": {
+        "uuid": "afb26f39_3b6bb72b",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 511,
+      "author": {
+        "id": 1000218
+      },
+      "writtenOn": "2020-03-04T19:31:08Z",
+      "side": 1,
+      "message": "mcast conf here is done after tp-setup task is completed. So the reason is changed to \"tech-profile-config-download-success\" above anyway. I didn\u0027t want to add another reason change here because each reason change added to thr system makes a traffic overhead  for olt restart like cases.",
+      "parentUuid": "574bdbb2_490ecc76",
+      "range": {
+        "startLine": 511,
+        "startChar": 28,
+        "endLine": 511,
+        "endChar": 33
+      },
+      "revId": "9f3f7938f57518c5fee64dcfaca241add6adb595",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4f3b5b3c_4a04e2d2",
         "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
         "patchSetId": 4
@@ -110,6 +212,24 @@
       "writtenOn": "2020-03-04T18:38:02Z",
       "side": 1,
       "message": "error log?",
+      "revId": "9f3f7938f57518c5fee64dcfaca241add6adb595",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "88eda137_68f7fa3b",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 597,
+      "author": {
+        "id": 1000218
+      },
+      "writtenOn": "2020-03-04T19:31:08Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4f3b5b3c_4a04e2d2",
       "revId": "9f3f7938f57518c5fee64dcfaca241add6adb595",
       "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
       "unresolved": false
@@ -139,6 +259,30 @@
     },
     {
       "key": {
+        "uuid": "5d53c28c_2fc09b64",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 1145,
+      "author": {
+        "id": 1000218
+      },
+      "writtenOn": "2020-03-04T19:31:08Z",
+      "side": 1,
+      "message": "Code changed here.",
+      "parentUuid": "8d315131_14968886",
+      "range": {
+        "startLine": 1144,
+        "startChar": 45,
+        "endLine": 1145,
+        "endChar": 22
+      },
+      "revId": "9f3f7938f57518c5fee64dcfaca241add6adb595",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bf38fe81_d678ecd3",
         "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
         "patchSetId": 4
@@ -150,6 +294,30 @@
       "writtenOn": "2020-03-04T09:16:03Z",
       "side": 1,
       "message": "this is done here although it\u0027s not used in the add_vlan_filter_task. where is this information queried ?",
+      "range": {
+        "startLine": 1147,
+        "startChar": 19,
+        "endLine": 1147,
+        "endChar": 65
+      },
+      "revId": "9f3f7938f57518c5fee64dcfaca241add6adb595",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2cf78e39_b5162510",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 1147,
+      "author": {
+        "id": 1000218
+      },
+      "writtenOn": "2020-03-04T19:31:08Z",
+      "side": 1,
+      "message": "It is used in multicast task.",
+      "parentUuid": "bf38fe81_d678ecd3",
       "range": {
         "startLine": 1147,
         "startChar": 19,
