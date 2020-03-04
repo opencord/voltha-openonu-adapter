@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "574bdbb2_490ecc76",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 511,
+      "author": {
+        "id": 1000116
+      },
+      "writtenOn": "2020-03-04T09:16:03Z",
+      "side": 1,
+      "message": "I\u0027m wondering if this will yield a new state self.core_proxy.device_reason_update(self.device_id, \u0027tech-profile-config-download-success\u0027)",
+      "range": {
+        "startLine": 511,
+        "startChar": 28,
+        "endLine": 511,
+        "endChar": 33
+      },
+      "revId": "9f3f7938f57518c5fee64dcfaca241add6adb595",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8d315131_14968886",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 1145,
+      "author": {
+        "id": 1000116
+      },
+      "writtenOn": "2020-03-04T09:16:03Z",
+      "side": 1,
+      "message": "this can be concatenated in one if",
+      "range": {
+        "startLine": 1144,
+        "startChar": 45,
+        "endLine": 1145,
+        "endChar": 22
+      },
+      "revId": "9f3f7938f57518c5fee64dcfaca241add6adb595",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bf38fe81_d678ecd3",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 1147,
+      "author": {
+        "id": 1000116
+      },
+      "writtenOn": "2020-03-04T09:16:03Z",
+      "side": 1,
+      "message": "this is done here although it\u0027s not used in the add_vlan_filter_task. where is this information queried ?",
+      "range": {
+        "startLine": 1147,
+        "startChar": 19,
+        "endLine": 1147,
+        "endChar": 65
+      },
+      "revId": "9f3f7938f57518c5fee64dcfaca241add6adb595",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    }
+  ]
+}
