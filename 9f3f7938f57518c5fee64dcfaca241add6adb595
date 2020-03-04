@@ -2,6 +2,80 @@
   "comments": [
     {
       "key": {
+        "uuid": "7435b145_41775544",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1000127
+      },
+      "writtenOn": "2020-03-04T18:38:02Z",
+      "side": 1,
+      "message": "Document the key-value in comments.",
+      "revId": "9f3f7938f57518c5fee64dcfaca241add6adb595",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bb24fe32_fe924d26",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1000127
+      },
+      "writtenOn": "2020-03-04T18:38:02Z",
+      "side": 1,
+      "message": "This seemed to be dictionary of dictionary from the code, and not what is mentioned in the comments here.",
+      "revId": "9f3f7938f57518c5fee64dcfaca241add6adb595",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a76f125b_796f51d1",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 490,
+      "author": {
+        "id": 1000127
+      },
+      "writtenOn": "2020-03-04T18:38:02Z",
+      "side": 1,
+      "message": "Does this need to have an element of uni_id.\ntp_id can be reused across uni_ports.",
+      "revId": "9f3f7938f57518c5fee64dcfaca241add6adb595",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1bd45bc1_82babf9f",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 510,
+      "author": {
+        "id": 1000127
+      },
+      "writtenOn": "2020-03-04T18:38:02Z",
+      "side": 1,
+      "message": "Do we need all the logs at info level here? Also you may want to align with the existing log formats (hyphen separated)",
+      "range": {
+        "startLine": 506,
+        "startChar": 0,
+        "endLine": 510,
+        "endChar": 114
+      },
+      "revId": "9f3f7938f57518c5fee64dcfaca241add6adb595",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "574bdbb2_490ecc76",
         "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
         "patchSetId": 4
@@ -19,6 +93,23 @@
         "endLine": 511,
         "endChar": 33
       },
+      "revId": "9f3f7938f57518c5fee64dcfaca241add6adb595",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4f3b5b3c_4a04e2d2",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 597,
+      "author": {
+        "id": 1000127
+      },
+      "writtenOn": "2020-03-04T18:38:02Z",
+      "side": 1,
+      "message": "error log?",
       "revId": "9f3f7938f57518c5fee64dcfaca241add6adb595",
       "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
       "unresolved": false
