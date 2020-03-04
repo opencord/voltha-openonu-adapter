@@ -46,6 +46,8 @@ class BrcmMcastTask(Task):
         self._device = omci_agent.get_device ( device_id )
         self._results = None
         self._local_deferred = None
+        self._uni_port = handler.uni_ports[uni_id]
+        assert self._uni_port.uni_id == uni_id
         #mcast entities IDs
         self._mcast_operation_profile_id = handler.pon_port.mac_bridge_port_ani_entity_id + tp_id
         self._mcast_sub_conf_info_id = self._mcast_operation_profile_id + tp_id
