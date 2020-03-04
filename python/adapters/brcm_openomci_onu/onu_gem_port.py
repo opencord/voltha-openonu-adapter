@@ -90,11 +90,15 @@ class OnuGemPort(object):
         self.tx_bytes = 0
 
     def __str__(self):
-        return "OnuGemPort - entity_id {}, alloc-id: {}, gem-id: {}".format(self.entity_id, self.alloc_id,
-                                                                              self.gem_id)
+        return "OnuGemPort - entity_id {}, alloc-id: {}, gem-id: {}, direction: {}, multicast: {} ".format(self.entity_id, self.alloc_id,
+                                                                              self.gem_id, self.direction, self.multicast)
 
     def __repr__(self):
         return str(self)
+
+    @property
+    def mcast(self):
+        return self.multicast
 
     @property
     def pon_id(self):
@@ -253,6 +257,7 @@ class OnuGemPort(object):
                           priority_q=gem_port['priority_q'],
                           scheduling_policy=gem_port['scheduling_policy'],
                           weight=gem_port['weight'],
+                          multicast=gem_port['is_multicast'],
                           handler=handler,
                           untagged=False)
 
@@ -269,17 +274,17 @@ class OnuGemPort(object):
                        ieee_mapper_service_profile_entity_id=ieee_mapper_service_profile_entity_id,
                        gal_enet_profile_entity_id=gal_enet_profile_entity_id,
                        ul_prior_q_entity_id=ul_prior_q_entity_id,
-                       dl_prior_q_entity_id=dl_prior_q_entity_id)
+                       dl_prior_q_entity_id=dl_prior_q_entity_id,
+                       multicast=self.multicast)
 
         try:
             direction = "downstream" if self.multicast else "bi-directional"
             entity_id = self.gem_id if self.multicast else self.entity_id
-            assert not self.multicast, 'MCAST is not supported yet'
 
             attributes = dict()
             attributes['priority_queue_pointer_downstream'] = dl_prior_q_entity_id
             msg = GemPortNetworkCtpFrame(
-                self.entity_id,  # same entity id as GEM port
+                entity_id,  # same entity id as GEM port
                 port_id=self.gem_id,
                 tcont_id=tcont_entity_id,
                 direction=direction,
