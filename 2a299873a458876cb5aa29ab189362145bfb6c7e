@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4153de75_52d63371",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 1744,
+      "author": {
+        "id": 1000218
+      },
+      "writtenOn": "2020-03-05T00:56:40Z",
+      "side": 1,
+      "message": "I think we don\u0027t need that. We saved the serial number in persisted state. We can gather it from there.",
+      "range": {
+        "startLine": 1744,
+        "startChar": 0,
+        "endLine": 1744,
+        "endChar": 69
+      },
+      "revId": "2a299873a458876cb5aa29ab189362145bfb6c7e",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b1b87270_45fbe54d",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 1745,
+      "author": {
+        "id": 1000218
+      },
+      "writtenOn": "2020-03-05T00:56:40Z",
+      "side": 1,
+      "message": "I wonder if we queried parent_device anywhere before, so can add the parent_device_serila_number to persistent state. Querying an OLT device is a challenge because it probably has a huge Device structure.",
+      "range": {
+        "startLine": 1745,
+        "startChar": 0,
+        "endLine": 1745,
+        "endChar": 76
+      },
+      "revId": "2a299873a458876cb5aa29ab189362145bfb6c7e",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b36b6c9b_8ff45c5d",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 1757,
+      "author": {
+        "id": 1000218
+      },
+      "writtenOn": "2020-03-05T00:56:40Z",
+      "side": 1,
+      "message": "see comment above.",
+      "range": {
+        "startLine": 1757,
+        "startChar": 0,
+        "endLine": 1757,
+        "endChar": 66
+      },
+      "revId": "2a299873a458876cb5aa29ab189362145bfb6c7e",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    }
+  ]
+}
