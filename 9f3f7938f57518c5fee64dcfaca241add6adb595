@@ -225,6 +225,30 @@
     },
     {
       "key": {
+        "uuid": "652e5a1b_515819c1",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 511,
+      "author": {
+        "id": 1000127
+      },
+      "writtenOn": "2020-03-05T18:14:08Z",
+      "side": 1,
+      "message": "@mahir @andrea Agree.",
+      "parentUuid": "e8c9e429_fa122857",
+      "range": {
+        "startLine": 511,
+        "startChar": 28,
+        "endLine": 511,
+        "endChar": 33
+      },
+      "revId": "9f3f7938f57518c5fee64dcfaca241add6adb595",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4f3b5b3c_4a04e2d2",
         "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
         "patchSetId": 4
