@@ -201,6 +201,30 @@
     },
     {
       "key": {
+        "uuid": "e8c9e429_fa122857",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 511,
+      "author": {
+        "id": 1000116
+      },
+      "writtenOn": "2020-03-05T08:40:24Z",
+      "side": 1,
+      "message": "I see your point. @Girish, do you agree ?",
+      "parentUuid": "afb26f39_3b6bb72b",
+      "range": {
+        "startLine": 511,
+        "startChar": 28,
+        "endLine": 511,
+        "endChar": 33
+      },
+      "revId": "9f3f7938f57518c5fee64dcfaca241add6adb595",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4f3b5b3c_4a04e2d2",
         "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
         "patchSetId": 4
@@ -271,6 +295,30 @@
       "side": 1,
       "message": "Code changed here.",
       "parentUuid": "8d315131_14968886",
+      "range": {
+        "startLine": 1144,
+        "startChar": 45,
+        "endLine": 1145,
+        "endChar": 22
+      },
+      "revId": "9f3f7938f57518c5fee64dcfaca241add6adb595",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "aa108271_2611a130",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 1145,
+      "author": {
+        "id": 1000116
+      },
+      "writtenOn": "2020-03-05T08:40:24Z",
+      "side": 1,
+      "message": "I do not see the code change in latests patch.",
+      "parentUuid": "5d53c28c_2fc09b64",
       "range": {
         "startLine": 1144,
         "startChar": 45,
