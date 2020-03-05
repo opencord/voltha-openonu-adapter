@@ -331,6 +331,30 @@
     },
     {
       "key": {
+        "uuid": "b7d965fd_90b906e4",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 1145,
+      "author": {
+        "id": 1000218
+      },
+      "writtenOn": "2020-03-05T17:10:13Z",
+      "side": 1,
+      "message": "I attempted to change here after Girish\u0027s comment on self._set_vlan dict, but then I recognized that the dict shouldn\u0027t be changed. So I didn\u0027t need to change here. For your comment, imho it is better leave them separate. Otherwise I need to write another if statement for the second line below. It is in the first if but not in the second one.",
+      "parentUuid": "aa108271_2611a130",
+      "range": {
+        "startLine": 1144,
+        "startChar": 45,
+        "endLine": 1145,
+        "endChar": 22
+      },
+      "revId": "9f3f7938f57518c5fee64dcfaca241add6adb595",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bf38fe81_d678ecd3",
         "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
         "patchSetId": 4
