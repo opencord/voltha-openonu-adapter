@@ -171,32 +171,14 @@ class PonPort(object):
         """
 
         if not self._valid:
-            return  # Deleting
+            return False # Deleting
 
         if not reflow and tcont.alloc_id in self._tconts:
-            return  # already created
+            return False # already created
 
         self.log.info('add-tcont', tcont=tcont.alloc_id, reflow=reflow)
         self._tconts[tcont.alloc_id] = tcont
-
-    def update_tcont_td(self, alloc_id, new_td):
-
-        tcont = self._tconts.get(alloc_id)
-
-        if tcont is None:
-            return  # not-found
-
-        tcont.traffic_descriptor = new_td
-
-        # TODO: Not yet implemented
-        # TODO: How does this affect ONU tcont settings?
-        # try:
-        #    results = yield tcont.add_to_hardware(self._handler.omci)
-        # except Exception as e:
-        #    self.log.exception('tcont', tcont=tcont, e=e)
-        #    # May occur with xPON provisioning, use hw-resync to recover
-        #    results = 'resync needed'
-        # returnValue(results)
+        return True
 
     @inlineCallbacks
     def remove_tcont(self, alloc_id, remove_from_hw=True):
@@ -234,15 +216,16 @@ class PonPort(object):
         """
 
         if not self._valid:
-            return  # Deleting
+            return False # Deleting
 
         if not reflow and (gem_port.gem_id, gem_port.direction) in self._gem_ports:
-            return  # nop
+            return False # nop
 
         # The gem_port entity id is set to be same as gem_id
         gem_port.entity_id = gem_port.gem_id
         self.log.info('add-gem-port', gem_port=gem_port, reflow=reflow)
         self._gem_ports[(gem_port.gem_id, gem_port.direction)] = gem_port
+        return True
 
     @inlineCallbacks
     def remove_gem_id(self, gem_id, direction, remove_from_hw=True):

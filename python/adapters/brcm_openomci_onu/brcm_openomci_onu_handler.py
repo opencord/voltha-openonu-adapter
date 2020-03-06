@@ -381,9 +381,11 @@ class BrcmOpenomciOnuHandler(object):
 
         tcont = OnuTCont.create(self, tcont=tcontdict)
 
-        self._pon.add_tcont(tcont)
-        new_tconts.append(tcont)
-        self.log.debug('pon-add-tcont', tcont=tcont)
+        success = self._pon.add_tcont(tcont)
+        if success:
+            new_tconts.append(tcont)
+            self.log.debug('pon-add-tcont', tcont=tcont)
+
         return new_tconts
 
     # Called when there is an olt up indication, providing the gem port id chosen by the olt handler
@@ -419,11 +421,11 @@ class BrcmOpenomciOnuHandler(object):
             gemdict['uni_id'] = uni_id
 
             gem_port = OnuGemPort.create(self, gem_port=gemdict)
-            new_gem_ports.append(gem_port)
 
-            self._pon.add_gem_port(gem_port, True)
-
-            self.log.debug('pon-add-gemport', gem_port=gem_port)
+            success = self._pon.add_gem_port(gem_port, True)
+            if success:
+                new_gem_ports.append(gem_port)
+                self.log.debug('pon-add-gemport', gem_port=gem_port)
 
         return new_gem_ports
 
@@ -526,6 +528,9 @@ class BrcmOpenomciOnuHandler(object):
 
                 self.log.info('downloading-tech-profile-configuration', uni_id=uni_id, tp_id=tp_id)
                 self.log.debug("tconts-gems-to-install", tconts=tconts, gem_ports=gem_ports)
+
+                self.log.debug("current-cached-tconts", tconts=list(self.pon_port.tconts.values()))
+                self.log.debug("current-cached-gem-ports", gem_ports=list(self.pon_port.gem_ports.values()))
 
                 self._tp_service_specific_task[uni_id][tp_path] = \
                     BrcmTpSetupTask(self.omci_agent, self, uni_id, tconts, gem_ports, tp_id)
@@ -661,14 +666,14 @@ class BrcmOpenomciOnuHandler(object):
             # due to additional tasks on different UNIs. So, it we cannot use the pon_port affter
             # this initializer
             tcont = None
-            self.log.debug("tconts", tconts=list(self.pon_port.tconts.values()))
+            self.log.debug("current-cached-tconts", tconts=list(self.pon_port.tconts.values()))
             for tc in list(self.pon_port.tconts.values()):
                 if tc.alloc_id == alloc_id:
                     tcont = tc
                     self.pon_port.remove_tcont(tc.alloc_id, False)
 
             gem_port = None
-            self.log.debug("gem-ports", gem_ports=list(self.pon_port.gem_ports.values()))
+            self.log.debug("current-cached-gem-ports", gem_ports=list(self.pon_port.gem_ports.values()))
             for gp in list(self.pon_port.gem_ports.values()):
                 if gp.gem_id == gem_port_id:
                     gem_port = gp
@@ -726,7 +731,7 @@ class BrcmOpenomciOnuHandler(object):
         self._pm_metrics.update(pm_config)
 
     def remove_onu_flows(self, device, flows):
-        self.log.debug('remove_onu_flows', device_id=device.id)
+        self.log.debug('remove-onu-flows')
 
         # no point in removing omci flows if the device isnt reachable
         if device.connect_status != ConnectStatus.REACHABLE or \
@@ -791,13 +796,7 @@ class BrcmOpenomciOnuHandler(object):
                     self.log.exception('failed-to-remove-flow', e=e)
 
     def add_onu_flows(self, device, flows):
-        self.log.debug('function-entry', flows=flows)
-
-        #
-        # We need to proxy through the OLT to get to the ONU
-        # Configuration from here should be using OMCI
-        #
-        # self.log.info('bulk-flow-update', device_id=device.id, flows=flows)
+        self.log.debug('add-onu-flows')
 
         # no point in pushing omci flows if the device isnt reachable
         if device.connect_status != ConnectStatus.REACHABLE or \
