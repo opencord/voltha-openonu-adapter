@@ -30,7 +30,6 @@ from zope.interface import implementer
 from pyvoltha.adapters.interface import IAdapterInterface
 from voltha_protos.adapter_pb2 import Adapter
 from voltha_protos.adapter_pb2 import AdapterConfig
-from voltha_protos.common_pb2 import LogLevel
 from voltha_protos.device_pb2 import DeviceType, DeviceTypes
 from voltha_protos.health_pb2 import HealthStatus
 
@@ -69,7 +68,7 @@ class BrcmOpenomciOnuAdapter(object):
             id=self.name,
             vendor='VOLTHA OpenONU',
             version=build_info.version,
-            config=AdapterConfig(log_level=LogLevel.INFO)
+            config=AdapterConfig()
         )
         self.devices_handlers = dict()
         self.device_handler_class = BrcmOpenomciOnuHandler
