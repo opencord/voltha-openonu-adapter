@@ -433,10 +433,12 @@ class BrcmOpenomciOnuHandler(object):
                                       _set_vlan_vid=filter_info.get("set_vlan_vid"),
                                       _set_vlan_pcp=filter_info.get("set_vlan_pcp"),
                                       tp_id=filter_info.get("tp_id"))
-                # Now remove the entry from the dictionary
-                self._queued_vlan_filter_task[uni_id][tp_id].remove(filter_info)
-                self.log.debug("executed-queued-vlan-filter-task",
-                               uni_id=uni_id, tp_id=tp_id)
+                    # Now remove the entry from the dictionary
+                    self._queued_vlan_filter_task[uni_id][tp_id].remove(filter_info)
+                    self.log.debug("executed-queued-vlan-filter-task",
+                                   uni_id=uni_id, tp_id=tp_id)
+                # Now delete the key entries once we have handled the queued vlan filter tasks.
+                del self._queued_vlan_filter_task[uni_id]
         except Exception as e:
             self.log.error("vlan-filter-configuration-failed", uni_id=uni_id, error=e)
 
