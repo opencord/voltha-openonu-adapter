@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c2bcf8e9_a0a02021",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 5
+      },
+      "lineNbr": 448,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2020-03-06T01:03:03Z",
+      "side": 1,
+      "message": "i may create a separate patch for this.  this is a bug where tconts are leaked each time download tech profile is run. The same alloc id ends up being assigned to multiple tconts.\n\nEventually you will run out on and the tp task will fail.",
+      "range": {
+        "startLine": 447,
+        "startChar": 8,
+        "endLine": 448,
+        "endChar": 36
+      },
+      "revId": "a4754aa6f099ad88a3e71a09d06c16b349c802d8",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    }
+  ]
+}
