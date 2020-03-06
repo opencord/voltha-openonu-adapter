@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5357c650_2cc627ab",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 442,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2020-03-06T00:53:22Z",
+      "side": 1,
+      "message": "can\u0027t you just delete `self._queued_vlan_filter_task[uni_id]` as that will automatically delete `self._queued_vlan_filter_task[uni_id][tp_id]`?",
+      "range": {
+        "startLine": 441,
+        "startChar": 0,
+        "endLine": 442,
+        "endChar": 57
+      },
+      "revId": "f04f0343322a9d830044100123b43bd15299165b",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    }
+  ]
+}
