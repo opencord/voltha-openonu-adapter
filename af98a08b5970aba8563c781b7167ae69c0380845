@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "19c6eb55_b71fa05d",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 441,
+      "author": {
+        "id": 1000218
+      },
+      "writtenOn": "2020-03-06T02:22:47Z",
+      "side": 1,
+      "message": "I think this is not necessary. The indent problem fixed above deletes the all entries belongs to the uni.",
+      "range": {
+        "startLine": 441,
+        "startChar": 25,
+        "endLine": 441,
+        "endChar": 49
+      },
+      "revId": "af98a08b5970aba8563c781b7167ae69c0380845",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    }
+  ]
+}
