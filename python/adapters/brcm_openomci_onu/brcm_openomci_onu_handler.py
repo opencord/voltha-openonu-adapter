@@ -32,6 +32,7 @@ from twisted.internet.defer import DeferredQueue, inlineCallbacks
 
 from heartbeat import HeartBeat
 from pyvoltha.adapters.extensions.events.device_events.onu.onu_active_event import OnuActiveEvent
+from pyvoltha.adapters.extensions.events.device_events.onu.onu_disabled_event import OnuDisabledEvent
 from pyvoltha.adapters.extensions.events.kpi.onu.onu_pm_metrics import OnuPmMetrics
 from pyvoltha.adapters.extensions.events.kpi.onu.onu_omci_pm import OnuOmciPmMetrics
 from pyvoltha.adapters.extensions.events.adapter_events import AdapterEvents
@@ -1366,10 +1367,9 @@ class BrcmOpenomciOnuHandler(object):
     def disable(self, device):
         self.log.info('disable', device_id=device.id, serial_number=device.serial_number)
         try:
-            yield self.disable_ports(lock_ports=True)
+            yield self.disable_ports(lock_ports=True, device_disabled=True)
             yield self.core_proxy.device_reason_update(self.device_id, "omci-admin-lock")
             yield self.core_proxy.device_state_update(self.device_id, oper_status=OperStatus.UNKNOWN)
-
         except Exception as e:
             self.log.exception('exception-in-onu-disable', exception=e)
 
@@ -1405,7 +1405,7 @@ class BrcmOpenomciOnuHandler(object):
         self._deferred.addCallbacks(success, failure)
 
     @inlineCallbacks
-    def disable_ports(self, lock_ports=True):
+    def disable_ports(self, lock_ports=True, device_disabled=False):
         self.log.info('disable-ports', device_id=self.device_id)
 
         # TODO: for now only support the first UNI given no requirement for multiple uni yet. Also needed to reduce flow
@@ -1418,7 +1418,7 @@ class BrcmOpenomciOnuHandler(object):
                                                         port.operstatus)
 
         if lock_ports is True:
-            self.lock_ports(lock=True)
+            self.lock_ports(lock=True, device_disabled=device_disabled)
 
     @inlineCallbacks
     def enable_ports(self):
@@ -1719,10 +1719,41 @@ class BrcmOpenomciOnuHandler(object):
             self.log.exception('onu-activated-event-error',
                                errmsg=active_event_error.message)
 
-    def lock_ports(self, lock=True):
+    @inlineCallbacks
+    def onu_disabled_event(self):
+        self.log.debug('onu-disabled-event')
+        try:
+            device = yield self.core_proxy.get_device(self.device_id)
+            parent_device = yield self.core_proxy.get_device(self.parent_id)
+            olt_serial_number = parent_device.serial_number
+            raised_ts = arrow.utcnow().timestamp
+
+            self.log.debug("onu-indication-context-data",
+                           pon_id=self._onu_indication.intf_id,
+                           onu_id=self._onu_indication.onu_id,
+                           registration_id=self.device_id,
+                           device_id=self.device_id,
+                           onu_serial_number=device.serial_number,
+                           olt_serial_number=olt_serial_number,
+                           raised_ts=raised_ts)
+
+            self.log.debug("Trying-to-raise-onu-disabled-event")
+            OnuDisabledEvent(self.events, self.device_id,
+                           self._onu_indication.intf_id,
+                           device.serial_number,
+                           str(self.device_id),
+                           olt_serial_number, raised_ts,
+                           onu_id=self._onu_indication.onu_id).send(True)
+        except Exception as active_event_error:
+            self.log.exception('onu-disabled-event-error',
+                               errmsg=active_event_error.message)
+
+    def lock_ports(self, lock=True, device_disabled=False):
 
         def success(response):
             self.log.debug('set-onu-ports-state', lock=lock, response=response)
+            if device_disabled:
+                self.onu_disabled_event()
 
         def failure(response):
             self.log.error('cannot-set-onu-ports-state', lock=lock, response=response)
