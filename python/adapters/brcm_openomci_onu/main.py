@@ -22,6 +22,7 @@ import argparse
 import os
 import time
 import types
+import sys
 
 import arrow
 import yaml
@@ -72,7 +73,8 @@ defs = dict(
     backend=os.environ.get('BACKEND', 'none'),
     retry_interval=os.environ.get('RETRY_INTERVAL', 2),
     heartbeat_topic=os.environ.get('HEARTBEAT_TOPIC', "adapters.heartbeat"),
-    probe=os.environ.get('PROBE', ':8080')
+    probe=os.environ.get('PROBE', ':8080'),
+    log_level=os.environ.get('LOG_LEVEL', 'WARN')
 )
 
 
@@ -177,16 +179,11 @@ def parse_args():
                         default=False,
                         help=_help)
 
-    _help = "suppress debug and info logs"
-    parser.add_argument('-q', '--quiet',
-                        dest='quiet',
-                        action='count',
-                        help=_help)
-
-    _help = 'enable verbose logging'
-    parser.add_argument('-v', '--verbose',
-                        dest='verbose',
-                        action='count',
+    _help = 'enable logging'
+    parser.add_argument('-l', '--log_level',
+                        dest='log_level',
+                        action='store',
+                        default=defs['log_level'],
                         help=_help)
 
     _help = ('use docker container name as conatiner instance id'
@@ -310,7 +307,11 @@ class Main(object):
         # if quiet is set we want to go up to WARNING
         # if you set both, you're doing something non-sense and you'll be back at INFO
 
-        verbosity_adjust = 1 - (args.verbose or 0) + (args.quiet or 0)
+        verbosity_adjust = self.string_to_int(str(args.log_level))
+        if verbosity_adjust == -1:
+            print("Invalid loglevel is given: " + str(args.log_level))
+            sys.exit(0)
+
         self.log = setup_logging(self.config.get('logging', {}),
                                  args.instance_id,
                                  verbosity_adjust=verbosity_adjust)
@@ -340,6 +341,15 @@ class Main(object):
 
     def start(self):
         self.start_reactor()  # will not return except Keyboard interrupt
+
+    def string_to_int(self, loglevel):
+        l = loglevel.upper()
+        if l == "DEBUG": return 0
+        elif l == "INFO": return 1
+        elif l == "WARN": return 2
+        elif l == "ERROR": return 3
+        elif l == "CRITICAL": return 4
+        else: return -1
 
     def stop(self):
         pass
