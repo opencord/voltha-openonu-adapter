@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "206578f9_f7e63fdc",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 1735,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2020-03-11T16:14:09Z",
+      "side": 1,
+      "message": "curious if both the py and go versions output the IDs in the same format (i.e. base 10)",
+      "range": {
+        "startLine": 1735,
+        "startChar": 0,
+        "endLine": 1735,
+        "endChar": 52
+      },
+      "revId": "e2e5f2b9fdd254f7d8f82c5949b03b4f7145a03e",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    }
+  ]
+}
