@@ -22,6 +22,30 @@
       "revId": "e2e5f2b9fdd254f7d8f82c5949b03b4f7145a03e",
       "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "69b436fd_e8eaa75d",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 1735,
+      "author": {
+        "id": 1000016
+      },
+      "writtenOn": "2020-03-11T16:50:35Z",
+      "side": 1,
+      "message": "I think base-10 is consistent. I\u0027ll keep any eye out, and if an inconsistency is found, I\u0027ll plan on introducing a Jira ticket to pick one or the other.",
+      "parentUuid": "206578f9_f7e63fdc",
+      "range": {
+        "startLine": 1735,
+        "startChar": 0,
+        "endLine": 1735,
+        "endChar": 52
+      },
+      "revId": "e2e5f2b9fdd254f7d8f82c5949b03b4f7145a03e",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
     }
   ]
 }
