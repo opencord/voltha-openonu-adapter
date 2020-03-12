@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "239eeb98_ab43258d",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 1265,
+      "author": {
+        "id": 1000007
+      },
+      "writtenOn": "2020-03-12T14:46:08Z",
+      "side": 1,
+      "message": "should we add the device id?",
+      "range": {
+        "startLine": 1265,
+        "startChar": 26,
+        "endLine": 1265,
+        "endChar": 48
+      },
+      "revId": "2101f3d59b30b8ae2719a0f6607fc890c8c03f1c",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    }
+  ]
+}
