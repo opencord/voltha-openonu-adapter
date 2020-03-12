@@ -1260,6 +1260,12 @@ class BrcmOpenomciOnuHandler(object):
     def process_inter_adapter_message(self, request):
         self.log.debug('process-inter-adapter-message', type=request.header.type, from_topic=request.header.from_topic,
                        to_topic=request.header.to_topic, to_device_id=request.header.to_device_id)
+
+        if not self.enabled:
+            self.log.warn('device-not-activated')
+            reactor.callLater(0.5, self.process_inter_adapter_message, request)
+            return
+
         try:
             if request.header.type == InterAdapterMessageType.OMCI_REQUEST:
                 omci_msg = InterAdapterOmciMessage()
