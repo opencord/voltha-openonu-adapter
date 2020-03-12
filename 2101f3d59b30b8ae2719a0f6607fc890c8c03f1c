@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "4626e0d3_05f309a0",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2020-03-12T15:48:49Z",
+      "side": 1,
+      "message": "see here.",
+      "range": {
+        "startLine": 86,
+        "startChar": 19,
+        "endLine": 86,
+        "endChar": 60
+      },
+      "revId": "2101f3d59b30b8ae2719a0f6607fc890c8c03f1c",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "239eeb98_ab43258d",
         "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
         "patchSetId": 1
@@ -13,6 +36,30 @@
       "writtenOn": "2020-03-12T14:46:08Z",
       "side": 1,
       "message": "should we add the device id?",
+      "range": {
+        "startLine": 1265,
+        "startChar": 26,
+        "endLine": 1265,
+        "endChar": 48
+      },
+      "revId": "2101f3d59b30b8ae2719a0f6607fc890c8c03f1c",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "971d0b79_5f4f96db",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 1265,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2020-03-12T15:48:49Z",
+      "side": 1,
+      "message": "the structlog already added it. its an included part of every log message in the handler.",
+      "parentUuid": "239eeb98_ab43258d",
       "range": {
         "startLine": 1265,
         "startChar": 26,
