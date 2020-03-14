@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2a4fc718_22fdbc1a",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 1267,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2020-03-14T18:09:10Z",
+      "side": 1,
+      "message": "this is already taken care of.",
+      "range": {
+        "startLine": 1264,
+        "startChar": 0,
+        "endLine": 1267,
+        "endChar": 18
+      },
+      "revId": "2984fd27ee4cc0a0119d6e8f2082376175f88761",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8c75ae79_148a4de2",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 1285,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2020-03-14T18:09:10Z",
+      "side": 1,
+      "message": "this is the only invocation of create_interface and the above  check is already done.",
+      "range": {
+        "startLine": 1285,
+        "startChar": 20,
+        "endLine": 1285,
+        "endChar": 57
+      },
+      "revId": "2984fd27ee4cc0a0119d6e8f2082376175f88761",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    }
+  ]
+}
