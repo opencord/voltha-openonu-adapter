@@ -45,6 +45,30 @@
       "revId": "2984fd27ee4cc0a0119d6e8f2082376175f88761",
       "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8f733ff9_9408296a",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 1285,
+      "author": {
+        "id": 1000218
+      },
+      "writtenOn": "2020-03-14T19:33:15Z",
+      "side": 1,
+      "message": "you are right. I\u0027ll abandon the patch. I don\u0027t know why I saw this error, and solved with this patch. Perhaps I did not have your patch in my previous test.",
+      "parentUuid": "8c75ae79_148a4de2",
+      "range": {
+        "startLine": 1285,
+        "startChar": 20,
+        "endLine": 1285,
+        "endChar": 57
+      },
+      "revId": "2984fd27ee4cc0a0119d6e8f2082376175f88761",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
     }
   ]
 }
