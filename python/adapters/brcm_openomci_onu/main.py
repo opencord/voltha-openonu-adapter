@@ -64,6 +64,7 @@ defs = dict(
     device_type=os.environ.get('DEVICE_TYPE', 'openonu'),
     accept_bulk_flow=os.environ.get('ACCEPT_BULK_FLOW', True),
     accept_atomic_flow=os.environ.get('ACCEPT_ATOMIC_FLOW', True),
+    accept_incremental_evto_update=os.environ.get('ACCEPT_INCREMENTAL_EVTO_UPDATE', False),
     etcd=os.environ.get('ETCD', 'localhost:2379'),
     core_topic=os.environ.get('CORE_TOPIC', 'rwcore'),
     event_topic=os.environ.get('EVENT_TOPIC', 'voltha.events'),
@@ -146,6 +147,14 @@ def parse_args():
                         dest='accept_atomic_flow',
                         action='store',
                         default=defs['accept_atomic_flow'],
+                        help=_help)
+
+    _help = 'specifies whether the adapter accepts incremental EVTO updates ' \
+            '(default: %s)' % defs['accept_incremental_evto_update']
+    parser.add_argument('-aie', '--accept_incremental_evto_update',
+                        dest='accept_incremental_evto_update',
+                        action='store',
+                        default=defs['accept_incremental_evto_update'],
                         help=_help)
 
     _help = '<hostname>:<port> to etcd server (default: %s)' % defs['etcd']
