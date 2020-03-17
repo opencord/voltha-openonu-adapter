@@ -502,7 +502,6 @@ class BrcmOpenomciOnuHandler(object):
                                       _set_vlan_pcp=filter_info.get("set_vlan_pcp"),
                                       tp_id=filter_info.get("tp_id"))
                     # Now remove the entry from the dictionary
-                    self._queued_vlan_filter_task[uni_id][tp_id].remove(filter_info)
                     self.log.debug("executed-queued-vlan-filter-task",
                                    uni_id=uni_id, tp_id=tp_id)
                 # Now delete the key entries once we have handled the queued vlan filter tasks.
@@ -847,7 +846,18 @@ class BrcmOpenomciOnuHandler(object):
                             self.log.debug('The dhcp trap-to-host flow will be discarded', device_id=device.id)
                             return
 
-                        _vlan_vid = 0
+                        _match_vlan_vid = None
+                        for field in fd.get_ofb_fields(flow):
+                            if field.type == fd.VLAN_VID:
+                                if field.vlan_vid == RESERVED_TRANSPARENT_VLAN and field.vlan_vid_mask == RESERVED_TRANSPARENT_VLAN:
+                                    _match_vlan_vid = RESERVED_TRANSPARENT_VLAN
+                                else:
+                                    _match_vlan_vid = field.vlan_vid & 0xfff
+                                self.log.debug('field-type-vlan-vid',
+                                               vlan=_match_vlan_vid)
+
+                        _set_vlan_vid = None
+                        _set_vlan_pcp = None
                         # Retrieve the VLAN_VID that needs to be removed from the EVTO rule on the ONU.
                         for action in fd.get_actions(flow):
                             if action.type == fd.SET_FIELD:
@@ -855,9 +865,13 @@ class BrcmOpenomciOnuHandler(object):
                                 assert (action.set_field.field.oxm_class ==
                                         OFPXMC_OPENFLOW_BASIC)
                                 if _field.type == fd.VLAN_VID:
-                                    _vlan_vid = _field.vlan_vid & 0xfff
+                                    _set_vlan_vid = _field.vlan_vid & 0xfff
                                     self.log.debug('vlan-vid-to-remove',
-                                                   _vlan_vid=_vlan_vid, in_port=_in_port)
+                                                   _vlan_vid=_set_vlan_vid, in_port=_in_port)
+                                elif _field.type == fd.VLAN_PCP:
+                                    _set_vlan_pcp = _field.vlan_pcp
+                                    self.log.debug('set-field-type-vlan-pcp',
+                                                   vlan_pcp=_set_vlan_pcp)
 
                         uni_port = self.uni_port(_in_port)
                         uni_id = _in_port & 0xF
@@ -870,7 +884,8 @@ class BrcmOpenomciOnuHandler(object):
                     # The vlan filter remove should be followed by a TP deleted for that TP ID.
                     # Use this information to re-schedule any vlan filter add tasks for the same TP ID again.
                     # First check if the TP download was done, before we access that TP delete is necessary
-                    if uni_id in self._tech_profile_download_done and tp_id in self._tech_profile_download_done[uni_id] and \
+                    if uni_id in self._tech_profile_download_done and tp_id in self._tech_profile_download_done[
+                        uni_id] and \
                             self._tech_profile_download_done[uni_id][tp_id] is True:
                         if uni_id not in self._pending_delete_tp:
                             self._pending_delete_tp[uni_id] = dict()
@@ -878,9 +893,11 @@ class BrcmOpenomciOnuHandler(object):
                         else:
                             self._pending_delete_tp[uni_id][tp_id] = True
                     # Deleting flow from ONU.
-                    self._remove_vlan_filter_task(device, uni_id, uni_port=uni_port, _set_vlan_vid=_vlan_vid,
-                                                  match_vlan=_vlan_vid, tp_id=tp_id)
-
+                    self._remove_vlan_filter_task(device, uni_id, uni_port=uni_port,
+                                                  _set_vlan_pcp=_set_vlan_pcp,
+                                                  _set_vlan_vid=_set_vlan_vid,
+                                                  match_vlan=_match_vlan_vid,
+                                                  tp_id=tp_id)
                     # TODO:Delete TD task.
                 except Exception as e:
                     self.log.exception('failed-to-remove-flow', e=e)
@@ -916,7 +933,7 @@ class BrcmOpenomciOnuHandler(object):
                 _push_tpid = None
                 _field = None
                 _set_vlan_vid = None
-                _set_vlan_pcp = 0
+                _set_vlan_pcp = None
                 _tunnel_id = None
                 self.log.debug("add-flow", device_id=device.id, flow=flow)
 
@@ -1385,7 +1402,7 @@ class BrcmOpenomciOnuHandler(object):
                 self._onu_persisted_state['onu_id'] = onu_indication.onu_id
                 self._onu_persisted_state['intf_id'] = onu_indication.intf_id
                 self._onu_persisted_state['admin_state'] = onu_indication.admin_state
-                self._onu_persisted_state['oper_state'] =  onu_indication.oper_state
+                self._onu_persisted_state['oper_state'] = onu_indication.oper_state
 
                 if onu_indication.oper_state == "up":
                     yield self.create_interface(onu_indication)
@@ -1470,7 +1487,6 @@ class BrcmOpenomciOnuHandler(object):
         if self._onu_omci_device is not None and self._onu_omci_device.active:
             self.log.warn('received-onu-indication-for-active-onu', onu_indication=onu_indication)
             return
-
 
         yield self.core_proxy.device_state_update(self.device_id, oper_status=OperStatus.ACTIVATING,
                                                   connect_status=ConnectStatus.REACHABLE)
