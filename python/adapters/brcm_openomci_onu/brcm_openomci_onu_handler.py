@@ -813,9 +813,8 @@ class BrcmOpenomciOnuHandler(object):
         self.log.debug('remove-onu-flows')
 
         # no point in removing omci flows if the device isnt reachable
-        if device.connect_status != ConnectStatus.REACHABLE or \
-                device.admin_state != AdminState.ENABLED:
-            self.log.warn("device-disabled-or-offline-skipping-remove-flow",
+        if device.connect_status != ConnectStatus.REACHABLE:
+            self.log.warn("device-offline-skipping-remove-flow",
                           admin=device.admin_state, connect=device.connect_status)
             return
 
@@ -847,7 +846,18 @@ class BrcmOpenomciOnuHandler(object):
                             self.log.debug('The dhcp trap-to-host flow will be discarded', device_id=device.id)
                             return
 
-                        _vlan_vid = 0
+                        _match_vlan_vid = None
+                        for field in fd.get_ofb_fields(flow):
+                            if field.type == fd.VLAN_VID:
+                                if field.vlan_vid == RESERVED_TRANSPARENT_VLAN and field.vlan_vid_mask == RESERVED_TRANSPARENT_VLAN:
+                                    _match_vlan_vid = RESERVED_TRANSPARENT_VLAN
+                                else:
+                                    _match_vlan_vid = field.vlan_vid & 0xfff
+                                self.log.debug('field-type-vlan-vid',
+                                               vlan=_match_vlan_vid)
+
+                        _set_vlan_vid = None
+                        _set_vlan_pcp = None
                         # Retrieve the VLAN_VID that needs to be removed from the EVTO rule on the ONU.
                         for action in fd.get_actions(flow):
                             if action.type == fd.SET_FIELD:
@@ -855,9 +865,13 @@ class BrcmOpenomciOnuHandler(object):
                                 assert (action.set_field.field.oxm_class ==
                                         OFPXMC_OPENFLOW_BASIC)
                                 if _field.type == fd.VLAN_VID:
-                                    _vlan_vid = _field.vlan_vid & 0xfff
+                                    _set_vlan_vid = _field.vlan_vid & 0xfff
                                     self.log.debug('vlan-vid-to-remove',
-                                                   _vlan_vid=_vlan_vid, in_port=_in_port)
+                                                   _vlan_vid=_set_vlan_vid, in_port=_in_port)
+                                elif _field.type == fd.VLAN_PCP:
+                                    _set_vlan_pcp = _field.vlan_pcp
+                                    self.log.debug('set-field-type-vlan-pcp',
+                                                   vlan_pcp=_set_vlan_pcp)
 
                         uni_port = self.uni_port(_in_port)
                         uni_id = _in_port & 0xF
@@ -878,9 +892,11 @@ class BrcmOpenomciOnuHandler(object):
                         else:
                             self._pending_delete_tp[uni_id][tp_id] = True
                     # Deleting flow from ONU.
-                    self._remove_vlan_filter_task(device, uni_id, uni_port=uni_port, _set_vlan_vid=_vlan_vid,
-                                                  match_vlan=_vlan_vid, tp_id=tp_id)
-
+                    self._remove_vlan_filter_task(device, uni_id, uni_port=uni_port,
+                                                  _set_vlan_pcp=_set_vlan_pcp,
+                                                  _set_vlan_vid=_set_vlan_vid,
+                                                  match_vlan=_match_vlan_vid,
+                                                  tp_id=tp_id)
                     # TODO:Delete TD task.
                 except Exception as e:
                     self.log.exception('failed-to-remove-flow', e=e)
@@ -889,9 +905,8 @@ class BrcmOpenomciOnuHandler(object):
         self.log.debug('add-onu-flows')
 
         # no point in pushing omci flows if the device isnt reachable
-        if device.connect_status != ConnectStatus.REACHABLE or \
-                device.admin_state != AdminState.ENABLED:
-            self.log.warn("device-disabled-or-offline-skipping-flow-update",
+        if device.connect_status != ConnectStatus.REACHABLE:
+            self.log.warn("device-offline-skipping-flow-update",
                           admin=device.admin_state, connect=device.connect_status)
             return
 
@@ -916,7 +931,7 @@ class BrcmOpenomciOnuHandler(object):
                 _push_tpid = None
                 _field = None
                 _set_vlan_vid = None
-                _set_vlan_pcp = 0
+                _set_vlan_pcp = None
                 _tunnel_id = None
                 self.log.debug("add-flow", device_id=device.id, flow=flow)
 
@@ -1083,9 +1098,8 @@ class BrcmOpenomciOnuHandler(object):
         # self.log.info('bulk-flow-update', device_id=device.id, flows=flows)
 
         # no point in pushing omci flows if the device isnt reachable
-        if device.connect_status != ConnectStatus.REACHABLE or \
-                device.admin_state != AdminState.ENABLED:
-            self.log.warn("device-disabled-or-offline-skipping-flow-update",
+        if device.connect_status != ConnectStatus.REACHABLE:
+            self.log.warn("device-offline-skipping-flow-update",
                           admin=device.admin_state, connect=device.connect_status)
             return
 
