@@ -17,7 +17,7 @@ from twisted.internet import reactor
 from twisted.internet.defer import inlineCallbacks, returnValue, TimeoutError, failure
 from pyvoltha.adapters.extensions.omci.omci_me import PptpEthernetUniFrame, GalEthernetProfileFrame, \
     MacBridgePortConfigurationDataFrame, MacBridgeServiceProfileFrame, Ieee8021pMapperServiceProfileFrame, \
-    VeipUniFrame, ExtendedVlanTaggingOperationConfigurationDataFrame
+    VeipUniFrame, ExtendedVlanTaggingOperationConfigurationDataFrame,Ont2GFrame
 from pyvoltha.adapters.extensions.omci.tasks.task import Task
 from pyvoltha.adapters.extensions.omci.omci_defs import EntityOperations, ReasonCodes
 from uni_port import UniType
@@ -195,6 +195,13 @@ class BrcmMibDownloadTask(Task):
             results = yield omci_cc.send(frame)
             self.check_status_and_state(results, 'create-gal-ethernet-profile')
 
+            ont2_attributes = dict(current_connectivity_mode=5)
+            msg = Ont2GFrame(attributes=ont2_attributes)
+            frame = msg.set()
+            self.log.debug('openomci-msg', omci_msg=msg)
+            results = yield omci_cc.send(frame)
+            self.check_status_and_state(results, 'set-ont2g')
+
         except TimeoutError as e:
             self.log.warn('rx-timeout-initial-gal-profile', e=e)
             raise
@@ -223,12 +230,12 @@ class BrcmMibDownloadTask(Task):
             # TODO: magic. event if static, assign to a meaningful variable name
             attributes = {
                 'spanning_tree_ind': False,
-                'learning_ind': True,
+                'learning_ind': False,
                 'priority': 0x8000,
                 'max_age': 20 * 256,
                 'hello_time': 2 * 256,
                 'forward_delay': 15 * 256,
-                'unknown_mac_address_discard': True
+                'unknown_mac_address_discard': False
             }
             msg = MacBridgeServiceProfileFrame(
                 self._mac_bridge_service_profile_entity_id + uni_port.mac_bridge_port_num,
@@ -253,10 +260,10 @@ class BrcmMibDownloadTask(Task):
 
             # default to PPTP
             tp_type = 1
+            association_type = 2
             if uni_port.type.value == UniType.VEIP.value:
                 tp_type = 11
-            elif uni_port.type.value == UniType.PPTP.value:
-                tp_type = 1
+                association_type = 10
 
             msg = MacBridgePortConfigurationDataFrame(
                 self._mac_bridge_port_ani_entity_id + uni_port.entity_id,  # Entity ID
@@ -269,6 +276,40 @@ class BrcmMibDownloadTask(Task):
             self.log.debug('openomci-msg', omci_msg=msg)
             results = yield omci_cc.send(frame)
             self.check_status_and_state(results, 'create-mac-bridge-port-configuration-data-uni-port')
+
+
+            ################################################################################
+            # Create Extended VLAN Tagging Operation config (UNI-side)
+            #
+            #  EntityID relates to the VLAN TCIS later used int vlan filter task.  This only
+            #  sets up the inital MIB entry as it relates to port config, it does not set vlan
+            #  that is saved for the vlan filter task
+            #
+            #  References:
+            #            - PPTP Ethernet or VEIP UNI
+            #
+
+            attributes = dict(
+                association_type=association_type,             # Assoc Type, PPTP/VEIP Ethernet UNI
+                associated_me_pointer=uni_port.entity_id,      # Assoc ME, PPTP/VEIP Entity Id
+
+                # See VOL-1311 - Need to set table during create to avoid exception
+                # trying to read back table during post-create-read-missing-attributes
+                # But, because this is a R/W attribute. Some ONU may not accept the
+                # value during create. It is repeated again in a set below.
+                input_tpid=self._input_tpid,    # input TPID
+                output_tpid=self._output_tpid,  # output TPID
+            )
+
+            msg = ExtendedVlanTaggingOperationConfigurationDataFrame(
+                self._mac_bridge_service_profile_entity_id + uni_port.mac_bridge_port_num,  # Bridge Entity ID
+                attributes=attributes
+            )
+
+            frame = msg.create()
+            self.log.debug('openomci-msg', omci_msg=msg)
+            results = yield omci_cc.send(frame)
+            self.check_status_and_state(results, 'create-extended-vlan-tagging-operation-configuration-data')
 
         except TimeoutError as e:
             self.log.warn('rx-timeout-inital-per-uni-setup', e=e)
