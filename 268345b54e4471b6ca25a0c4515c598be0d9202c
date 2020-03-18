@@ -69,6 +69,24 @@
       "revId": "268345b54e4471b6ca25a0c4515c598be0d9202c",
       "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f4508c9c_52aa7a7a",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 16
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1000513
+      },
+      "writtenOn": "2020-03-18T13:35:29Z",
+      "side": 1,
+      "message": "yeah, I saw this patch and I\u0027m testing it. But twisted_etcd_store.py doesn\u0027t have EtcdStore class.",
+      "parentUuid": "de903a55_acc24944",
+      "revId": "268345b54e4471b6ca25a0c4515c598be0d9202c",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
     }
   ]
 }
