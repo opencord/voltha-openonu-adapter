@@ -258,6 +258,23 @@
     },
     {
       "key": {
+        "uuid": "687b76fe_0636a858",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_vlan_filter_task.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 326,
+      "author": {
+        "id": 1000472
+      },
+      "writtenOn": "2020-03-18T13:17:00Z",
+      "side": 1,
+      "message": "I would suggest to delete VlanTaggingFilterDataFrame if it is already present then create. During vOLTHA1.7 release I tried creating without clearing old config and found things were not working fine due to improper vlan_filter_list.\nIgnore this comment if this scenario is tested.",
+      "revId": "eb12677ed5fcde3beba04ddcc8dfdc4e76bc7a12",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b355754f_b3785a4d",
         "filename": "python/adapters/brcm_openomci_onu/omci/brcm_vlan_filter_task.py",
         "patchSetId": 2
