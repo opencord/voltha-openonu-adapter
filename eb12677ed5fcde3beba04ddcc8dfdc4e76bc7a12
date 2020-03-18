@@ -2,6 +2,144 @@
   "comments": [
     {
       "key": {
+        "uuid": "7bfa9a9a_669314b0",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_vlan_filter_task.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1000116
+      },
+      "writtenOn": "2020-03-18T10:51:01Z",
+      "side": 1,
+      "message": "copy",
+      "range": {
+        "startLine": 77,
+        "startChar": 41,
+        "endLine": 77,
+        "endChar": 46
+      },
+      "revId": "eb12677ed5fcde3beba04ddcc8dfdc4e76bc7a12",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "99fca6f1_03f84382",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_vlan_filter_task.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1000116
+      },
+      "writtenOn": "2020-03-18T10:51:01Z",
+      "side": 1,
+      "message": "I\u0027m not sure about this assignment here. According to my understanding the 4096 will yield a message that ignores what vlan is on the packet but checks that the vlan is actually present. meaning that a tagged packet, whatever the vlan is will pass but an untagged one will be dropped at the ONT/ONU. is this the behaviour we want in case there is no match ? or do we want to forward the traffic thus we have to assign a different value and take that into account in a specificific if case (see how TRANSPARENT is handled here https://github.com/opencord/voltha-openonu-adapter/blob/cf916ea467f7ec6661eb910d4c9a2d147ae914fe/python/adapters/brcm_openomci_onu/omci/brcm_vlan_filter_task.py#L212)",
+      "range": {
+        "startLine": 81,
+        "startChar": 12,
+        "endLine": 81,
+        "endChar": 56
+      },
+      "revId": "eb12677ed5fcde3beba04ddcc8dfdc4e76bc7a12",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2bba5e8e_e0f22d8a",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_vlan_filter_task.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1000116
+      },
+      "writtenOn": "2020-03-18T10:51:01Z",
+      "side": 1,
+      "message": "remove useless tab",
+      "range": {
+        "startLine": 82,
+        "startChar": 13,
+        "endLine": 82,
+        "endChar": 17
+      },
+      "revId": "eb12677ed5fcde3beba04ddcc8dfdc4e76bc7a12",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7e6abc6c_4f58f274",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_vlan_filter_task.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1000116
+      },
+      "writtenOn": "2020-03-18T10:51:01Z",
+      "side": 1,
+      "message": "remove useless space",
+      "range": {
+        "startLine": 87,
+        "startChar": 42,
+        "endLine": 87,
+        "endChar": 43
+      },
+      "revId": "eb12677ed5fcde3beba04ddcc8dfdc4e76bc7a12",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0d40bd8e_4b3d5a19",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_vlan_filter_task.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1000116
+      },
+      "writtenOn": "2020-03-18T10:51:01Z",
+      "side": 1,
+      "message": "15 is just a made up value ? I thought the pcp went from 0 to 7. \nIf it\u0027a a made UP value maybe better extracting it as RESERVENT_TRANSPARENT_VLAN_PCP or something\nIt might be taken from line 173 of this patch, is that the case ?",
+      "range": {
+        "startLine": 89,
+        "startChar": 29,
+        "endLine": 89,
+        "endChar": 31
+      },
+      "revId": "eb12677ed5fcde3beba04ddcc8dfdc4e76bc7a12",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b1e8b59b_f13a9841",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_vlan_filter_task.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 208,
+      "author": {
+        "id": 1000116
+      },
+      "writtenOn": "2020-03-18T10:51:01Z",
+      "side": 1,
+      "message": "useless",
+      "range": {
+        "startLine": 208,
+        "startChar": 82,
+        "endLine": 208,
+        "endChar": 83
+      },
+      "revId": "eb12677ed5fcde3beba04ddcc8dfdc4e76bc7a12",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9d505cf6_929b8b3e",
         "filename": "python/adapters/brcm_openomci_onu/omci/brcm_vlan_filter_task.py",
         "patchSetId": 2
@@ -42,6 +180,52 @@
         "startChar": 0,
         "endLine": 244,
         "endChar": 71
+      },
+      "revId": "eb12677ed5fcde3beba04ddcc8dfdc4e76bc7a12",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b355754f_b3785a4d",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_vlan_filter_task.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 331,
+      "author": {
+        "id": 1000116
+      },
+      "writtenOn": "2020-03-18T10:51:01Z",
+      "side": 1,
+      "message": "4096",
+      "range": {
+        "startLine": 331,
+        "startChar": 51,
+        "endLine": 331,
+        "endChar": 55
+      },
+      "revId": "eb12677ed5fcde3beba04ddcc8dfdc4e76bc7a12",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "67452261_4842eb62",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_vlan_filter_task.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 333,
+      "author": {
+        "id": 1000116
+      },
+      "writtenOn": "2020-03-18T10:51:01Z",
+      "side": 1,
+      "message": "we should probably check that the packet is tagged here",
+      "range": {
+        "startLine": 333,
+        "startChar": 16,
+        "endLine": 333,
+        "endChar": 77
       },
       "revId": "eb12677ed5fcde3beba04ddcc8dfdc4e76bc7a12",
       "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
