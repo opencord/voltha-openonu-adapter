@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "71bcdf72_a933f4ca",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 16
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2020-03-18T13:11:30Z",
+      "side": 1,
+      "message": "its no longer used and there is no reference below.",
+      "parentUuid": "81292e3a_92763764",
+      "revId": "268345b54e4471b6ca25a0c4515c598be0d9202c",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5bcbd892_93b02fb6",
         "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
         "patchSetId": 16
@@ -30,6 +48,24 @@
       "writtenOn": "2020-03-18T07:49:45Z",
       "side": 1,
       "message": "Hi Matt,\n\nI think you need to undo this line. Because these two classes aren\u0027t into twisted_etcd_store.py.",
+      "revId": "268345b54e4471b6ca25a0c4515c598be0d9202c",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "de903a55_acc24944",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 16
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2020-03-18T13:11:30Z",
+      "side": 1,
+      "message": "See dependent pyvoltha patch:  https://gerrit.opencord.org/#/c/17881/\n\nOnce that is in pip this patch will get a requirements.txt update.",
+      "parentUuid": "5bcbd892_93b02fb6",
       "revId": "268345b54e4471b6ca25a0c4515c598be0d9202c",
       "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
       "unresolved": false
