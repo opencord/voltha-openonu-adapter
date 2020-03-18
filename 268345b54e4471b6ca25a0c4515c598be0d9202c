@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "81292e3a_92763764",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 16
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1000513
+      },
+      "writtenOn": "2020-03-18T10:34:23Z",
+      "side": 1,
+      "message": "and you need to add DeferredQueue",
+      "revId": "268345b54e4471b6ca25a0c4515c598be0d9202c",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5bcbd892_93b02fb6",
         "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
         "patchSetId": 16
