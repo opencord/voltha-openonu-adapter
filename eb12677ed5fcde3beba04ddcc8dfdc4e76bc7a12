@@ -188,6 +188,30 @@
     },
     {
       "key": {
+        "uuid": "b4b51b71_717a8403",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_vlan_filter_task.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1000218
+      },
+      "writtenOn": "2020-03-18T19:03:27Z",
+      "side": 1,
+      "message": "If there is no tag(match_vlan\u003dtransparent) on incoming packet, then no tags will be removed, but the set_vlan_vid wil be added. In TT case there are incoming packets with tag and no-tag. For tagged packets we swap it, but for untaged, we only add the new tag.",
+      "parentUuid": "80bec5dd_c2c12b78",
+      "range": {
+        "startLine": 90,
+        "startChar": 12,
+        "endLine": 90,
+        "endChar": 46
+      },
+      "revId": "eb12677ed5fcde3beba04ddcc8dfdc4e76bc7a12",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b1e8b59b_f13a9841",
         "filename": "python/adapters/brcm_openomci_onu/omci/brcm_vlan_filter_task.py",
         "patchSetId": 2
@@ -269,6 +293,24 @@
       "writtenOn": "2020-03-18T13:17:00Z",
       "side": 1,
       "message": "I would suggest to delete VlanTaggingFilterDataFrame if it is already present then create. During vOLTHA1.7 release I tried creating without clearing old config and found things were not working fine due to improper vlan_filter_list.\nIgnore this comment if this scenario is tested.",
+      "revId": "eb12677ed5fcde3beba04ddcc8dfdc4e76bc7a12",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0f3f421d_727dd035",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_vlan_filter_task.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 326,
+      "author": {
+        "id": 1000218
+      },
+      "writtenOn": "2020-03-18T19:03:27Z",
+      "side": 1,
+      "message": "Yes, this is tested, but i\u0027ll keep this in mind for future tests.",
+      "parentUuid": "687b76fe_0636a858",
       "revId": "eb12677ed5fcde3beba04ddcc8dfdc4e76bc7a12",
       "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
       "unresolved": false
