@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0ea4e15e_c91e2d2f",
+        "filename": "python/adapters/brcm_openomci_onu/main.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2020-03-18T21:45:15Z",
+      "side": 1,
+      "message": "should default to WARN",
+      "range": {
+        "startLine": 77,
+        "startChar": 42,
+        "endLine": 77,
+        "endChar": 46
+      },
+      "revId": "b6c705be442c9286037dfb1661d505965dd224fe",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b959ab6a_d129b613",
+        "filename": "python/adapters/brcm_openomci_onu/main.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2020-03-18T21:45:15Z",
+      "side": 1,
+      "message": "the other components are using `--log_level`. I actually like `--loglevel` better, but we likely should be consistent.",
+      "range": {
+        "startLine": 183,
+        "startChar": 33,
+        "endLine": 183,
+        "endChar": 41
+      },
+      "revId": "b6c705be442c9286037dfb1661d505965dd224fe",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e364c8c8_834592e6",
+        "filename": "python/adapters/brcm_openomci_onu/main.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 351,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2020-03-18T21:45:15Z",
+      "side": 1,
+      "message": "The other components are using the following. This component should be consistent if possible\nINFO, DEBUG, ERROR, WARN, FATAL",
+      "range": {
+        "startLine": 344,
+        "startChar": 0,
+        "endLine": 351,
+        "endChar": 23
+      },
+      "revId": "b6c705be442c9286037dfb1661d505965dd224fe",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    }
+  ]
+}
