@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "e54084a2_e0b9d619",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_vlan_filter_task.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1000116
+      },
+      "writtenOn": "2020-03-18T11:55:18Z",
+      "side": 1,
+      "message": "Please disregard this comment. I went and checked the G.988 document because I was not sure of my initial understanding. The 4096 is needed as per Table 9.3.13 to allow the tag Swap in ONU as per TT workflow.",
+      "parentUuid": "99fca6f1_03f84382",
+      "range": {
+        "startLine": 81,
+        "startChar": 12,
+        "endLine": 81,
+        "endChar": 56
+      },
+      "revId": "eb12677ed5fcde3beba04ddcc8dfdc4e76bc7a12",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2bba5e8e_e0f22d8a",
         "filename": "python/adapters/brcm_openomci_onu/omci/brcm_vlan_filter_task.py",
         "patchSetId": 2
@@ -110,6 +134,53 @@
         "startChar": 29,
         "endLine": 89,
         "endChar": 31
+      },
+      "revId": "eb12677ed5fcde3beba04ddcc8dfdc4e76bc7a12",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "64fe5348_18577b46",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_vlan_filter_task.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1000116
+      },
+      "writtenOn": "2020-03-18T11:55:18Z",
+      "side": 1,
+      "message": "Please disregard this comment. I went and checked the G.988 document because I was not sure of my initial understanding. This is needed as per Table 9.3.13. I would still extract it to have a better understanding. Also this set could probably be done at line 82",
+      "parentUuid": "0d40bd8e_4b3d5a19",
+      "range": {
+        "startLine": 89,
+        "startChar": 29,
+        "endLine": 89,
+        "endChar": 31
+      },
+      "revId": "eb12677ed5fcde3beba04ddcc8dfdc4e76bc7a12",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "80bec5dd_c2c12b78",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_vlan_filter_task.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1000116
+      },
+      "writtenOn": "2020-03-18T11:55:18Z",
+      "side": 1,
+      "message": "it might be my lack of understanding of the TT workflow but according to G.988 shouldn\u0027t this be 1 to allow swap ? See page 167",
+      "range": {
+        "startLine": 90,
+        "startChar": 12,
+        "endLine": 90,
+        "endChar": 46
       },
       "revId": "eb12677ed5fcde3beba04ddcc8dfdc4e76bc7a12",
       "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
