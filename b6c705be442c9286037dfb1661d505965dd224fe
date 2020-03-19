@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "ebbc953b_25f23a16",
+        "filename": "python/adapters/brcm_openomci_onu/main.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1000612
+      },
+      "writtenOn": "2020-03-19T06:18:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0ea4e15e_c91e2d2f",
+      "range": {
+        "startLine": 77,
+        "startChar": 42,
+        "endLine": 77,
+        "endChar": 46
+      },
+      "revId": "b6c705be442c9286037dfb1661d505965dd224fe",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b959ab6a_d129b613",
         "filename": "python/adapters/brcm_openomci_onu/main.py",
         "patchSetId": 4
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "41d04395_a208785e",
+        "filename": "python/adapters/brcm_openomci_onu/main.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1000612
+      },
+      "writtenOn": "2020-03-19T06:18:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b959ab6a_d129b613",
+      "range": {
+        "startLine": 183,
+        "startChar": 33,
+        "endLine": 183,
+        "endChar": 41
+      },
+      "revId": "b6c705be442c9286037dfb1661d505965dd224fe",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e364c8c8_834592e6",
         "filename": "python/adapters/brcm_openomci_onu/main.py",
         "patchSetId": 4
@@ -59,6 +107,30 @@
       "writtenOn": "2020-03-18T21:45:15Z",
       "side": 1,
       "message": "The other components are using the following. This component should be consistent if possible\nINFO, DEBUG, ERROR, WARN, FATAL",
+      "range": {
+        "startLine": 344,
+        "startChar": 0,
+        "endLine": 351,
+        "endChar": 23
+      },
+      "revId": "b6c705be442c9286037dfb1661d505965dd224fe",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "62ad5257_09e185d9",
+        "filename": "python/adapters/brcm_openomci_onu/main.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 351,
+      "author": {
+        "id": 1000612
+      },
+      "writtenOn": "2020-03-19T06:18:02Z",
+      "side": 1,
+      "message": "The logging library used in python does not have FATAL loglevel. So it has to be CRITICAL only I think.",
+      "parentUuid": "e364c8c8_834592e6",
       "range": {
         "startLine": 344,
         "startChar": 0,
