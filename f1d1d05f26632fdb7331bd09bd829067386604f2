@@ -163,6 +163,30 @@
     },
     {
       "key": {
+        "uuid": "6c08940a_6120c543",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 17
+      },
+      "lineNbr": 1397,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2020-03-19T21:25:02Z",
+      "side": 1,
+      "message": "this set and the one in activate have other opportunities to write again.  from an operations point of view if the errors keep happening is when some manual intervention is needed.  \n\nthe reconcile function is really where this data is needed and it now checks if it can get it before using it.",
+      "parentUuid": "9196f4f8_d8cba203",
+      "range": {
+        "startLine": 1396,
+        "startChar": 0,
+        "endLine": 1397,
+        "endChar": 86
+      },
+      "revId": "f1d1d05f26632fdb7331bd09bd829067386604f2",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3bf45739_bdbf2dde",
         "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
         "patchSetId": 17
@@ -289,6 +313,30 @@
       "writtenOn": "2020-03-19T14:43:11Z",
       "side": 1,
       "message": "we are retrying just once ? could this be an exponential backoff ?",
+      "range": {
+        "startLine": 1657,
+        "startChar": 0,
+        "endLine": 1658,
+        "endChar": 55
+      },
+      "revId": "f1d1d05f26632fdb7331bd09bd829067386604f2",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "de7a791b_be2b6b7d",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 17
+      },
+      "lineNbr": 1658,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2020-03-19T21:25:02Z",
+      "side": 1,
+      "message": "its basically recursive.  it will call itself again until above success happens.  the retry interval is somewhat random.   in other places we have a limit on these attempts, this could be added later.",
+      "parentUuid": "5f4d42dc_6a56a21c",
       "range": {
         "startLine": 1657,
         "startChar": 0,
