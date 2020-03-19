@@ -1,0 +1,303 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "82b92165_1504c3dc",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_adapter.py",
+        "patchSetId": 17
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1000116
+      },
+      "writtenOn": "2020-03-19T14:43:11Z",
+      "side": 1,
+      "message": "debug is probably better",
+      "range": {
+        "startLine": 137,
+        "startChar": 21,
+        "endLine": 137,
+        "endChar": 25
+      },
+      "revId": "f1d1d05f26632fdb7331bd09bd829067386604f2",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5154e3eb_7a93d708",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 17
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1000116
+      },
+      "writtenOn": "2020-03-19T14:43:11Z",
+      "side": 1,
+      "message": "I would leave it at debug",
+      "range": {
+        "startLine": 86,
+        "startChar": 17,
+        "endLine": 86,
+        "endChar": 21
+      },
+      "revId": "f1d1d05f26632fdb7331bd09bd829067386604f2",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4b819c59_cab928dd",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 17
+      },
+      "lineNbr": 261,
+      "author": {
+        "id": 1000116
+      },
+      "writtenOn": "2020-03-19T14:43:11Z",
+      "side": 1,
+      "message": "should the be handled somehow or re-thrown ? it seems we are getting the system in a somewhat inconsistent state. Unless if later stages of the system simply gloss over state that they can\u0027t find.",
+      "range": {
+        "startLine": 260,
+        "startChar": 17,
+        "endLine": 261,
+        "endChar": 82
+      },
+      "revId": "f1d1d05f26632fdb7331bd09bd829067386604f2",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0ffd10c3_e4205894",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 17
+      },
+      "lineNbr": 304,
+      "author": {
+        "id": 1000116
+      },
+      "writtenOn": "2020-03-19T14:43:11Z",
+      "side": 1,
+      "message": "can we proceed even when this error happens ?",
+      "range": {
+        "startLine": 304,
+        "startChar": 16,
+        "endLine": 304,
+        "endChar": 79
+      },
+      "revId": "f1d1d05f26632fdb7331bd09bd829067386604f2",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c39b9c10_11292906",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 17
+      },
+      "lineNbr": 356,
+      "author": {
+        "id": 1000116
+      },
+      "writtenOn": "2020-03-19T14:43:11Z",
+      "side": 1,
+      "message": "this fetches it from the local copy, so even with no storage (error cases) it should work, correct?",
+      "range": {
+        "startLine": 356,
+        "startChar": 8,
+        "endLine": 356,
+        "endChar": 70
+      },
+      "revId": "f1d1d05f26632fdb7331bd09bd829067386604f2",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bfee88e3_606992f1",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 17
+      },
+      "lineNbr": 376,
+      "author": {
+        "id": 1000116
+      },
+      "writtenOn": "2020-03-19T14:43:11Z",
+      "side": 1,
+      "message": "probably debug",
+      "range": {
+        "startLine": 376,
+        "startChar": 17,
+        "endLine": 376,
+        "endChar": 21
+      },
+      "revId": "f1d1d05f26632fdb7331bd09bd829067386604f2",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9196f4f8_d8cba203",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 17
+      },
+      "lineNbr": 1397,
+      "author": {
+        "id": 1000116
+      },
+      "writtenOn": "2020-03-19T14:43:11Z",
+      "side": 1,
+      "message": "same concern for error as before",
+      "range": {
+        "startLine": 1396,
+        "startChar": 0,
+        "endLine": 1397,
+        "endChar": 86
+      },
+      "revId": "f1d1d05f26632fdb7331bd09bd829067386604f2",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3bf45739_bdbf2dde",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 17
+      },
+      "lineNbr": 1610,
+      "author": {
+        "id": 1000116
+      },
+      "writtenOn": "2020-03-19T14:43:11Z",
+      "side": 1,
+      "message": "debug",
+      "range": {
+        "startLine": 1610,
+        "startChar": 17,
+        "endLine": 1610,
+        "endChar": 21
+      },
+      "revId": "f1d1d05f26632fdb7331bd09bd829067386604f2",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0f6f7f59_fa8d9639",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 17
+      },
+      "lineNbr": 1618,
+      "author": {
+        "id": 1000116
+      },
+      "writtenOn": "2020-03-19T14:43:11Z",
+      "side": 1,
+      "message": "debug",
+      "range": {
+        "startLine": 1618,
+        "startChar": 21,
+        "endLine": 1618,
+        "endChar": 25
+      },
+      "revId": "f1d1d05f26632fdb7331bd09bd829067386604f2",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e5c63d39_eb476107",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 17
+      },
+      "lineNbr": 1624,
+      "author": {
+        "id": 1000116
+      },
+      "writtenOn": "2020-03-19T14:43:11Z",
+      "side": 1,
+      "message": "debug",
+      "range": {
+        "startLine": 1624,
+        "startChar": 21,
+        "endLine": 1624,
+        "endChar": 25
+      },
+      "revId": "f1d1d05f26632fdb7331bd09bd829067386604f2",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dccb58ec_58948b79",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 17
+      },
+      "lineNbr": 1637,
+      "author": {
+        "id": 1000116
+      },
+      "writtenOn": "2020-03-19T14:43:11Z",
+      "side": 1,
+      "message": "debug",
+      "range": {
+        "startLine": 1637,
+        "startChar": 21,
+        "endLine": 1637,
+        "endChar": 25
+      },
+      "revId": "f1d1d05f26632fdb7331bd09bd829067386604f2",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4bc03ada_4bf46949",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 17
+      },
+      "lineNbr": 1640,
+      "author": {
+        "id": 1000116
+      },
+      "writtenOn": "2020-03-19T14:43:11Z",
+      "side": 1,
+      "message": "debug\nvalid for all other non essential logs in the class",
+      "range": {
+        "startLine": 1640,
+        "startChar": 17,
+        "endLine": 1640,
+        "endChar": 21
+      },
+      "revId": "f1d1d05f26632fdb7331bd09bd829067386604f2",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5f4d42dc_6a56a21c",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 17
+      },
+      "lineNbr": 1658,
+      "author": {
+        "id": 1000116
+      },
+      "writtenOn": "2020-03-19T14:43:11Z",
+      "side": 1,
+      "message": "we are retrying just once ? could this be an exponential backoff ?",
+      "range": {
+        "startLine": 1657,
+        "startChar": 0,
+        "endLine": 1658,
+        "endChar": 55
+      },
+      "revId": "f1d1d05f26632fdb7331bd09bd829067386604f2",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    }
+  ]
+}
