@@ -28,6 +28,11 @@ RUN if [ -n "$LOCAL_PROTOS" ] ; then \
     pip install --no-cache-dir /local_imports/voltha-protos/dist/*.tar.gz ; \
 fi
 
+# XXX - TEMPORARY - XXX
+# Remove before final submit
+
+RUN pip install --index-url https://test.pypi.org/simple/ pyvoltha==2.3.24
+
 # Bundle app source
 ENV PYTHONPATH=/voltha
 COPY adapters/brcm_openomci_onu /voltha/adapters/brcm_openomci_onu
