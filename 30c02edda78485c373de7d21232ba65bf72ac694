@@ -22,6 +22,30 @@
       "revId": "30c02edda78485c373de7d21232ba65bf72ac694",
       "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "623e005b_c2c567c5",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_vlan_filter_task.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 297,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2020-03-19T18:15:26Z",
+      "side": 1,
+      "message": "correct.  the filter_* above are the row match criteria.  calling VlanTaggingOperation.delete() just automatically fills in the treatments with all the 0xFF needed to delete the entry/row.",
+      "parentUuid": "eb9c55b4_b57364ad",
+      "range": {
+        "startLine": 288,
+        "startChar": 1,
+        "endLine": 297,
+        "endChar": 2
+      },
+      "revId": "30c02edda78485c373de7d21232ba65bf72ac694",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
     }
   ]
 }
