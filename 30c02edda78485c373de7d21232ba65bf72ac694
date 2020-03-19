@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "eb9c55b4_b57364ad",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_vlan_filter_task.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 297,
+      "author": {
+        "id": 1000218
+      },
+      "writtenOn": "2020-03-19T18:00:46Z",
+      "side": 1,
+      "message": "I assume that this deletes the related row in the table, not the table itself. Is it correct?",
+      "range": {
+        "startLine": 288,
+        "startChar": 1,
+        "endLine": 297,
+        "endChar": 2
+      },
+      "revId": "30c02edda78485c373de7d21232ba65bf72ac694",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    }
+  ]
+}
