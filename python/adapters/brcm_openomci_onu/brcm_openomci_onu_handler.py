@@ -543,7 +543,17 @@ class BrcmOpenomciOnuHandler(object):
             except Exception as e:
                 self.log.exception("error-loading-tech-profile", e=e)
         else:
+            # There is an active tech-profile task ongoing on this UNI port. So, reschedule this task
+            # after a short interval
+            if uni_id in self._tp_service_specific_task and len(self._tp_service_specific_task[uni_id]):
+                self.log.debug("active-tp-tasks-in-progress-for-uni--scheduling-this-task-for-later",
+                               uni_id=uni_id, tp_path=tp_path)
+                reactor.callLater(0.2, self.load_and_configure_tech_profile,
+                                  uni_id, tp_path)
+                return
+
             self.log.info("tech-profile-config-already-done")
+
             # Could be a case where TP exists but new gem-ports are getting added dynamically
             tpstored = self.kv_client[tp_path]
             tpstring = tpstored.decode('ascii')
@@ -592,6 +602,7 @@ class BrcmOpenomciOnuHandler(object):
                 self._deferred = \
                     self._onu_omci_device.task_runner.queue_task(self._tp_service_specific_task[uni_id][tp_path])
                 self._deferred.addCallbacks(success, failure)
+
     def start_multicast_service(self, uni_id, tp_path,retry_count=0):
         self.log.debug("starting-multicast-service", uni_id=uni_id, tp_path=tp_path)
         tp_id = self.extract_tp_id_from_path(tp_path)
