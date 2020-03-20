@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e9fffa92_47eacce7",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_mib_download_task.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 242,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2020-03-20T13:21:21Z",
+      "side": 1,
+      "message": "Was going to ask about this too.  per the spec mode 5 (figure 8.2.2-7) means that EVTO and Vlan tagging op data must be assigned to the mac bridge port config data, not the UNI like we do today.  Some ONU may silently ignore this (alpha), but others may not.  Ill have to test on other onu types to see if it later rejects the EVTO altogether because of this.\n\nLeft unspecified i suspect it acts more like mode 1 or 2, which allows EVTO and vlan tag op to be assigned to: \n\n\"Any ME to which VLAN tagging can be assigned\"",
+      "range": {
+        "startLine": 242,
+        "startChar": 37,
+        "endLine": 242,
+        "endChar": 64
+      },
+      "revId": "4f358a3621e2d23d4d3bdddde0f7a51cf6f19407",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    }
+  ]
+}
