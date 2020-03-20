@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a26a9dfa_6b21ee9c",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_mib_download_task.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 226,
+      "author": {
+        "id": 1000097
+      },
+      "writtenOn": "2020-03-20T09:24:08Z",
+      "side": 1,
+      "message": "Just for my understanding... why are we setting the learning_ind to False? is it because for non of the workflows we need to handle un-tagged packets?",
+      "revId": "b33836d53554c3759ba29039c3c4f207ef0ad09b",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "35d68c21_ae9f1dfc",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_mib_download_task.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 231,
+      "author": {
+        "id": 1000097
+      },
+      "writtenOn": "2020-03-20T09:24:08Z",
+      "side": 1,
+      "message": "What I understand of this parameter is to allow the broadcast of unknown packets or not. Wouldn\u0027t setting it to False enable the broadcasting? Is that what we want?",
+      "revId": "b33836d53554c3759ba29039c3c4f207ef0ad09b",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "00a65c4f_970216c5",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_mib_download_task.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 246,
+      "author": {
+        "id": 1000097
+      },
+      "writtenOn": "2020-03-20T09:24:08Z",
+      "side": 1,
+      "message": "Isn\u0027t it sufficient to set the Ont2G only once? or do we need to reset it for each of the UNIs?",
+      "revId": "b33836d53554c3759ba29039c3c4f207ef0ad09b",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    }
+  ]
+}
