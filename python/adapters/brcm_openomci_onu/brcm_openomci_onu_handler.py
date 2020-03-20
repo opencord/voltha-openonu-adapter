@@ -75,7 +75,7 @@ from voltha_protos.voltha_pb2 import TestResponse
 OP = EntityOperations
 RC = ReasonCodes
 
-IS_MULTICAST='is_multicast'
+IS_MULTICAST = 'is_multicast'
 GEM_PORT_ID = 'gemport_id'
 _STARTUP_RETRY_WAIT = 10
 _PATH_SEPERATOR = "/"
@@ -101,7 +101,7 @@ class BrcmOpenomciOnuHandler(object):
         self._omcc_version = OMCCVersion.Unknown
         self._total_tcont_count = 0  # From ANI-G ME
         self._qos_flexibility = 0  # From ONT2_G ME
-        self._tp = dict()          #tp_id -> technology profile definition in KV Store.
+        self._tp = dict()  # tp_id -> technology profile definition in KV Store.
         self._onu_indication = None
         self._unis = dict()  # Port # -> UniPort
 
@@ -126,12 +126,18 @@ class BrcmOpenomciOnuHandler(object):
 
         self._tp_service_specific_task = dict()
         self._tech_profile_download_done = dict()
+
+        # When the vlan filter is being removed for a given TP ID on a given UNI,
+        # mark that we are expecting a tp delete to happen for this UNI.
+        # Unless the TP delete is complete to not allow new vlan add tasks to this TP ID
+        self._pending_delete_tp = dict()
+
         # Stores information related to queued vlan filter tasks
         # Dictionary with key being uni_id and value being device,uni port ,uni id and vlan id
 
         self._queued_vlan_filter_task = dict()
 
-        self._set_vlan = dict()  #uni_id, tp_id -> set_vlan_id
+        self._set_vlan = dict()  # uni_id, tp_id -> set_vlan_id
         # Initialize KV store client
         self.args = registry('main').get_args()
         if self.args.backend == 'etcd':
@@ -509,9 +515,9 @@ class BrcmOpenomciOnuHandler(object):
 
                     # Execute mcast task
                     for gem in gem_ports:
-                        self.log.debug("checking-multicast-service-for-gem ",  gem=gem)
+                        self.log.debug("checking-multicast-service-for-gem ", gem=gem)
                         if gem.mcast is True:
-                            self.log.info("found-multicast-service-for-gem ",  gem=gem, uni_id=uni_id, tp_id=tp_id)
+                            self.log.info("found-multicast-service-for-gem ", gem=gem, uni_id=uni_id, tp_id=tp_id)
                             reactor.callInThread(self.start_multicast_service, uni_id, tp_path)
                             self.log.debug("started_multicast_service-successfully", tconts=tconts, gems=gem_ports)
                             break
@@ -543,7 +549,17 @@ class BrcmOpenomciOnuHandler(object):
             except Exception as e:
                 self.log.exception("error-loading-tech-profile", e=e)
         else:
+            # There is an active tech-profile task ongoing on this UNI port. So, reschedule this task
+            # after a short interval
+            if uni_id in self._tp_service_specific_task and len(self._tp_service_specific_task[uni_id]):
+                self.log.debug("active-tp-tasks-in-progress-for-uni--scheduling-this-task-for-later",
+                               uni_id=uni_id, tp_path=tp_path)
+                reactor.callLater(0.2, self.load_and_configure_tech_profile,
+                                  uni_id, tp_path)
+                return
+
             self.log.info("tech-profile-config-already-done")
+
             # Could be a case where TP exists but new gem-ports are getting added dynamically
             tpstored = self.kv_client[tp_path]
             tpstring = tpstored.decode('ascii')
@@ -592,7 +608,8 @@ class BrcmOpenomciOnuHandler(object):
                 self._deferred = \
                     self._onu_omci_device.task_runner.queue_task(self._tp_service_specific_task[uni_id][tp_path])
                 self._deferred.addCallbacks(success, failure)
-    def start_multicast_service(self, uni_id, tp_path,retry_count=0):
+
+    def start_multicast_service(self, uni_id, tp_path, retry_count=0):
         self.log.debug("starting-multicast-service", uni_id=uni_id, tp_path=tp_path)
         tp_id = self.extract_tp_id_from_path(tp_path)
         if uni_id in self._set_vlan and tp_id in self._set_vlan[uni_id]:
@@ -609,39 +626,45 @@ class BrcmOpenomciOnuHandler(object):
                         self._tp[tp_id] = tp
 
                 self.log.debug("mcast-vlan-learned-before", self._set_vlan[uni_id][tp_id], uni_id=uni_id, tp_id=tp_id)
+
                 def success(_results):
                     self.log.debug('multicast-success', uni_id=uni_id)
                     self._multicast_task = None
 
                 def failure(_reason):
                     self.log.warn('multicast-failure', _reason=_reason)
-                    retry = _STARTUP_RETRY_WAIT * (random.randint(1,5))
+                    retry = _STARTUP_RETRY_WAIT * (random.randint(1, 5))
                     reactor.callLater(retry, self.start_multicast_service,
-                                                             uni_id, tp_path)
+                                      uni_id, tp_path)
 
                 self.log.debug('starting-multicast-task', mcast_vlan_id=self._set_vlan[uni_id][tp_id])
                 downstream_gem_port_attribute_list = tp['downstream_gem_port_attribute_list']
                 for i in range(len(downstream_gem_port_attribute_list)):
                     if IS_MULTICAST in downstream_gem_port_attribute_list[i] and \
                             downstream_gem_port_attribute_list[i][IS_MULTICAST] == 'True':
-                        dynamic_access_control_list_table = downstream_gem_port_attribute_list[i]['dynamic_access_control_list'].split("-")
-                        static_access_control_list_table = downstream_gem_port_attribute_list[i]['static_access_control_list'].split("-")
+                        dynamic_access_control_list_table = downstream_gem_port_attribute_list[i][
+                            'dynamic_access_control_list'].split("-")
+                        static_access_control_list_table = downstream_gem_port_attribute_list[i][
+                            'static_access_control_list'].split("-")
                         multicast_gem_id = downstream_gem_port_attribute_list[i]['multicast_gem_id']
                         break
 
                 self._multicast_task = BrcmMcastTask(self.omci_agent, self, self.device_id, uni_id, tp_id,
-                                                     self._set_vlan[uni_id][tp_id],dynamic_access_control_list_table, static_access_control_list_table, multicast_gem_id)
+                                                     self._set_vlan[uni_id][tp_id], dynamic_access_control_list_table,
+                                                     static_access_control_list_table, multicast_gem_id)
                 self._deferred = self._onu_omci_device.task_runner.queue_task(self._multicast_task)
                 self._deferred.addCallbacks(success, failure)
             except Exception as e:
                 self.log.exception("error-loading-multicast", e=e)
         else:
-            if retry_count<30:
+            if retry_count < 30:
                 retry_count = +1
-                self.log.debug("going-to-wait-for-flow-to-learn-mcast-vlan", uni_id=uni_id, tp_id=tp_id, retry=retry_count)
+                self.log.debug("going-to-wait-for-flow-to-learn-mcast-vlan", uni_id=uni_id, tp_id=tp_id,
+                               retry=retry_count)
                 reactor.callLater(0.5, self.start_multicast_service, uni_id, tp_path, retry_count)
             else:
-                self.log.error("mcast-vlan-not-configured-yet-failing-mcast-service-conf", uni_id=uni_id, tp_id=tp_id, retry=retry_count)
+                self.log.error("mcast-vlan-not-configured-yet-failing-mcast-service-conf", uni_id=uni_id, tp_id=tp_id,
+                               retry=retry_count)
 
     def delete_tech_profile(self, uni_id, tp_path, alloc_id=None, gem_port_id=None):
         try:
@@ -690,7 +713,11 @@ class BrcmOpenomciOnuHandler(object):
                     # The deletion of TCONT marks the complete deletion of tech-profile
                     try:
                         del self._tech_profile_download_done[uni_id][tp_table_id]
+                        self.log.debug("tp-profile-download-flag-cleared", uni_id=uni_id, tp_id=tp_table_id)
                         del self._tp_service_specific_task[uni_id][tp_path]
+                        self.log.debug("tp-service-specific-task-cleared", uni_id=uni_id, tp_id=tp_table_id)
+                        del self._pending_delete_tp[uni_id][tp_table_id]
+                        self.log.debug("pending-delete-tp-task-flag-cleared", uni_id=uni_id, tp_id=tp_table_id)
                     except Exception as ex:
                         self.log.error("del-tp-state-info", e=ex)
 
@@ -790,9 +817,20 @@ class BrcmOpenomciOnuHandler(object):
                     self.log.debug('flow-ports', in_port=_in_port, out_port=_out_port, uni_port=str(uni_port))
 
                     tp_id = self.get_tp_id_in_flow(flow)
+                    # The vlan filter remove should be followed by a TP deleted for that TP ID.
+                    # Use this information to re-schedule any vlan filter add tasks for the same TP ID again.
+                    # First check if the TP download was done, before we access that TP delete is necessary
+                    if uni_id in self._tech_profile_download_done and tp_id in self._tech_profile_download_done[uni_id] and \
+                            self._tech_profile_download_done[uni_id][tp_id] is True:
+                        if uni_id not in self._pending_delete_tp:
+                            self._pending_delete_tp[uni_id] = dict()
+                            self._pending_delete_tp[uni_id][tp_id] = True
+                        else:
+                            self._pending_delete_tp[uni_id][tp_id] = True
                     # Deleting flow from ONU.
                     self._remove_vlan_filter_task(device, uni_id, uni_port=uni_port, _set_vlan_vid=_vlan_vid,
                                                   match_vlan=_vlan_vid, tp_id=tp_id)
+
                     # TODO:Delete TD task.
                 except Exception as e:
                     self.log.exception('failed-to-remove-flow', e=e)
@@ -1185,6 +1223,13 @@ class BrcmOpenomciOnuHandler(object):
 
     def _add_vlan_filter_task(self, device, uni_id, uni_port=None, match_vlan=0,
                               _set_vlan_vid=None, _set_vlan_pcp=8, tp_id=0):
+        if uni_id in self._pending_delete_tp and tp_id in self._pending_delete_tp[uni_id] and \
+                self._pending_delete_tp[uni_id][tp_id] is True:
+            self.log.debug("pending-del-tp--scheduling-add-vlan-filter-task-for-later")
+            reactor.callLater(0.2, self._add_vlan_filter_task, device, uni_id, uni_port, match_vlan,
+                              _set_vlan_vid, _set_vlan_pcp, tp_id)
+            return
+
         self.log.info('_adding_vlan_filter_task', uni_port=uni_port, uni_id=uni_id, tp_id=tp_id, match_vlan=match_vlan,
                       vlan=_set_vlan_vid, vlan_pcp=_set_vlan_pcp)
         assert uni_port is not None
@@ -1746,11 +1791,11 @@ class BrcmOpenomciOnuHandler(object):
 
             self.log.debug("Trying-to-raise-onu-disabled-event")
             OnuDisabledEvent(self.events, self.device_id,
-                           self._onu_indication.intf_id,
-                           device.serial_number,
-                           str(self.device_id),
-                           olt_serial_number, raised_ts,
-                           onu_id=self._onu_indication.onu_id).send(True)
+                             self._onu_indication.intf_id,
+                             device.serial_number,
+                             str(self.device_id),
+                             olt_serial_number, raised_ts,
+                             onu_id=self._onu_indication.onu_id).send(True)
         except Exception as active_event_error:
             self.log.exception('onu-disabled-event-error',
                                errmsg=active_event_error.message)
