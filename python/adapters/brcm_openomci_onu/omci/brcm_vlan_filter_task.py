@@ -16,6 +16,7 @@
 
 from __future__ import absolute_import
 import structlog
+from pyvoltha.common.utils.asleep import asleep
 from pyvoltha.adapters.extensions.omci.tasks.task import Task
 from twisted.internet import reactor
 from twisted.internet.defer import inlineCallbacks, failure, returnValue
@@ -327,6 +328,7 @@ class BrcmVlanFilterTask(Task):
 
             else: #addTag = False
                 #TODO: needs to be implemented - future task.
+                yield asleep(1)
                 self.log.debug('removing-vlan-filter-tag', uni_port=self._uni_port, match_vlan=self._match_vlan, )
             self.deferred.callback(self)
 
