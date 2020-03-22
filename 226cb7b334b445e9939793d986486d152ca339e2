@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "75982740_966e0ac5",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 1033,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2020-03-22T01:21:01Z",
+      "side": 1,
+      "message": "check if there is a task in progress.  this could be a delete that\u0027s not done deleting.  causing above checks to still be True.",
+      "range": {
+        "startLine": 1033,
+        "startChar": 16,
+        "endLine": 1033,
+        "endChar": 59
+      },
+      "revId": "226cb7b334b445e9939793d986486d152ca339e2",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0a74d2ed_2e7c3454",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_vlan_filter_task.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 331,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2020-03-22T01:21:01Z",
+      "side": 1,
+      "message": "a cheat.  but in reality this would take some time when implemented.  \n\nAlso, a bigger issue, we should not have to process flow adds and flow deletes for the same subscriber/uni at the same time.  onos/olt-app should manage this.",
+      "range": {
+        "startLine": 331,
+        "startChar": 16,
+        "endLine": 331,
+        "endChar": 31
+      },
+      "revId": "226cb7b334b445e9939793d986486d152ca339e2",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    }
+  ]
+}
