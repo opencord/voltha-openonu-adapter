@@ -19,15 +19,19 @@ from structlog import get_logger
 log = get_logger()
 
 class Probe(SimpleHTTPRequestHandler):
-    kafka_adapter_proxy_running = False
+    # Checks for Onu Adapter Readiness; all should be true
     kafka_cluster_proxy_running = False
-    register_adapter_with_core = False
+    kafka_adapter_proxy_running = False
+    adapter_registered_with_core = False
+
+    # Only Kafka connectivity check defines Liveness
+    kafka_proxy_faulty = True
 
     def readiness_probe(self):
-        return Probe.kafka_adapter_proxy_running and Probe.kafka_cluster_proxy_running and Probe.register_adapter_with_core
+        return Probe.kafka_adapter_proxy_running and Probe.kafka_cluster_proxy_running and Probe.adapter_registered_with_core
 
     def liveness_probe(self):
-        return Probe.kafka_adapter_proxy_running and Probe.kafka_cluster_proxy_running and Probe.register_adapter_with_core
+        return not Probe.kafka_proxy_faulty
 
     def do_GET(self):
         if self.path == '/readz':
