@@ -30,7 +30,7 @@ import socketserver
 import configparser
 
 from simplejson import dumps
-from twisted.internet.defer import inlineCallbacks, returnValue
+from twisted.internet.defer import inlineCallbacks, returnValue, Deferred
 from twisted.internet.task import LoopingCall
 from zope.interface import implementer
 
@@ -336,7 +336,6 @@ class Main(object):
         self.startup_components()
 
         if not args.no_heartbeat:
-            self.start_heartbeat()
             self.start_kafka_cluster_heartbeat(self.instance_id)
 
     def start(self):
@@ -388,6 +387,7 @@ class Main(object):
                 )
             ).start()
             Probe.kafka_cluster_proxy_running = True
+            Probe.kafka_proxy_faulty = False
 
             config = self._get_adapter_config()
 
@@ -430,7 +430,7 @@ class Main(object):
 
             # retry for ever
             res = yield self._register_with_core(-1)
-            Probe.register_adapter_with_core = True
+            Probe.adapter_registered_with_core = True
 
             self.log.info('started-internal-services')
 
@@ -443,6 +443,8 @@ class Main(object):
         self.log.info('exiting-on-keyboard-interrupt')
         for component in reversed(registry.iterate()):
             yield component.stop()
+
+        self.server.shutdown()
 
         import threading
         self.log.info('THREADS:')
@@ -469,8 +471,9 @@ class Main(object):
         args = self.args
         host = args.probe.split(':')[0]
         port = args.probe.split(':')[1]
-        server = socketserver.TCPServer((host, int(port)), Probe)
-        server.serve_forever()
+        socketserver.TCPServer.allow_reuse_address = True
+        self.server = socketserver.TCPServer((host, int(port)), Probe)
+        self.server.serve_forever()
 
     @inlineCallbacks
     def _register_with_core(self, retries):
@@ -496,17 +499,6 @@ class Main(object):
                 self.log.exception("failed-registration", e=e)
                 raise
 
-    def start_heartbeat(self):
-
-        t0 = time.time()
-        t0s = time.ctime(t0)
-
-        def heartbeat():
-            self.log.debug(status='up', since=t0s, uptime=time.time() - t0)
-
-        lc = LoopingCall(heartbeat)
-        lc.start(10)
-
     # Temporary function to send a heartbeat message to the external kafka
     # broker
     def start_kafka_cluster_heartbeat(self, instance_id):
@@ -521,28 +513,55 @@ class Main(object):
         )
         topic = defs['heartbeat_topic']
 
-        def send_msg(start_time):
+        def send_heartbeat_msg():
             try:
                 kafka_cluster_proxy = get_kafka_proxy()
-                if kafka_cluster_proxy and not kafka_cluster_proxy.is_faulty():
-                    # self.log.debug('kafka-proxy-available')
+                if kafka_cluster_proxy:
                     message['ts'] = arrow.utcnow().timestamp
-                    message['uptime'] = time.time() - start_time
-                    # self.log.debug('start-kafka-heartbeat')
-                    kafka_cluster_proxy.send_message(topic, dumps(message))
+                    self.log.debug('sending-kafka-heartbeat-message')
+
+                    # Creating a handler to receive the message callbacks
+                    df = Deferred()
+                    df.addCallback(self.process_kafka_alive_state_update)
+                    kafka_cluster_proxy.register_alive_state_update(df)
+                    kafka_cluster_proxy.send_heartbeat_message(topic, dumps(message))
                 else:
                     Probe.kafka_cluster_proxy_running = False
                     self.log.error('kafka-proxy-unavailable')
             except Exception as e:
                 self.log.exception('failed-sending-message-heartbeat', e=e)
 
-        try:
-            t0 = time.time()
-            lc = LoopingCall(send_msg, t0)
-            lc.start(10)
-        except Exception as e:
-            self.log.exception('failed-kafka-heartbeat', e=e)
+        def check_heartbeat_delivery():
+            try:
+                kafka_cluster_proxy = get_kafka_proxy()
+                if kafka_cluster_proxy:
+                    kafka_cluster_proxy.check_heartbeat_delivery()
+            except Exception as e:
+                self.log.exception('failed-checking-heartbeat-delivery', e=e)
 
+        def schedule_periodic_heartbeat():
+            try:
+                # Sending the heartbeat message in a loop
+                lc_heartbeat = LoopingCall(send_heartbeat_msg)
+                lc_heartbeat.start(10)
+                # Polling the delivery status more frequently to get early notification
+                lc_poll = LoopingCall(check_heartbeat_delivery)
+                lc_poll.start(2)
+            except Exception as e:
+                self.log.exception('failed-kafka-heartbeat-startup', e=e)
+
+        from twisted.internet import reactor
+        # Delaying heartbeat initially to let kafka connection be established
+        reactor.callLater(5, schedule_periodic_heartbeat)
+
+    # Receiving the callback and updating the probe accordingly
+    def process_kafka_alive_state_update(self, alive_state):
+        self.log.debug('process-kafka-alive-state-update', alive_state=alive_state)
+        Probe.kafka_cluster_proxy_running = alive_state
+
+        kafka_cluster_proxy = get_kafka_proxy()
+        if kafka_cluster_proxy:
+            Probe.kafka_proxy_faulty = kafka_cluster_proxy.is_faulty()
 
 if __name__ == '__main__':
     Main().start()
