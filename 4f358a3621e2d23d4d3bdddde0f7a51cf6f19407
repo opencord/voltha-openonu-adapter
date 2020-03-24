@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "1ffdbc94_ff837a3d",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_mib_download_task.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 226,
+      "author": {
+        "id": 1000097
+      },
+      "writtenOn": "2020-03-24T08:08:23Z",
+      "side": 1,
+      "message": "IS the MAC Filter table used? For the TT workflow do you need to filter the packets based on MAC address on the ONT itself? Isn\u0027t the filtering at the OLT enough?",
+      "parentUuid": "c6369c31_8e5b1ce4",
+      "revId": "4f358a3621e2d23d4d3bdddde0f7a51cf6f19407",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1b305248_7230953a",
         "filename": "python/adapters/brcm_openomci_onu/omci/brcm_mib_download_task.py",
         "patchSetId": 4
@@ -118,6 +136,24 @@
       "writtenOn": "2020-03-24T07:16:51Z",
       "side": 1,
       "message": "ONT2-G entity represents ONU, not UNI. So, You don\u0027t need to set this entity for each UNI.",
+      "revId": "4f358a3621e2d23d4d3bdddde0f7a51cf6f19407",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e4c25660_0096d827",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_mib_download_task.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 246,
+      "author": {
+        "id": 1000097
+      },
+      "writtenOn": "2020-03-24T08:08:23Z",
+      "side": 1,
+      "message": "Then we should set the ONT2G outside of this function, as this function gets called for each UNI",
+      "parentUuid": "42f09afe_8017a60f",
       "revId": "4f358a3621e2d23d4d3bdddde0f7a51cf6f19407",
       "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
       "unresolved": false
