@@ -2,6 +2,40 @@
   "comments": [
     {
       "key": {
+        "uuid": "c6369c31_8e5b1ce4",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_mib_download_task.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 226,
+      "author": {
+        "id": 1000513
+      },
+      "writtenOn": "2020-03-24T07:16:51Z",
+      "side": 1,
+      "message": "Because We need to learn MAC address from OLT. So I need to set False because G-988 spec saying \"The OLT should disable the learning mode in the MAC bridge service profile before writing to the MAC filter table\"",
+      "revId": "4f358a3621e2d23d4d3bdddde0f7a51cf6f19407",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1b305248_7230953a",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_mib_download_task.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 231,
+      "author": {
+        "id": 1000513
+      },
+      "writtenOn": "2020-03-24T07:16:51Z",
+      "side": 1,
+      "message": "I need to set False If I set learning_ind as False.",
+      "revId": "4f358a3621e2d23d4d3bdddde0f7a51cf6f19407",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e9fffa92_47eacce7",
         "filename": "python/adapters/brcm_openomci_onu/omci/brcm_mib_download_task.py",
         "patchSetId": 4
@@ -67,6 +101,23 @@
         "endLine": 242,
         "endChar": 64
       },
+      "revId": "4f358a3621e2d23d4d3bdddde0f7a51cf6f19407",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "42f09afe_8017a60f",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_mib_download_task.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 246,
+      "author": {
+        "id": 1000513
+      },
+      "writtenOn": "2020-03-24T07:16:51Z",
+      "side": 1,
+      "message": "ONT2-G entity represents ONU, not UNI. So, You don\u0027t need to set this entity for each UNI.",
       "revId": "4f358a3621e2d23d4d3bdddde0f7a51cf6f19407",
       "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
       "unresolved": false
