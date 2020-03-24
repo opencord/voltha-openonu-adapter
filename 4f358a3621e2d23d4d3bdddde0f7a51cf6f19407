@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "88dd81d4_9f5501df",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_mib_download_task.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 1000436
+      },
+      "writtenOn": "2020-03-24T17:41:53Z",
+      "side": 1,
+      "message": "Agree with Amit.  The onu2-g change needs to be moved to this function given it needs to only happen once for the whole onu.",
+      "range": {
+        "startLine": 177,
+        "startChar": 8,
+        "endLine": 177,
+        "endChar": 36
+      },
+      "revId": "4f358a3621e2d23d4d3bdddde0f7a51cf6f19407",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c6369c31_8e5b1ce4",
         "filename": "python/adapters/brcm_openomci_onu/omci/brcm_mib_download_task.py",
         "patchSetId": 4
