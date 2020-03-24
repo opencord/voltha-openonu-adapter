@@ -46,6 +46,30 @@
       "revId": "4f358a3621e2d23d4d3bdddde0f7a51cf6f19407",
       "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ec151ba4_cdf5f7aa",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_mib_download_task.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 242,
+      "author": {
+        "id": 1000513
+      },
+      "writtenOn": "2020-03-24T06:00:20Z",
+      "side": 1,
+      "message": "TT OMCI structure is using 1:MP map-filtering mode. It\u0027s not working for TT use-case If I didn\u0027t set this attribute as 5.",
+      "parentUuid": "058ea375_9d5d36f3",
+      "range": {
+        "startLine": 242,
+        "startChar": 37,
+        "endLine": 242,
+        "endChar": 64
+      },
+      "revId": "4f358a3621e2d23d4d3bdddde0f7a51cf6f19407",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
     }
   ]
 }
