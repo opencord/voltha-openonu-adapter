@@ -34,7 +34,7 @@ from twisted.internet.defer import inlineCallbacks, returnValue, Deferred
 from twisted.internet.task import LoopingCall
 from zope.interface import implementer
 
-from pyvoltha.common.structlog_setup import setup_logging, update_logging
+from pyvoltha.common.structlog_setup import setup_logging, update_logging, string_to_int
 from pyvoltha.common.utils.asleep import asleep
 from pyvoltha.common.utils.deferred_utils import TimeOutError
 from pyvoltha.common.utils.dockerhelpers import get_my_containers_name
@@ -51,6 +51,7 @@ from voltha_protos.adapter_pb2 import AdapterConfig
 
 from brcm_openomci_onu_adapter import BrcmOpenomciOnuAdapter
 from probe import Probe
+from pyvoltha.adapters.log_controller import LogController, KV_STORE_DATA_PATH_PREFIX
 
 defs = dict(
     build_info_file='./BUILDINFO',
@@ -74,7 +75,8 @@ defs = dict(
     retry_interval=os.environ.get('RETRY_INTERVAL', 2),
     heartbeat_topic=os.environ.get('HEARTBEAT_TOPIC', "adapters.heartbeat"),
     probe=os.environ.get('PROBE', ':8080'),
-    log_level=os.environ.get('LOG_LEVEL', 'WARN')
+    log_level=os.environ.get('LOG_LEVEL', 'WARN'),
+    component_name=os.environ.get('COMPONENT_NAME', "adapter-open-onu")
 )
 
 
@@ -184,6 +186,12 @@ def parse_args():
                         dest='log_level',
                         action='store',
                         default=defs['log_level'],
+                        help=_help)
+
+    _help = 'get the component name'
+    parser.add_argument('-cn', '--component_name',
+                        dest='env',
+                        action='store',
                         help=_help)
 
     _help = ('use docker container name as conatiner instance id'
@@ -297,20 +305,17 @@ class Main(object):
         self.config = load_config(args)
 
         # log levels in python are:
-        # 1 - DEBUG => verbosity_adjust = 0
-        # 2 - INFO => verbosity_adjust = 1
-        # 3 - WARNING => verbosity_adjust = 2
-        # 4 - ERROR
-        # 5 - CRITICAL
-        # If no flags are set we want to stick with INFO,
-        # if verbose is set we want to go down to DEBUG
-        # if quiet is set we want to go up to WARNING
-        # if you set both, you're doing something non-sense and you'll be back at INFO
+        # 1 - DEBUG => verbosity_adjust = 10
+        # 2 - INFO => verbosity_adjust = 20
+        # 3 - WARNING => verbosity_adjust = 30
+        # 4 - ERROR => verbosity_adjust = 40
+        # 5 - CRITICAL => verbosity_adjust = 50
 
-        verbosity_adjust = self.string_to_int(str(args.log_level))
-        if verbosity_adjust == -1:
-            print("Invalid loglevel is given: " + str(args.log_level))
-            sys.exit(0)
+        verbosity_adjust = string_to_int(str(args.log_level))
+
+        if verbosity_adjust == 0:
+            raise ValueError("Invalid loglevel is given: " + str(args.log_level))
+            sys.exit(1)
 
         self.log = setup_logging(self.config.get('logging', {}),
                                  args.instance_id,
@@ -323,6 +328,11 @@ class Main(object):
 
         if not args.no_banner:
             print_banner(self.log)
+
+        self.etcd_host = str(args.etcd).split(':')[0]
+        self.etcd_port = str(args.etcd).split(':')[1]
+
+        self.controller = LogController(self.etcd_host, self.etcd_port)
 
         self.adapter = None
         # Create a unique instance id using the passed-in instance id and
@@ -340,15 +350,6 @@ class Main(object):
 
     def start(self):
         self.start_reactor()  # will not return except Keyboard interrupt
-
-    def string_to_int(self, loglevel):
-        l = loglevel.upper()
-        if l == "DEBUG": return 0
-        elif l == "INFO": return 1
-        elif l == "WARN": return 2
-        elif l == "ERROR": return 3
-        elif l == "CRITICAL": return 4
-        else: return -1
 
     def stop(self):
         pass
@@ -373,10 +374,6 @@ class Main(object):
                           etcd=self.args.etcd)
 
             registry.register('main', self)
-
-            # Update the logger to output the vcore id.
-            self.log = update_logging(instance_id=self.instance_id,
-                                      vcore_id=None)
 
             yield registry.register(
                 'kafka_cluster_proxy',
@@ -459,12 +456,13 @@ class Main(object):
             t.join()
 
     def start_reactor(self):
-        from twisted.internet import reactor
+        from twisted.internet import reactor, defer
         reactor.callWhenRunning(
             lambda: self.log.info('twisted-reactor-started'))
         reactor.addSystemEventTrigger('before', 'shutdown',
                                       self.shutdown_components)
         reactor.callInThread(self.start_probe)
+        defer.maybeDeferred(self.controller.start_watch_log_config_change, self.args.instance_id, str(self.args.log_level))
         reactor.run()
 
     def start_probe(self):
