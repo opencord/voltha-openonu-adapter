@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "38bd44a1_e0b486fc",
+        "filename": "python/adapters/brcm_openomci_onu/main.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1000016
+      },
+      "writtenOn": "2020-03-27T20:00:21Z",
+      "side": 1,
+      "message": "seems like this should be named `component_name` or something similar.",
+      "range": {
+        "startLine": 79,
+        "startChar": 4,
+        "endLine": 79,
+        "endChar": 7
+      },
+      "revId": "f11397a1f8be947ac9e3020b10603fcee46c755a",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "56deb035_b17590d0",
+        "filename": "python/adapters/brcm_openomci_onu/main.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 1000016
+      },
+      "writtenOn": "2020-03-27T20:00:21Z",
+      "side": 1,
+      "message": "related to above comment, choose a more intuitive argument name?",
+      "range": {
+        "startLine": 192,
+        "startChar": 24,
+        "endLine": 192,
+        "endChar": 37
+      },
+      "revId": "f11397a1f8be947ac9e3020b10603fcee46c755a",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    }
+  ]
+}
