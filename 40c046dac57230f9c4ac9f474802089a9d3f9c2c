@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7771f534_8b62e34c",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 7
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000116
+      },
+      "writtenOn": "2020-03-27T07:53:42Z",
+      "side": 1,
+      "message": "please bring back \nVOL-2823 Change vlan-filter task to support TT case\n\n-Instead of hardcoded values, use the vid and pcp values in flow.\n-Add task removal for flow-remove case.",
+      "range": {
+        "startLine": 7,
+        "startChar": 0,
+        "endLine": 7,
+        "endChar": 71
+      },
+      "revId": "40c046dac57230f9c4ac9f474802089a9d3f9c2c",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    }
+  ]
+}
