@@ -58,7 +58,7 @@ class BrcmOpenomciOnuAdapter(object):
         )
     ]
 
-    def __init__(self, core_proxy, adapter_proxy, config, build_info):
+    def __init__(self, core_proxy, adapter_proxy, config, build_info, current_replica, total_replicas, endpoint):
         self.log = structlog.get_logger()
         self.log.debug('starting-adapter', config=config)
 
@@ -69,7 +69,10 @@ class BrcmOpenomciOnuAdapter(object):
             id=self.name,
             vendor='VOLTHA OpenONU',
             version=build_info.version,
-            config=AdapterConfig()
+            config=AdapterConfig(),
+            currentReplica=current_replica,
+            totalReplicas=total_replicas,
+            endpoint=endpoint
         )
         self.devices_handlers = dict()
         self.device_handler_class = BrcmOpenomciOnuHandler
