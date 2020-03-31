@@ -59,7 +59,7 @@ defs = dict(
     container_name_regex=os.environ.get('CONTAINER_NUMBER_EXTRACTOR', '^.*\.(['
                                                                       '0-9]+)\..*$'),
     consul=os.environ.get('CONSUL', 'localhost:8500'),
-    name=os.environ.get('NAME', 'openonu'),
+    name=os.environ.get('NAME', 'brcm_openomci_onu'),
     vendor=os.environ.get('VENDOR', 'Voltha Project'),
     device_type=os.environ.get('DEVICE_TYPE', 'openonu'),
     accept_bulk_flow=os.environ.get('ACCEPT_BULK_FLOW', True),
@@ -76,6 +76,8 @@ defs = dict(
     heartbeat_topic=os.environ.get('HEARTBEAT_TOPIC', "adapters.heartbeat"),
     probe=os.environ.get('PROBE', ':8080'),
     log_level=os.environ.get('LOG_LEVEL', 'WARN'),
+    current_replica=1,
+    total_replicas=1,
     component_name=os.environ.get('COMPONENT_NAME', "adapter-open-onu")
 )
 
@@ -107,6 +109,7 @@ def parse_args():
                         default=defs['consul'],
                         help=_help)
 
+    # NOTE this is really the adapter type
     _help = 'name of this adapter (default: %s)' % defs['name']
     parser.add_argument('-na', '--name',
                         dest='name',
@@ -248,6 +251,20 @@ def parse_args():
         default=defs['probe'],
         help=_help)
 
+    _help = 'Replica number of this particular instance (default: %s)' % defs['current_replica']
+    parser.add_argument(
+        '--currentReplica', dest='current_replica', action='store',
+        default=defs['current_replica'],
+        type=int,
+        help=_help)
+
+    _help = 'Total number of instances for this adapter (default: %s)' % defs['total_replicas']
+    parser.add_argument(
+        '--totalReplicas', dest='total_replicas', action='store',
+        default=defs['total_replicas'],
+        type=int,
+        help=_help)
+
     args = parser.parse_args()
 
     # post-processing
@@ -342,7 +359,8 @@ class Main(object):
 
         self.core_topic = str(args.core_topic)
         self.event_topic = str(args.event_topic)
-        self.listening_topic = str(args.name)
+        self.listening_topic = "%s_%s" % (args.name, args.current_replica)
+        self.id = "%s_%s" % (args.name, args.current_replica)
         self.startup_components()
 
         if not args.no_heartbeat:
@@ -400,9 +418,15 @@ class Main(object):
                 my_listening_topic=self.listening_topic)
 
             self.adapter = BrcmOpenomciOnuAdapter(
-                core_proxy=self.core_proxy, adapter_proxy=self.adapter_proxy,
+                id=self.id,
+                core_proxy=self.core_proxy,
+                adapter_proxy=self.adapter_proxy,
                 config=config,
-                build_info=self.build_info)
+                build_info=self.build_info,
+                current_replica=self.args.current_replica,
+                total_replicas=self.args.total_replicas,
+                endpoint=self.listening_topic
+            )
 
             self.adapter.start()
 
@@ -415,7 +439,7 @@ class Main(object):
                     kafka_host_port=self.args.kafka_adapter,
                     # TODO: Add KV Store object reference
                     kv_store=self.args.backend,
-                    default_topic=self.args.name,
+                    default_topic=self.listening_topic,
                     group_id_prefix=self.args.instance_id,
                     target_cls=openonu_request_handler
                 )
