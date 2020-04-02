@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a00ed985_54132278",
+        "filename": "python/adapters/brcm_openomci_onu/main.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 318,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2020-04-02T14:18:23Z",
+      "side": 1,
+      "message": "should you exit here with an error code as opposed to 0, which means exit without error",
+      "range": {
+        "startLine": 318,
+        "startChar": 21,
+        "endLine": 318,
+        "endChar": 22
+      },
+      "revId": "8d873e6633de387f2e5fc985009091d399c69a6f",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    }
+  ]
+}
