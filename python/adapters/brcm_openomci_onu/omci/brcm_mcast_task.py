@@ -217,7 +217,7 @@ class BrcmMcastTask(Task):
     def _create_mcast_operation_profile(self):
         self.log.debug ( 'starting-create-mcast-operation-profile' )
         attributes = dict ( igmp_version=IGMP_VERSION , igmp_function=self._set_igmp_function,
-                            immediate_leave=self._set_immediate_leave, robustness=0)
+                            immediate_leave=self._set_immediate_leave, robustness=2 )
         msg = MulticastOperationsProfileFrame ( entity_id=self._mcast_operation_profile_id,
                                                 querier_ip_address=0,
                                                 query_interval=125,
