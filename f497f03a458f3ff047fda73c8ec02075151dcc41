@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b5c2f650_4fe9b4c0",
+        "filename": "VERSION",
+        "patchSetId": 4
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000127
+      },
+      "writtenOn": "2020-04-20T19:29:27Z",
+      "side": 1,
+      "message": "The convention is 2.4.1-dev (notice the hyphen instead of underscore).",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 9
+      },
+      "revId": "f497f03a458f3ff047fda73c8ec02075151dcc41",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    }
+  ]
+}
