@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "53a1839e_3b568772",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 15
+      },
+      "lineNbr": 817,
+      "author": {
+        "id": 1000127
+      },
+      "writtenOn": "2020-05-01T21:52:22Z",
+      "side": 0,
+      "message": "Why is this check removed?  I think this is breaking one of the test on the hardware.\nBasically in disable/enable ONU test is broken as the ONU device is not in the right state after ONU enable.",
+      "revId": "b46c122d0a0146f7c44700a751c9936c0af4f831",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5aaf3c69_d86dc0fd",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 15
+      },
+      "lineNbr": 893,
+      "author": {
+        "id": 1000127
+      },
+      "writtenOn": "2020-05-01T21:52:22Z",
+      "side": 0,
+      "message": "Same here.",
+      "revId": "b46c122d0a0146f7c44700a751c9936c0af4f831",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "09b034d3_85b68f13",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 15
+      },
+      "lineNbr": 1087,
+      "author": {
+        "id": 1000127
+      },
+      "writtenOn": "2020-05-01T21:52:22Z",
+      "side": 0,
+      "message": "Same here",
+      "revId": "b46c122d0a0146f7c44700a751c9936c0af4f831",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    }
+  ]
+}
