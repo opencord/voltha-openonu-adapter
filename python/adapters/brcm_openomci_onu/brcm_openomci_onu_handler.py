@@ -33,6 +33,7 @@ from twisted.internet.defer import inlineCallbacks, returnValue
 from heartbeat import HeartBeat
 from pyvoltha.adapters.extensions.events.device_events.onu.onu_active_event import OnuActiveEvent
 from pyvoltha.adapters.extensions.events.device_events.onu.onu_disabled_event import OnuDisabledEvent
+from pyvoltha.adapters.extensions.events.device_events.onu.onu_deleted_event import OnuDeletedEvent
 from pyvoltha.adapters.extensions.events.kpi.onu.onu_pm_metrics import OnuPmMetrics
 from pyvoltha.adapters.extensions.events.kpi.onu.onu_omci_pm import OnuOmciPmMetrics
 from pyvoltha.adapters.extensions.events.adapter_events import AdapterEvents
@@ -412,17 +413,20 @@ class BrcmOpenomciOnuHandler(object):
     @inlineCallbacks
     def delete(self, device):
         self.log.info('delete-onu', device_id=device.id, serial_number=device.serial_number)
-
         try:
             yield self.onu_kv_client.delete(device.id)
         except Exception as e:
             self.log.error('could-not-delete-onu-state', device_id=device.id, e=e)
 
-        self._deferred.cancel()
-        self._test_request.stop_collector()
-        self._pm_metrics.stop_collector()
-        self.log.debug('removing-openomci-statemachine')
-        self.omci_agent.remove_device(device.id, cleanup=True)
+        try:
+            self._deferred.cancel()
+            self._test_request.stop_collector()
+            self._pm_metrics.stop_collector()
+            self.log.debug('removing-openomci-statemachine')
+            self.omci_agent.remove_device(device.id, cleanup=True)
+            yield self.onu_deleted_event()
+        except Exception as e:
+            self.log.error('could-not-delete-onu', device_id=device.id, e=e)
 
     def _create_tconts(self, uni_id, us_scheduler):
         alloc_id = us_scheduler['alloc_id']
@@ -1961,7 +1965,7 @@ class BrcmOpenomciOnuHandler(object):
                            onu_id=onu_id).send(True)
         except Exception as active_event_error:
             self.log.exception('onu-activated-event-error',
-                               errmsg=active_event_error.message)
+                               errmsg=active_event_error)
 
     @inlineCallbacks
     def onu_disabled_event(self):
@@ -1971,26 +1975,60 @@ class BrcmOpenomciOnuHandler(object):
             parent_device = yield self.core_proxy.get_device(self.parent_id)
             olt_serial_number = parent_device.serial_number
             raised_ts = arrow.utcnow().timestamp
+            intf_id = self._onu_persisted_state.get('intf_id')
+            onu_id = self._onu_persisted_state.get('onu_id')
+            onu_serial = self._onu_persisted_state.get('serial_number')
 
             self.log.debug("onu-indication-context-data",
-                           pon_id=self._onu_indication.intf_id,
-                           onu_id=self._onu_indication.onu_id,
+                           pon_id=intf_id,
+                           onu_id=onu_id,
                            registration_id=self.device_id,
                            device_id=self.device_id,
-                           onu_serial_number=device.serial_number,
+                           onu_serial_number=onu_serial,
                            olt_serial_number=olt_serial_number,
                            raised_ts=raised_ts)
 
             self.log.debug("Trying-to-raise-onu-disabled-event")
             OnuDisabledEvent(self.events, self.device_id,
-                             self._onu_indication.intf_id,
+                             intf_id,
                              device.serial_number,
                              str(self.device_id),
                              olt_serial_number, raised_ts,
-                             onu_id=self._onu_indication.onu_id).send(True)
-        except Exception as active_event_error:
+                             onu_id=onu_id).send(True)
+        except Exception as disable_event_error:
             self.log.exception('onu-disabled-event-error',
-                               errmsg=active_event_error.message)
+                               errmsg=disable_event_error)
+
+    @inlineCallbacks
+    def onu_deleted_event(self):
+        self.log.debug('onu-deleted-event')
+        try:
+            device = yield self.core_proxy.get_device(self.device_id)
+            parent_device = yield self.core_proxy.get_device(self.parent_id)
+            olt_serial_number = parent_device.serial_number
+            raised_ts = arrow.utcnow().timestamp
+            intf_id = self._onu_persisted_state.get('intf_id')
+            onu_id = self._onu_persisted_state.get('onu_id')
+            serial_number = self._onu_persisted_state.get('serial_number')
+
+            self.log.debug("onu-deleted-event-context-data",
+                           pon_id=intf_id,
+                           onu_id=onu_id,
+                           registration_id=self.device_id,
+                           device_id=self.device_id,
+                           onu_serial_number=serial_number,
+                           olt_serial_number=olt_serial_number,
+                           raised_ts=raised_ts)
+
+            OnuDeletedEvent(self.events, self.device_id,
+                             intf_id,
+                             serial_number,
+                             str(self.device_id),
+                             olt_serial_number, raised_ts,
+                             onu_id=onu_id).send(True)
+        except Exception as deleted_event_error:
+            self.log.exception('onu-deleted-event-error',
+                               errmsg=deleted_event_error)
 
     def lock_ports(self, lock=True, device_disabled=False):
 
