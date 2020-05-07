@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5359a1ea_0c0b7cb3",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 2001,
+      "author": {
+        "id": 1000127
+      },
+      "writtenOn": "2020-05-07T15:07:54Z",
+      "side": 1,
+      "message": "This log may be unnecessary.",
+      "revId": "6d2de0a0204753508b4452ff05aea5008ee07707",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    }
+  ]
+}
