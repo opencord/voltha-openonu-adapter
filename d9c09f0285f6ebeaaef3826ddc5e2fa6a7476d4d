@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "747adf67_686b8791",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 510,
+      "author": {
+        "id": 1000218
+      },
+      "writtenOn": "2020-05-14T21:33:58Z",
+      "side": 1,
+      "message": "Should\u0027t this be in the for loop? These seems to remove only the last tp_id in queue. The aim in previous code was to delete entire uni related tp_ids, after they all processed, so delete the queued_vlan_filter_task[uni_id] after the for loop ended.\nActually i firstly added per tp deletion in the for loop, but then I had some problems with it in my tests and removed it(seems I have forgotten the comment  there :))",
+      "range": {
+        "startLine": 510,
+        "startChar": 0,
+        "endLine": 510,
+        "endChar": 64
+      },
+      "revId": "d9c09f0285f6ebeaaef3826ddc5e2fa6a7476d4d",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    }
+  ]
+}
