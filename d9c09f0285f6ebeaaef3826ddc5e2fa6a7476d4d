@@ -22,6 +22,30 @@
       "revId": "d9c09f0285f6ebeaaef3826ddc5e2fa6a7476d4d",
       "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "798e9fe9_82268dce",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 510,
+      "author": {
+        "id": 1000127
+      },
+      "writtenOn": "2020-05-14T23:07:36Z",
+      "side": 1,
+      "message": "No, this is correct. \nself._queued_vlan_filter_task[uni_id][tp_id] is a list of vlan_ids for a given tp_id.\nIn the above loop, we iterate the list and execute the vlan_filter_task for all the vlan_ids for a given uni_id and tp_id.\nThen we delete the key which is tp_id.\nOnce we have dealt with all the tp_id on a given uni_id, we delete the uni_id key.",
+      "parentUuid": "747adf67_686b8791",
+      "range": {
+        "startLine": 510,
+        "startChar": 0,
+        "endLine": 510,
+        "endChar": 64
+      },
+      "revId": "d9c09f0285f6ebeaaef3826ddc5e2fa6a7476d4d",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
     }
   ]
 }
