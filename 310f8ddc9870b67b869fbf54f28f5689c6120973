@@ -22,6 +22,30 @@
       "revId": "310f8ddc9870b67b869fbf54f28f5689c6120973",
       "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "06d9398f_6062ef0b",
+        "filename": "templates/README.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 1000116
+      },
+      "writtenOn": "2020-05-15T16:55:52Z",
+      "side": 1,
+      "message": "+1 to that.",
+      "parentUuid": "7e6ea8a2_e11c68a3",
+      "range": {
+        "startLine": 5,
+        "startChar": 40,
+        "endLine": 5,
+        "endChar": 119
+      },
+      "revId": "310f8ddc9870b67b869fbf54f28f5689c6120973",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
     }
   ]
 }
