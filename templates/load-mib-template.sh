@@ -24,4 +24,5 @@ cat ALCL-BVMGR00BRAXS020XA-3FE47059BFHB21-v2.json | ETCDCTL_API=3 etcdctl --endp
 cat BRCM-BVM4K00BRA0915-0083-5023_020O02414-v2.json | ETCDCTL_API=3 etcdctl --endpoints=$ETCD_IP:2379 put service/voltha/omci_mibs/templates/BRCM/BVM4K00BRA0915-0083/5023_020O02414
 cat BRCM-BVM4K00BRA0915-0083-5023_003GWOV36-VEIP-v1.json | ETCDCTL_API=3 etcdctl --endpoints=$ETCD_IP:2379 put service/voltha/omci_mibs/templates/BRCM/BVM4K00BRA0915-0083/5023_003GWOV36
 cat BBSM-12345123451234512345-00000000000001-v1.json | ETCDCTL_API=3 etcdctl --endpoints=$ETCD_IP:2379 put service/voltha/omci_mibs/templates/BBSM/12345123451234512345/00000000000001
-
+cat BRCM_ISKT-G108_10-7.0.1b8-0.6-v1.json | ETCDCTL_API=3 etcdctl --endpoints=$ETCD_IP:2379 put service/voltha/omci_mibs/templates/BRCM/G108_10/7.0.1b8-0.6
+cat BRCM_ALPH-BVM4K00BRA0915-0083-5023_020O02414-v1.json | ETCDCTL_API=3 etcdctl --endpoints=$ETCD_IP:2379 put service/voltha/omci_mibs/templates/BRCM/BVM4K00BRA0915-0083/5023_020O02414
