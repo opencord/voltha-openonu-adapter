@@ -46,6 +46,30 @@
       "revId": "d9c09f0285f6ebeaaef3826ddc5e2fa6a7476d4d",
       "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "368225ff_59059e77",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 510,
+      "author": {
+        "id": 1000218
+      },
+      "writtenOn": "2020-05-15T00:08:07Z",
+      "side": 1,
+      "message": "Yes you are right. My bad.",
+      "parentUuid": "798e9fe9_82268dce",
+      "range": {
+        "startLine": 510,
+        "startChar": 0,
+        "endLine": 510,
+        "endChar": 64
+      },
+      "revId": "d9c09f0285f6ebeaaef3826ddc5e2fa6a7476d4d",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
     }
   ]
 }
