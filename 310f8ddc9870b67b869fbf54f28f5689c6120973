@@ -46,6 +46,30 @@
       "revId": "310f8ddc9870b67b869fbf54f28f5689c6120973",
       "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d7959f05_67a4259b",
+        "filename": "templates/README.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 1000127
+      },
+      "writtenOn": "2020-05-15T17:55:14Z",
+      "side": 1,
+      "message": "Looking at docs.voltha.org - it looks more of a user guide.\nIs it right place to put design documents?\nHowever it may be worthwhile to put the details creating the MIB templates (see link below).",
+      "parentUuid": "06d9398f_6062ef0b",
+      "range": {
+        "startLine": 5,
+        "startChar": 40,
+        "endLine": 5,
+        "endChar": 119
+      },
+      "revId": "310f8ddc9870b67b869fbf54f28f5689c6120973",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
     }
   ]
 }
