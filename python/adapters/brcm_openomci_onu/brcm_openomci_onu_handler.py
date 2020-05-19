@@ -1597,6 +1597,7 @@ class BrcmOpenomciOnuHandler(object):
                 self.log.info('enable-port', device_id=self.device_id, port=port)
                 yield self.core_proxy.port_state_update(self.device_id, Port.ETHERNET_UNI, port.port_number,
                                                         port.operstatus)
+            break # TEO only reports the first UNI
 
     # TODO: Normally we would want any uni ethernet link down or uni ethernet link up alarms to register in the core,
     #  but practically olt provisioning cannot handle the churn of links up, down, then up again typical on startup.
@@ -1845,6 +1846,11 @@ class BrcmOpenomciOnuHandler(object):
         uni_name = "uni-{}".format(uni_no)
 
         mac_bridge_port_num = uni_id + 1  # TODO +1 is only to test non-zero index
+
+        if mac_bridge_port_num != 1:
+            # TEO only care about the first UNI
+            self.log.debug("TEO-ignoring-UNI", mac_bridge_port_num=mac_bridge_port_num)
+            return
 
         self.log.debug('uni-port-inputs', uni_no=uni_no, uni_id=uni_id, uni_name=uni_name, uni_type=uni_type,
                        entity_id=entity_id, mac_bridge_port_num=mac_bridge_port_num, serial_number=device.serial_number)
