@@ -67,6 +67,7 @@ defs = dict(
     accept_incremental_evto_update=os.environ.get('ACCEPT_INCREMENTAL_EVTO_UPDATE', False),
     etcd=os.environ.get('ETCD', 'localhost:2379'),
     core_topic=os.environ.get('CORE_TOPIC', 'rwcore'),
+    adapter_topic=os.environ.get('ADAPTER_TOPIC', 'openolt'),
     event_topic=os.environ.get('EVENT_TOPIC', 'voltha.events'),
     interface=os.environ.get('INTERFACE', get_my_primary_interface()),
     instance_id=os.environ.get('INSTANCE_ID', os.environ.get('HOSTNAME', '1')),
@@ -246,6 +247,13 @@ def parse_args():
                         action='store',
                         default=defs['core_topic'],
                         help=_help)
+    
+    _help = 'topic of openolt adapter on the kafka bus'
+    parser.add_argument('-at', '--adapter_topic',
+                        dest='adapter_topic',
+                        action='store',
+                        default=defs['adapter_topic'],
+                        help=_help)
 
     _help = 'topic of events on the kafka bus'
     parser.add_argument('-et', '--event_topic',
@@ -367,6 +375,7 @@ class Main(object):
         self.instance_id = self.args.instance_id + '_' + str(current_time)
 
         self.core_topic = str(args.core_topic)
+        self.adapter_topic = str(args.adapter_topic)
         self.event_topic = str(args.event_topic)
         self.listening_topic = "%s_%s" % (args.name, args.current_replica)
         self.id = "%s_%s" % (args.name, args.current_replica)
@@ -423,7 +432,7 @@ class Main(object):
 
             self.adapter_proxy = AdapterProxy(
                 kafka_proxy=None,
-                core_topic=self.core_topic,
+                adapter_topic=self.adapter_topic,
                 my_listening_topic=self.listening_topic)
 
             self.adapter = BrcmOpenomciOnuAdapter(
