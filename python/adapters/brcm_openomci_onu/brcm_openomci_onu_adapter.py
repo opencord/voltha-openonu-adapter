@@ -208,11 +208,11 @@ class BrcmOpenomciOnuAdapter(object):
         raise NotImplementedError()
 
     # TODO(smbaker): When BrcmOpenomciOnuAdapter is updated to inherit from OnuAdapter, this function can be deleted
-    def update_pm_config(self, device, pm_config):
+    def update_pm_config(self, device, pm_configs):
         self.log.info("adapter-update-pm-config", device_id=device.id, serial_number=device.serial_number,
-                 pm_config=pm_config)
+                 pm_configs=pm_configs)
         handler = self.devices_handlers[device.id]
-        handler.update_pm_config(device, pm_config)
+        handler.update_pm_config(device, pm_configs)
 
     def update_flows_bulk(self, device, flows, groups):
         '''

@@ -803,10 +803,10 @@ class BrcmOpenomciOnuHandler(object):
                                e=e, uni_id=uni_id, tp_path=tp_path,
                                alloc_id=alloc_id, gem_port_id=gem_port_id)
 
-    def update_pm_config(self, device, pm_config):
+    def update_pm_config(self, device, pm_configs):
         # TODO: This has not been tested
-        self.log.info('update_pm_config', pm_config=pm_config)
-        self._pm_metrics.update(pm_config)
+        self.log.info('update_pm_config', pm_configs=pm_configs)
+        self._pm_metrics.update(pm_configs)
 
     def remove_onu_flows(self, device, flows):
         self.log.debug('remove-onu-flows')
