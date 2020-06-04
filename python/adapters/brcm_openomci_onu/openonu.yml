@@ -17,46 +17,42 @@ logging:
     version: 1
 
     formatters:
-      brief:
-        format: '%(message)s'
-      default:
-        format: '%(asctime)s.%(msecs)03d %(levelname)-8s %(threadName)s %(module)s.%(funcName)s %(message)s'
-        datefmt: '%Y%m%dT%H%M%S'
+        brief:
+            format: '%(message)s'
+        default:
+            # yamllint disable-line rule:line-length
+            format: '%(asctime)s.%(msecs)03d %(levelname)-8s %(threadName)s %(module)s.%(funcName)s %(message)s'
+            datefmt: '%Y%m%dT%H%M%S'
 
     handlers:
         console:
-            class : logging.StreamHandler
+            class: logging.StreamHandler
             level: DEBUG
             formatter: default
             stream: ext://sys.stdout
-        localRotatingFile:
-            class: logging.handlers.RotatingFileHandler
-            filename: openonu.log
-            formatter: default
-            maxBytes: 2097152
-            backupCount: 10
-            level: DEBUG
 
     loggers:
         conf:
+            # yamllint disable-line rule:truthy
             propagate: False
-        '': # root logger
-            handlers: [console, localRotatingFile]
-            level: DEBUG # this can be bumped up/down by -q and -v command line
-                        # options
-            propagate: False
+        # root logger
+        '':
+            handlers: [console]
 
+            # log level can be bumped up/down by a -q and -v command line option
+            level: DEBUG
+            # yamllint disable-line rule:truthy
+            propagate: False
 
 kafka-cluster-proxy:
     event_bus_publisher:
         topic_mappings:
             'model-change-events':
                 kafka_topic: 'voltha.events'
-                filters:     [null]
+                filters: [null]
             'alarms':
                 kafka_topic: 'voltha.alarms'
-                filters:     [null]
+                filters: [null]
             'kpis':
                 kafka_topic: 'voltha.kpis'
-                filters:     [null]
-
+                filters: [null]
