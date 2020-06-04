@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "e7cb4e93_c930aaf2",
+        "filename": "python/adapters/brcm_openomci_onu/main.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1000056
+      },
+      "writtenOn": "2020-06-04T18:14:48Z",
+      "side": 1,
+      "message": "Would it be clearer if the attribute is olt_adapter_topic as well as \u0027OLT_ADAPTER_TOPIC\u0027?",
+      "revId": "28e2c92359f97c8c75ea7009d8bc5762c78459f5",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f9eab36e_1fc722e1",
         "filename": "python/adapters/brcm_openomci_onu/main.py",
         "patchSetId": 3
