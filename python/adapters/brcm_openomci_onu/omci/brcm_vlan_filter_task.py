@@ -364,24 +364,6 @@ class BrcmVlanFilterTask(Task):
             yield self._create_vlan_filter_entity(vlan_tagging_entity_id)
 
         self.log.info('setting-vlan-tagging')
-        attributes = dict(
-            # Specifies the TPIDs in use and that operations in the downstream direction are
-            # inverse to the operations in the upstream direction
-            input_tpid=self._input_tpid,  # input TPID
-            output_tpid=self._output_tpid,  # output TPID
-            downstream_mode=0,  # inverse of upstream
-        )
-
-        msg = ExtendedVlanTaggingOperationConfigurationDataFrame(
-            extended_vlan_tagging_entity_id,  # Bridge Entity ID
-            attributes=attributes
-        )
-
-        frame = msg.set()
-        self.log.debug('openomci-msg', omci_msg=msg)
-        self.strobe_watchdog()
-        results = yield self._device.omci_cc.send(frame)
-        self.check_status_and_state(results, 'set-extended-vlan-tagging-operation-configuration-data')
 
         # Onu-Transparent
         if self._set_vlan_id == RESERVED_TRANSPARENT_VLAN:
@@ -461,24 +443,6 @@ class BrcmVlanFilterTask(Task):
                                      + self._tp_id)
         extended_vlan_tagging_entity_id = self._mac_bridge_service_profile_entity_id + \
                                           self._uni_port.mac_bridge_port_num
-        attributes = dict(
-            # Specifies the TPIDs in use and that operations in the downstream direction are
-            # inverse to the operations in the upstream direction
-            input_tpid=self._input_tpid,  # input TPID
-            output_tpid=self._output_tpid,  # output TPID
-            downstream_mode=0,  # inverse of upstream
-        )
-
-        msg = ExtendedVlanTaggingOperationConfigurationDataFrame(
-            extended_vlan_tagging_entity_id,  # Bridge Entity ID
-            attributes=attributes
-        )
-
-        frame = msg.set()
-        self.log.debug('openomci-msg', omci_msg=msg)
-        self.strobe_watchdog()
-        results = yield self._device.omci_cc.send(frame)
-        self.check_status_and_state(results, 'set-extended-vlan-tagging-operation-configuration-data')
 
         # Onu-Transparent
         if self._set_vlan_id == RESERVED_TRANSPARENT_VLAN:
