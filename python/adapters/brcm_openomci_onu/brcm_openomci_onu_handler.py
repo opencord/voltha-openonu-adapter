@@ -935,6 +935,7 @@ class BrcmOpenomciOnuHandler(object):
                 _set_vlan_vid = None
                 _set_vlan_pcp = None
                 _tunnel_id = None
+                _proto = -1
                 self.log.debug("add-flow", device_id=device.id, flow=flow)
 
                 try:
@@ -966,6 +967,10 @@ class BrcmOpenomciOnuHandler(object):
 
                         elif field.type == fd.IP_PROTO:
                             _proto = field.ip_proto
+                            if _proto == 2:
+                                # Workaround for TT workflow - avoids installing invalid EVTO rule
+                                self.log.warn("skipping-igmp-trap-flow")
+                                break
                             self.log.debug('field-type-ip-proto',
                                            ip_proto=_proto)
 
@@ -1017,6 +1022,11 @@ class BrcmOpenomciOnuHandler(object):
                         else:
                             raise NotImplementedError('field.type={}'.format(
                                 field.type))
+
+                    if _proto == 2:
+                        # Workaround for TT workflow - avoids installing invalid EVTO rule
+                        self.log.warn("skipping-igmp-trap-flow")
+                        continue
 
                     for action in fd.get_actions(flow):
 
