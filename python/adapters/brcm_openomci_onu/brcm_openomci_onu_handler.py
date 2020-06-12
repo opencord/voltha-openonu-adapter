@@ -496,6 +496,25 @@ class BrcmOpenomciOnuHandler(object):
         return new_tconts, new_gems
 
     @inlineCallbacks
+    def _get_tp_instance_from_kv_store(self, tp_path):
+        _max_tp_load_retry_count = 5
+        _curr_retry_cnt = 0
+        _tp_instance = None
+        while _curr_retry_cnt < _max_tp_load_retry_count:
+            _curr_retry_cnt += 1
+            try:
+                _tp_instance = yield self.tp_kv_client.get(tp_path)
+            except Exception as e:
+                pass
+            if _tp_instance is None:
+                self.log.error("failed-to-load-tp--retrying", retry_cnt=_curr_retry_cnt)
+                continue
+            # if we have got a valid tp instance, break from loop
+            break
+
+        returnValue(_tp_instance)
+
+    @inlineCallbacks
     def load_and_configure_tech_profile(self, uni_id, tp_path):
         self.log.debug("loading-tech-profile-configuration", uni_id=uni_id, tp_path=tp_path)
         tp_id = self.extract_tp_id_from_path(tp_path)
@@ -509,10 +528,17 @@ class BrcmOpenomciOnuHandler(object):
                                   tp_path=tp_path)
                     returnValue(None)
 
-                tpstored = yield self.tp_kv_client.get(tp_path)
-                tpstring = tpstored.decode('ascii')
-                tp = json.loads(tpstring)
-                self._tp[tp_id] = tp
+                if tp_path in self._tp:
+                    tp = self._tp[tp_path]
+                else:
+                    tpstored = yield self._get_tp_instance_from_kv_store(tp_path)
+                    if tpstored is None:
+                        self.log.error("failed-to-load-tp-instance", tp_path=tp_path)
+                        returnValue(None)
+                    tpstring = tpstored.decode('ascii')
+                    tp = json.loads(tpstring)
+                    self._tp[tp_id] = tp
+
                 self.log.debug("tp-instance", tp=tp)
                 tconts, gem_ports = self._do_tech_profile_configuration(uni_id, tp)
 
