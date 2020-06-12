@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "34450ed6_558e72c7",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 576,
+      "author": {
+        "id": 1000218
+      },
+      "writtenOn": "2020-06-12T22:42:12Z",
+      "side": 1,
+      "message": "We may check self._tp dict if this tp already exist in memory. Then we don\u0027t need to go KV store in this case.",
+      "range": {
+        "startLine": 576,
+        "startChar": 0,
+        "endLine": 576,
+        "endChar": 77
+      },
+      "revId": "af4f9fbbb687d7226209bf2641660b2ebc289947",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    }
+  ]
+}
