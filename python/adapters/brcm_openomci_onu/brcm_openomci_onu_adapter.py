@@ -279,11 +279,24 @@ class BrcmOpenomciOnuAdapter(object):
                   port_name=ofp_port_info.port.ofp_port.name, port_no=ofp_port_info.port.device_port_no)
         return ofp_port_info
 
-    def process_inter_adapter_message(self, msg):
+    def process_inter_adapter_message(self, msg, max_retry=0, current_retry=0):
         # Unpack the header to know which device needs to handle this message
         if msg.header:
             self.log.debug('process-inter-adapter-message', type=msg.header.type, from_topic=msg.header.from_topic,
                       to_topic=msg.header.to_topic, to_device_id=msg.header.to_device_id)
+
+            # NOTE this should only happen in the case of ONU_IND_REQUEST as described in VOL-3223
+            if not msg.header.to_device_id in self.devices_handlers:
+                self.log.warn('process-inter-adapter-message-handler-not-found-retry-in-one-sec', type=msg.header.type,
+                               from_topic=msg.header.from_topic, to_topic=msg.header.to_topic, to_device_id=msg.header.to_device_id)
+                if current_retry == max_retry:
+                    self.log.error('process-inter-adapter-message-handler-not-found-no-more-retry', type=msg.header.type,
+                               from_topic=msg.header.from_topic, to_topic=msg.header.to_topic, to_device_id=msg.header.to_device_id)
+                    return
+                else:
+                    reactor.callLater(1, self.process_inter_adapter_message, msg, max_retry=10, current_retry=current_retry+1)
+                    return
+
             handler = self.devices_handlers[msg.header.to_device_id]
             handler.process_inter_adapter_message(msg)
 
