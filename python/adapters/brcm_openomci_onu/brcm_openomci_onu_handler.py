@@ -19,56 +19,51 @@ Broadcom OpenOMCI OLT/ONU adapter handler.
 """
 
 from __future__ import absolute_import
-import six
-import arrow
-import structlog
+
 import json
 import random
-
 from collections import OrderedDict
 
-from twisted.internet import reactor
-from twisted.internet.defer import inlineCallbacks, returnValue
-
-from heartbeat import HeartBeat
-from pyvoltha.adapters.extensions.events.device_events.onu.onu_active_event import OnuActiveEvent
-from pyvoltha.adapters.extensions.events.device_events.onu.onu_disabled_event import OnuDisabledEvent
-from pyvoltha.adapters.extensions.events.device_events.onu.onu_deleted_event import OnuDeletedEvent
-from pyvoltha.adapters.extensions.events.kpi.onu.onu_pm_metrics import OnuPmMetrics
-from pyvoltha.adapters.extensions.events.kpi.onu.onu_omci_pm import OnuOmciPmMetrics
-from pyvoltha.adapters.extensions.events.adapter_events import AdapterEvents
-
+import arrow
 import pyvoltha.common.openflow.utils as fd
-from pyvoltha.common.utils.registry import registry
-from pyvoltha.adapters.common.frameio.frameio import hexify
-from pyvoltha.common.utils.nethelpers import mac_str_to_tuple
-from pyvoltha.adapters.common.kvstore.twisted_etcd_store import TwistedEtcdStore
-from voltha_protos.logical_device_pb2 import LogicalPort
-from voltha_protos.common_pb2 import OperStatus, ConnectStatus, AdminState
-from voltha_protos.device_pb2 import Port
-from voltha_protos.openflow_13_pb2 import OFPXMC_OPENFLOW_BASIC, ofp_port, OFPPS_LIVE, OFPPS_LINK_DOWN, \
-    OFPPF_FIBER, OFPPF_1GB_FD
-from voltha_protos.inter_container_pb2 import InterAdapterMessageType, \
-    InterAdapterOmciMessage, PortCapability, InterAdapterTechProfileDownloadMessage, InterAdapterDeleteGemPortMessage, \
-    InterAdapterDeleteTcontMessage
-from voltha_protos.openolt_pb2 import OnuIndication
-from pyvoltha.adapters.extensions.omci.onu_device_entry import OnuDeviceEvents, \
-    OnuDeviceEntry, IN_SYNC_KEY
+import six
+import structlog
+from heartbeat import HeartBeat
+from omci.brcm_mcast_task import BrcmMcastTask
 from omci.brcm_mib_download_task import BrcmMibDownloadTask
-from omci.brcm_tp_setup_task import BrcmTpSetupTask
 from omci.brcm_tp_delete_task import BrcmTpDeleteTask
+from omci.brcm_tp_setup_task import BrcmTpSetupTask
 from omci.brcm_uni_lock_task import BrcmUniLockTask
 from omci.brcm_vlan_filter_task import BrcmVlanFilterTask
 from onu_gem_port import OnuGemPort
 from onu_tcont import OnuTCont
 from pon_port import PonPort
-from omci.brcm_mcast_task import BrcmMcastTask
-from uni_port import UniPort, UniType
-from uni_port import RESERVED_TRANSPARENT_VLAN
-from pyvoltha.common.tech_profile.tech_profile import TechProfile
-from pyvoltha.adapters.extensions.omci.tasks.omci_test_request import OmciTestRequest
-from pyvoltha.adapters.extensions.omci.omci_entities import AniG, Tcont, MacBridgeServiceProfile
+from pyvoltha.adapters.common.frameio.frameio import hexify
+from pyvoltha.adapters.common.kvstore.twisted_etcd_store import TwistedEtcdStore
+from pyvoltha.adapters.extensions.events.adapter_events import AdapterEvents
+from pyvoltha.adapters.extensions.events.device_events.onu.onu_active_event import OnuActiveEvent
+from pyvoltha.adapters.extensions.events.device_events.onu.onu_deleted_event import OnuDeletedEvent
+from pyvoltha.adapters.extensions.events.device_events.onu.onu_disabled_event import OnuDisabledEvent
+from pyvoltha.adapters.extensions.events.kpi.onu.onu_omci_pm import OnuOmciPmMetrics
+from pyvoltha.adapters.extensions.events.kpi.onu.onu_pm_metrics import OnuPmMetrics
 from pyvoltha.adapters.extensions.omci.omci_defs import EntityOperations, ReasonCodes
+from pyvoltha.adapters.extensions.omci.omci_entities import AniG, Tcont, MacBridgeServiceProfile
+from pyvoltha.adapters.extensions.omci.onu_device_entry import OnuDeviceEvents, \
+    OnuDeviceEntry, IN_SYNC_KEY
+from pyvoltha.adapters.extensions.omci.tasks.omci_test_request import OmciTestRequest
+from pyvoltha.common.tech_profile.tech_profile import TechProfile
+from pyvoltha.common.utils.registry import registry
+from twisted.internet import reactor
+from twisted.internet.defer import inlineCallbacks, returnValue
+from uni_port import RESERVED_TRANSPARENT_VLAN
+from uni_port import UniPort, UniType
+from voltha_protos.common_pb2 import OperStatus, ConnectStatus, AdminState
+from voltha_protos.device_pb2 import Port
+from voltha_protos.inter_container_pb2 import InterAdapterMessageType, \
+    InterAdapterOmciMessage, InterAdapterTechProfileDownloadMessage, InterAdapterDeleteGemPortMessage, \
+    InterAdapterDeleteTcontMessage
+from voltha_protos.openflow_13_pb2 import OFPXMC_OPENFLOW_BASIC
+from voltha_protos.openolt_pb2 import OnuIndication
 from voltha_protos.voltha_pb2 import TestResponse
 
 OP = EntityOperations
@@ -199,43 +194,6 @@ class BrcmOpenomciOnuHandler(object):
     def receive_message(self, msg):
         if self.omci_cc is not None:
             self.omci_cc.receive_message(msg)
-
-    def get_ofp_port_info(self, device, port_no):
-        self.log.debug('get-ofp-port-info', port_no=port_no, device_id=device.id)
-        cap = OFPPF_1GB_FD | OFPPF_FIBER
-
-        hw_addr = mac_str_to_tuple('08:%02x:%02x:%02x:%02x:%02x' %
-                                   ((device.parent_port_no >> 8 & 0xff),
-                                    device.parent_port_no & 0xff,
-                                    (port_no >> 16) & 0xff,
-                                    (port_no >> 8) & 0xff,
-                                    port_no & 0xff))
-
-        uni_port = self.uni_port(int(port_no))
-        name = device.serial_number + '-' + str(uni_port.mac_bridge_port_num)
-        self.log.debug('ofp-port-name', port_no=port_no, name=name, uni_port=uni_port)
-
-        ofstate = OFPPS_LINK_DOWN
-        if uni_port.operstatus is OperStatus.ACTIVE:
-            ofstate = OFPPS_LIVE
-
-        return PortCapability(
-            port=LogicalPort(
-                ofp_port=ofp_port(
-                    name=name,
-                    hw_addr=hw_addr,
-                    config=0,
-                    state=ofstate,
-                    curr=cap,
-                    advertised=cap,
-                    peer=cap,
-                    curr_speed=OFPPF_1GB_FD,
-                    max_speed=OFPPF_1GB_FD
-                ),
-                device_id=device.id,
-                device_port_no=port_no
-            )
-        )
 
     # Called once when the adapter creates the device/onu instance
     @inlineCallbacks
@@ -1869,7 +1827,9 @@ class BrcmOpenomciOnuHandler(object):
         self.log.debug('uni-port-inputs', uni_no=uni_no, uni_id=uni_id, uni_name=uni_name, uni_type=uni_type,
                        entity_id=entity_id, mac_bridge_port_num=mac_bridge_port_num, serial_number=device.serial_number)
 
-        uni_port = UniPort.create(self, uni_name, uni_id, uni_no, uni_name, uni_type)
+        uni_port = UniPort.create(self, uni_name, uni_id, uni_no, uni_name,
+                                  device.parent_port_no, device.serial_number,
+                                  uni_type,)
         uni_port.entity_id = entity_id
         uni_port.enabled = True
         uni_port.mac_bridge_port_num = mac_bridge_port_num
