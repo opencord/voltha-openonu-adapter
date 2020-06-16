@@ -16,8 +16,11 @@
 from __future__ import absolute_import
 import structlog
 from enum import Enum
+from pyvoltha.common.utils.nethelpers import mac_str_to_tuple
 from voltha_protos.common_pb2 import OperStatus, AdminState
 from voltha_protos.device_pb2 import Port
+from voltha_protos.openflow_13_pb2 import OFPPF_1GB_FD, OFPPF_FIBER, OFPPS_LINK_DOWN, OFPPS_LIVE, ofp_port
+
 
 class UniType(Enum):
     """
@@ -27,14 +30,17 @@ class UniType(Enum):
     VEIP = 'VirtualEthernetInterfacePoint'
     # TODO: Add others as they become supported
 
+
 # ReservedVlan Transparent Vlan (Masked Vlan, VLAN_ANY in ONOS Flows)
 
 RESERVED_TRANSPARENT_VLAN = 4096
+
 
 class UniPort(object):
     """Wraps southbound-port(s) support for ONU"""
 
     def __init__(self, handler, name, uni_id, port_no, ofp_port_no,
+                 parent_port_no, device_serial_number,
                  type=UniType.PPTP):
         self.log = structlog.get_logger(device_id=handler.device_id,
                                         port_no=port_no)
@@ -48,13 +54,15 @@ class UniPort(object):
         self._mac_bridge_port_num = 0
         self._type = type
         self._uni_id = uni_id
+        self._parent_port_no = parent_port_no
+        self._serial_num = device_serial_number
 
         self._admin_state = AdminState.DISABLED
         self._oper_status = OperStatus.DISCOVERED
 
     def __str__(self):
         return "UniPort - name: {}, port_number: {}, admin_state: {}, oper_state: {}, entity_id: {}, " \
-               "mac_bridge_port_num: {}, type: {}, ofp_port: {}"\
+               "mac_bridge_port_num: {}, type: {}, ofp_port: {}" \
             .format(self.name, self.port_number, self.adminstate, self.operstatus, self.entity_id,
                     self._mac_bridge_port_num, self.type, self._ofp_port_no)
 
@@ -62,8 +70,10 @@ class UniPort(object):
         return str(self)
 
     @staticmethod
-    def create(handler, name, uni_id, port_no, ofp_port_no, type):
-        port = UniPort(handler, name, uni_id, port_no, ofp_port_no, type)
+    def create(handler, name, uni_id, port_no, ofp_port_no,
+               parent_port_no, device_serial_number, type):
+        port = UniPort(handler, name, uni_id, port_no, ofp_port_no,
+                       parent_port_no, device_serial_number, type)
         return port
 
     def _start(self):
@@ -124,7 +134,6 @@ class UniPort(object):
         """
         return self._uni_id
 
-
     @property
     def mac_bridge_port_num(self):
         """
@@ -165,18 +174,59 @@ class UniPort(object):
         """
         return self._type
 
+    @property
+    def parent_port_no(self):
+        """
+        Parent port number for this ONU - will be the PON port of the OLT
+        where this ONU is connected
+        """
+        return self._parent_port_no
+
+    @property
+    def serial_number(self):
+        """
+        Serial number of the ONU
+        """
+        return self._serial_num
+
     def get_port(self):
         """
         Get the VOLTHA PORT object for this port
         :return: VOLTHA Port object
         """
+
+        cap = OFPPF_1GB_FD | OFPPF_FIBER
+
+        hw_addr = mac_str_to_tuple('08:%02x:%02x:%02x:%02x:%02x' %
+                                   ((self.parent_port_no >> 8 & 0xff),
+                                    self.parent_port_no & 0xff,
+                                    (self.port_number >> 16) & 0xff,
+                                    (self.port_number >> 8) & 0xff,
+                                    self.port_number & 0xff))
+
+        name = self.serial_number + '-' + str(self.mac_bridge_port_num)
+
+        ofstate = OFPPS_LINK_DOWN
+        if self.operstatus is OperStatus.ACTIVE:
+            ofstate = OFPPS_LIVE
+
         self._port = Port(port_no=self.port_number,
                           label=self.port_id_name(),
                           type=Port.ETHERNET_UNI,
                           admin_state=self._admin_state,
-                          oper_status=self._oper_status)
+                          oper_status=self._oper_status,
+                          ofp_port=ofp_port(
+                              name=name,
+                              hw_addr=hw_addr,
+                              config=0,
+                              state=ofstate,
+                              curr=cap,
+                              advertised=cap,
+                              peer=cap,
+                              curr_speed=OFPPF_1GB_FD,
+                              max_speed=OFPPF_1GB_FD
+                          ))
         return self._port
 
     def port_id_name(self):
         return 'uni-{}'.format(self._port_number)
-
