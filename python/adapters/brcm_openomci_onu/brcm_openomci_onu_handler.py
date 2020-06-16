@@ -1869,7 +1869,8 @@ class BrcmOpenomciOnuHandler(object):
         self.log.debug('uni-port-inputs', uni_no=uni_no, uni_id=uni_id, uni_name=uni_name, uni_type=uni_type,
                        entity_id=entity_id, mac_bridge_port_num=mac_bridge_port_num, serial_number=device.serial_number)
 
-        uni_port = UniPort.create(self, uni_name, uni_id, uni_no, uni_name, uni_type)
+        uni_port = UniPort.create(self, uni_name, uni_id, uni_no, uni_name, uni_type,
+                                  device.parent_port_no, device.serial_number)
         uni_port.entity_id = entity_id
         uni_port.enabled = True
         uni_port.mac_bridge_port_num = mac_bridge_port_num
