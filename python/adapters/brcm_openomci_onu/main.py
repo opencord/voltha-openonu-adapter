@@ -153,6 +153,7 @@ def parse_args():
     _help = 'specifies whether the adapter accepts incremental EVTO updates ' \
             '(default: %s)' % defs['accept_incremental_evto_update']
     parser.add_argument('-aie', '--accept_incremental_evto_update',
+                        type=str2bool,
                         dest='accept_incremental_evto_update',
                         action='store',
                         default=defs['accept_incremental_evto_update'],
@@ -247,7 +248,7 @@ def parse_args():
                         action='store',
                         default=defs['core_topic'],
                         help=_help)
-    
+
     _help = 'topic of openolt adapter on the kafka bus'
     parser.add_argument('-at', '--adapter_topic',
                         dest='adapter_topic',
@@ -318,6 +319,17 @@ def get_build_info():
         build_time=build_info.get('buildinfo', 'build_time', fallback='unknown')
     )
     return results
+
+
+def str2bool(v):
+    if isinstance(v, bool):
+        return v
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('bool-expected')
 
 
 def print_banner(log):
@@ -602,6 +614,7 @@ class Main(object):
         kafka_cluster_proxy = get_kafka_proxy()
         if kafka_cluster_proxy:
             Probe.kafka_proxy_faulty = kafka_cluster_proxy.is_faulty()
+
 
 if __name__ == '__main__':
     Main().start()
