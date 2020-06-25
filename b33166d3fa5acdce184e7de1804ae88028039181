@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b9426fab_c655f0c7",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_vlan_filter_task.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 464,
+      "author": {
+        "id": 1000127
+      },
+      "writtenOn": "2020-06-25T02:18:14Z",
+      "side": 0,
+      "message": "Are you sure this is not a problem in bulk_update case? The EVTO ME is completely deleted in \"self._reset_evto_and_vlan_tag_filter\" handler. Then we need to set the downstream mode again - right?",
+      "revId": "b33166d3fa5acdce184e7de1804ae88028039181",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": true
+    }
+  ]
+}
