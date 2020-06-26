@@ -31,6 +31,7 @@ from pyvoltha.adapters.interface import IAdapterInterface
 from voltha_protos.adapter_pb2 import Adapter
 from voltha_protos.adapter_pb2 import AdapterConfig
 from voltha_protos.device_pb2 import DeviceType, DeviceTypes
+from voltha_protos.voltha_pb2 import ImageDownload, ImageDownloads
 from voltha_protos.health_pb2 import HealthStatus
 
 from pyvoltha.adapters.common.frameio.frameio import hexify
@@ -165,26 +166,81 @@ class BrcmOpenomciOnuAdapter(object):
             if handler is not None:
                 handler.reboot()
 
+    @inlineCallbacks
+    def __download_image_success(self, result):
+        self.log.debug("__download_image_success")
+
+        onu_device = yield self.core_proxy.get_device(result.id)
+        onu_device.reason = 'image-download-success'
+        yield self.core_proxy.device_reason_update(result.id, onu_device.reason)
+
+        onu_dev = self._omci_agent.get_device(result.id)
+        status =  onu_dev.get_image_download_status(result.name) if onu_dev else None
+        image_download = [
+            ImageDownload(
+                id=result.id,
+                name=result.name,
+                url=result.url,
+                download_state=status.download_state,
+                image_version=result.image_version,
+                local_dir=result.local_dir
+            )
+        ]
+        image_downloads = ImageDownloads(items=image_download)
+
+        onu_device.image_downloads.extend(image_download)
+        yield self.core_proxy.device_update(onu_device)
+        self.log.debug('onu-device-updated', onu_device=onu_device)
+
+    @inlineCallbacks
+    def __download_image_fail(self, result):
+        self.log.debug("__download_image_fail", failure=result.value)
+        onu_device = yield self.core_proxy.get_device(result.value.id)
+        onu_device.reason = 'image-download-failed'
+        yield self.core_proxy.device_reason_update(result.value.id, onu_device.reason)
+
+        onu_dev = self._omci_agent.get_device(result.value.id)
+        status =  onu_dev.get_image_download_status(result.value.name) if onu_dev else None
+        image_download = [
+            ImageDownload(
+                id=result.value.id,
+                name=result.value.name,
+                url=result.value.url,
+                download_state=status.download_state,
+                image_version=result.value.image_version,
+                local_dir=result.value.local_dir
+            )
+        ]
+        image_downloads = ImageDownloads(items=image_download)
+
+        onu_device.image_downloads.extend(image_download)
+        yield self.core_proxy.device_update(onu_device)
+        self.log.debug('onu-device-updated', onu_device=onu_device)
+
     def download_image(self, device, request):
-        raise NotImplementedError()
+        self.log.debug('download-image', device=device, request=request)
+
+        onu_dev = self._omci_agent.get_device(device.id)
+        d = onu_dev.do_onu_software_download(request)
+        d.addCallbacks(self.__download_image_success, self.__download_image_fail)
 
     def get_image_download_status(self, device, request):
-        raise NotImplementedError()
+        self.log.debug('get_image_download_status', device=device, request=request)
+        onu_dev = self._omci_agent.get_device(device.id)
+        return onu_dev.get_image_download_status(request.name) if onu_dev else None
 
     def cancel_image_download(self, device, request):
-        raise NotImplementedError()
+        self.log.debug('cancel_image_download', device=device, request=request)
+        onu_dev = self._omci_agent.get_device(device.id)
+        onu_dev.cancel_onu_software_download(request.name)
 
     def activate_image_update(self, device, request):
-        raise NotImplementedError()
+        self.log.debug('activate_image_update', device=device, request=request)
+        onu_dev = self._omci_agent.get_device(device.id)
+        d = onu_dev.do_onu_image_activate(request.name)
 
     def revert_image_update(self, device, request):
-        raise NotImplementedError()
-
-    def enable_port(self, device_id, port):
-        raise NotImplementedError()
-
-    def disable_port(self, device_id, port):
-        raise NotImplementedError()
+        self.log.debug('revert_image_update', device=device, request=request)
 
     def self_test_device(self, device):
         """
