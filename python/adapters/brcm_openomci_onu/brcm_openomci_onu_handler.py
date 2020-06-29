@@ -1746,7 +1746,7 @@ class BrcmOpenomciOnuHandler(object):
         # Start collecting stats from the device after a brief pause
         if not self._pm_metrics_started:
             self._pm_metrics_started = True
-            pmstart = _STARTUP_RETRY_WAIT * (random.randint(1, 5))
+            pmstart = _STARTUP_RETRY_WAIT * (random.randint(1, self._pm_metrics.max_skew))
             reactor.callLater(pmstart, self._pm_metrics.start_collector)
 
         # Start test requests after a brief pause
