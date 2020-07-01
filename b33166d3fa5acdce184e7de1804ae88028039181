@@ -16,6 +16,24 @@
       "revId": "b33166d3fa5acdce184e7de1804ae88028039181",
       "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "41d54f8f_04e29685",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_vlan_filter_task.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 464,
+      "author": {
+        "id": 1000513
+      },
+      "writtenOn": "2020-07-01T07:39:25Z",
+      "side": 0,
+      "message": "This changes won\u0027t pose a problem. Yeah, You\u0027re delete EVTO ME in \"self._reset_evto_and_vlan_tag_filter\" method  and we should set downstream mode again.",
+      "parentUuid": "b9426fab_c655f0c7",
+      "revId": "b33166d3fa5acdce184e7de1804ae88028039181",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": true
     }
   ]
 }
