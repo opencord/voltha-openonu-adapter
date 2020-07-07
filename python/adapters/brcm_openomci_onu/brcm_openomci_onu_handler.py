@@ -128,6 +128,7 @@ class BrcmOpenomciOnuHandler(object):
 
         self._tp_service_specific_task = dict()
         self._tech_profile_download_done = dict()
+        self._failed_tp_task = dict()
 
         # When the vlan filter is being removed for a given TP ID on a given UNI,
         # mark that we are expecting a tp delete to happen for this UNI.
@@ -544,11 +545,18 @@ class BrcmOpenomciOnuHandler(object):
                                   _reason=_reason)
                     if tp_path in self._tp_service_specific_task[uni_id]:
                         del self._tp_service_specific_task[uni_id][tp_path]
-                    retry = _STARTUP_RETRY_WAIT * (random.randint(1, 5))
-                    reactor.callLater(retry, self.load_and_configure_tech_profile,
-                                      uni_id, tp_path)
+
+                    if uni_id not in self._failed_tp_task:
+                        self._failed_tp_task[uni_id] = list()
+                    # Append the tp_path to list only if unique
+                    # This failed TP task will executed once MIB reset and force mib-resync of the ONU are complete
+                    if self._failed_tp_task[uni_id].count(tp_path) == 0:
+                        self._failed_tp_task[uni_id].append(tp_path)
+                    # Initiate a MIB Reset of the ONU
+                    reactor.callLater(0, self.mib_reset)
+
                     yield self.core_proxy.device_reason_update(self.device_id,
-                                                               'tech-profile-config-download-failure-retrying')
+                                                               'tech-profile-config-download-failure-retrying-after-mib-sync')
 
                 self.log.info('downloading-tech-profile-configuration', uni_id=uni_id, tp_id=tp_id)
                 self.log.debug("tconts-gems-to-install", tconts=tconts, gem_ports=gem_ports)
@@ -1544,6 +1552,28 @@ class BrcmOpenomciOnuHandler(object):
         self._deferred = self._onu_omci_device.reboot()
         self._deferred.addCallbacks(success, failure)
 
+    def mib_reset(self):
+        self.log.info('mib-reset-device')
+
+        def success(_results):
+            self.log.info('mib-reset-success', _results=_results)
+            # subscribe to MIB Sync Events
+            self._subscribe_to_events()
+            # Force a MIB Resync procedure
+            reactor.callLater(1, self._force_mib_resync)
+
+        def failure(_reason):
+            self.log.info('mib-reset-failure', _reason=_reason)
+            # The MIB Reset procedure failed, re-initiate the MIB reset procedure
+            reactor.callLater(1, self.mib_reset)
+
+        self._deferred = self._onu_omci_device.mib_reset()
+        self._deferred.addCallbacks(success, failure)
+
+    def _force_mib_resync(self):
+        self.log.info("forcing-mib-resync")
+        self._onu_omci_device.mib_synchronizer.force_resync()
+
     @inlineCallbacks
     def disable_ports(self, lock_ports=True, device_disabled=False):
         self.log.info('disable-ports', device_id=self.device_id)
@@ -1691,6 +1721,11 @@ class BrcmOpenomciOnuHandler(object):
             self._start_monitoring()
             self._reconciling = False
             self.log.debug('reconcile-finished')
+
+        for uni_id in self._failed_tp_task:
+            for tp_path in self._failed_tp_task[uni_id]:
+                yield self.load_and_configure_tech_profile(uni_id, tp_path)
+                self._failed_tp_task[uni_id].remove(tp_path)
 
     def _download_mib(self, device):
         self.log.debug('downloading-initial-mib-configuration')
