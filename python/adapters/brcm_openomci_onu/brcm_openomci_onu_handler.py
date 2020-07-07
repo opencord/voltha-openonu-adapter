@@ -544,11 +544,13 @@ class BrcmOpenomciOnuHandler(object):
                                   _reason=_reason)
                     if tp_path in self._tp_service_specific_task[uni_id]:
                         del self._tp_service_specific_task[uni_id][tp_path]
-                    retry = _STARTUP_RETRY_WAIT * (random.randint(1, 5))
-                    reactor.callLater(retry, self.load_and_configure_tech_profile,
-                                      uni_id, tp_path)
+                    # retry = _STARTUP_RETRY_WAIT * (random.randint(1, 5))
+                    # reactor.callLater(retry, self.load_and_configure_tech_profile,
+                    #                   uni_id, tp_path)
+                    reactor.callLater(0, self.mib_reset)
+
                     yield self.core_proxy.device_reason_update(self.device_id,
-                                                               'tech-profile-config-download-failure-retrying')
+                                                               'tech-profile-config-download-failure-retrying-after-mib-sync')
 
                 self.log.info('downloading-tech-profile-configuration', uni_id=uni_id, tp_id=tp_id)
                 self.log.debug("tconts-gems-to-install", tconts=tconts, gem_ports=gem_ports)
@@ -1542,6 +1544,24 @@ class BrcmOpenomciOnuHandler(object):
             self.log.info('reboot-failure', _reason=_reason)
 
         self._deferred = self._onu_omci_device.reboot()
+        self._deferred.addCallbacks(success, failure)
+
+    @inlineCallbacks
+    def mib_reset(self):
+        self.log.info('mib-reset-device')
+
+        @inlineCallbacks
+        def success(_results):
+            self.log.info('mib-reset-success', _results=_results)
+            reactor.callLater(0, self.omci_agent.stop())
+            reactor.callLater(2, self.omci_agent.start())
+
+        @inlineCallbacks
+        def failure(_reason):
+            self.log.info('mib-reset-failure', _reason=_reason)
+            reactor.callLater(0, self.mib_reset)
+
+        self._deferred = self._onu_omci_device.mib_reset()
         self._deferred.addCallbacks(success, failure)
 
     @inlineCallbacks
