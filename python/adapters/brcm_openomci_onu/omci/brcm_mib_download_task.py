@@ -27,6 +27,15 @@ from pon_port \
 OP = EntityOperations
 RC = ReasonCodes
 
+# MAC Bridge default configuration
+SPANNING_TREE_ENABLED = False
+BRIDGE_LEARNING_ENABLED = False
+BRIDGE_PRIORITY = 0x8000
+MAX_AGE_OF_PROTOCOL = 20 * 256
+HELLO_TIME = 2 * 256
+FORWARD_DELAY = 15 * 256
+DISCARD_UNKNOWN_MAC_ADDRESS = False
+
 
 class MibDownloadFailure(Exception):
     """
@@ -229,14 +238,15 @@ class BrcmMibDownloadTask(Task):
 
             # TODO: magic. event if static, assign to a meaningful variable name
             attributes = {
-                'spanning_tree_ind': False,
-                'learning_ind': False,
-                'priority': 0x8000,
-                'max_age': 20 * 256,
-                'hello_time': 2 * 256,
-                'forward_delay': 15 * 256,
-                'unknown_mac_address_discard': False
+                'spanning_tree_ind': SPANNING_TREE_ENABLED,
+                'learning_ind': BRIDGE_LEARNING_ENABLED,
+                'priority': BRIDGE_PRIORITY,
+                'max_age': MAX_AGE_OF_PROTOCOL,
+                'hello_time': HELLO_TIME,
+                'forward_delay': FORWARD_DELAY,
+                'unknown_mac_address_discard': DISCARD_UNKNOWN_MAC_ADDRESS
             }
+
             msg = MacBridgeServiceProfileFrame(
                 self._mac_bridge_service_profile_entity_id + uni_port.mac_bridge_port_num,
                 attributes

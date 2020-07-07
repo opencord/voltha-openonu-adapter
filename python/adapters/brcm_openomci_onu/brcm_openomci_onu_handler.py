@@ -30,7 +30,8 @@ import six
 import structlog
 from heartbeat import HeartBeat
 from omci.brcm_mcast_task import BrcmMcastTask
-from omci.brcm_mib_download_task import BrcmMibDownloadTask
+from omci.brcm_mib_download_task import BrcmMibDownloadTask, SPANNING_TREE_ENABLED, BRIDGE_LEARNING_ENABLED, \
+    BRIDGE_PRIORITY, MAX_AGE_OF_PROTOCOL, HELLO_TIME, FORWARD_DELAY, DISCARD_UNKNOWN_MAC_ADDRESS
 from omci.brcm_tp_delete_task import BrcmTpDeleteTask
 from omci.brcm_tp_setup_task import BrcmTpSetupTask
 from omci.brcm_uni_lock_task import BrcmUniLockTask
@@ -128,6 +129,7 @@ class BrcmOpenomciOnuHandler(object):
 
         self._tp_service_specific_task = dict()
         self._tech_profile_download_done = dict()
+        self._failed_tp_task = dict()
 
         # When the vlan filter is being removed for a given TP ID on a given UNI,
         # mark that we are expecting a tp delete to happen for this UNI.
@@ -544,11 +546,18 @@ class BrcmOpenomciOnuHandler(object):
                                   _reason=_reason)
                     if tp_path in self._tp_service_specific_task[uni_id]:
                         del self._tp_service_specific_task[uni_id][tp_path]
-                    retry = _STARTUP_RETRY_WAIT * (random.randint(1, 5))
-                    reactor.callLater(retry, self.load_and_configure_tech_profile,
-                                      uni_id, tp_path)
+
+                    if uni_id not in self._failed_tp_task:
+                        self._failed_tp_task[uni_id] = list()
+                    # Append the tp_path to list only if unique
+                    # This failed TP task will executed once MIB reset and force mib-resync of the ONU are complete
+                    if self._failed_tp_task[uni_id].count(tp_path) == 0:
+                        self._failed_tp_task[uni_id].append(tp_path)
+                    # Initiate a MIB Reset of the ONU
+                    reactor.callLater(0, self.mib_reset)
+
                     yield self.core_proxy.device_reason_update(self.device_id,
-                                                               'tech-profile-config-download-failure-retrying')
+                                                               'tech-profile-config-download-failure-retrying-after-mib-sync')
 
                 self.log.info('downloading-tech-profile-configuration', uni_id=uni_id, tp_id=tp_id)
                 self.log.debug("tconts-gems-to-install", tconts=tconts, gem_ports=gem_ports)
@@ -1544,6 +1553,31 @@ class BrcmOpenomciOnuHandler(object):
         self._deferred = self._onu_omci_device.reboot()
         self._deferred.addCallbacks(success, failure)
 
+    def mib_reset(self):
+        self.log.info('mib-reset-device')
+
+        def success(_results):
+            self.log.info('mib-reset-success', _results=_results)
+            # Clear the gem port and tcont information from internal DB, they will be recreated again.
+            self._pon.gem_ports.clear()
+            self._pon.tconts.clear()
+            # subscribe to MIB Sync Events
+            self._subscribe_to_events()
+            # Force a MIB Resync procedure
+            reactor.callLater(1, self._force_mib_resync)
+
+        def failure(_reason):
+            self.log.info('mib-reset-failure', _reason=_reason)
+            # The MIB Reset procedure failed, re-initiate the MIB reset procedure
+            reactor.callLater(1, self.mib_reset)
+
+        self._deferred = self._onu_omci_device.mib_reset()
+        self._deferred.addCallbacks(success, failure)
+
+    def _force_mib_resync(self):
+        self.log.info("forcing-mib-resync")
+        self._onu_omci_device.mib_synchronizer.force_resync()
+
     @inlineCallbacks
     def disable_ports(self, lock_ports=True, device_disabled=False):
         self.log.info('disable-ports', device_id=self.device_id)
@@ -1707,6 +1741,13 @@ class BrcmOpenomciOnuHandler(object):
             yield self.onu_active_event()
             self._start_monitoring()
 
+            # Check if there were any failed TP install tasks that were aborted due to MIB going out of sync
+            for uni_id in self._failed_tp_task:
+                for tp_path in self._failed_tp_task[uni_id]:
+                    # Re-initiate the aborted TP tasks and also remove these TP task from the failed list
+                    yield self.load_and_configure_tech_profile(uni_id, tp_path)
+                    self._failed_tp_task[uni_id].remove(tp_path)
+
         @inlineCallbacks
         def failure(_reason):
             self.log.warn('mib-download-failure-retrying', _reason=_reason)
@@ -1749,10 +1790,22 @@ class BrcmOpenomciOnuHandler(object):
         for k, v in mac_bridges.items():
             if not isinstance(v, dict):
                 continue
-            # found at least one mac bridge, good enough to say its done, break out
-            self.log.debug('found-mac-bridge-mib-download-has-been-done', omci_key=k, omci_value=v)
-            results = True
-            break
+            try:
+                # found at least one mac bridge matching the required configuration,
+                # good enough to say its done, break out
+                if v["attributes"]["spanning_tree_ind"] == SPANNING_TREE_ENABLED and \
+                        v["attributes"]["learning_ind"] == BRIDGE_LEARNING_ENABLED and \
+                        v["attributes"]["priority"] == BRIDGE_PRIORITY and \
+                        v["attributes"]["max_age"] == MAX_AGE_OF_PROTOCOL and \
+                        v["attributes"]["hello_time"] == HELLO_TIME and \
+                        v["attributes"]["forward_delay"] == FORWARD_DELAY and \
+                        v["attributes"]["unknown_mac_address_discard"] == DISCARD_UNKNOWN_MAC_ADDRESS:
+                    self.log.debug('found-mac-bridge-mib-download-has-been-done', omci_key=k, omci_value=v)
+                    results = True
+                    break
+            except KeyError as e:
+                self.log.error("key-error-exception", e=e, v=v)
+                continue
 
         return results
 
@@ -1829,7 +1882,7 @@ class BrcmOpenomciOnuHandler(object):
 
         uni_port = UniPort.create(self, uni_name, uni_id, uni_no, uni_name,
                                   device.parent_port_no, device.serial_number,
-                                  uni_type,)
+                                  uni_type, )
         uni_port.entity_id = entity_id
         uni_port.enabled = True
         uni_port.mac_bridge_port_num = mac_bridge_port_num
@@ -1991,11 +2044,11 @@ class BrcmOpenomciOnuHandler(object):
                            raised_ts=raised_ts)
 
             OnuDeletedEvent(self.events, self.device_id,
-                             intf_id,
-                             serial_number,
-                             str(self.device_id),
-                             olt_serial_number, raised_ts,
-                             onu_id=onu_id).send(True)
+                            intf_id,
+                            serial_number,
+                            str(self.device_id),
+                            olt_serial_number, raised_ts,
+                            onu_id=onu_id).send(True)
         except Exception as deleted_event_error:
             self.log.exception('onu-deleted-event-error',
                                errmsg=deleted_event_error)
