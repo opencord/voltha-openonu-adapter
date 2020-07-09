@@ -327,7 +327,7 @@ class BrcmMibDownloadTask(Task):
             frame = msg.set()
             self.log.debug('openomci-msg', omci_msg=msg)
             self.strobe_watchdog()
-            results = yield self._device.omci_cc.send(frame)
+            results = yield omci_cc.send(frame)
             self.check_status_and_state(results, 'set-extended-vlan-tagging-operation-configuration-data')
 
         except TimeoutError as e:
