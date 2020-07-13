@@ -162,12 +162,13 @@ class BrcmTpSetupTask(Task):
     @inlineCallbacks
     def perform_service_specific_steps(self):
         self.log.info('starting-tech-profile-setup', uni_id=self._uni_port.uni_id,
-                        tconts=self._tconts, gem_ports=self._gem_ports, tp_table_id=self._tp_table_id)
+                      tconts=self._tconts, gem_ports=self._gem_ports, tp_table_id=self._tp_table_id)
 
         omci_cc = self._onu_device.omci_cc
         gem_pq_associativity = dict()
         pq_to_related_port = dict()
         is_related_ports_configurable = False
+        tcont_entity_id = 0
 
         try:
             ################################################################################
@@ -197,6 +198,9 @@ class BrcmTpSetupTask(Task):
             tcont_idents = self._onu_device.query_mib(Tcont.class_id)
             self.log.debug('tcont-idents', tcont_idents=tcont_idents)
 
+            # There can be only one tcont that can be installed per tech-profile download task
+            # Each tech-profile represents a single tcont and associated gemports
+            assert len(self._tconts) == 1
             for tcont in self._tconts:
                 self.log.debug('tcont-loop', tcont=tcont)
 
@@ -220,6 +224,10 @@ class BrcmTpSetupTask(Task):
                     # Also assign entity id within tcont object
                     results = yield tcont.add_to_hardware(omci_cc, free_entity_id)
                     self.check_status_and_state(results, 'new-tcont-added')
+                    # There is only tcont to be added per tech-profile download procedure
+                    # So, there is no issue of overwriting the 'tcont_entity_id'
+                    tcont_entity_id = free_entity_id
+
                 else:
                     self.log.debug('tcont-already-assigned', tcont_entity_id=tcont.entity_id, alloc_id=tcont.alloc_id)
 
@@ -269,29 +277,32 @@ class BrcmTpSetupTask(Task):
                 except TypeError:
                     continue
 
-                if 'instance_id' in v:
+                # Parse PQ MEs only with relevant information
+                if 'instance_id' in v and 'related_port' in v['attributes']:
                     related_port = v['attributes']['related_port']
                     pq_to_related_port[k] = related_port
-
+                    # If the MSB is set, it represents an Upstream PQ referencing the TCONT
                     if v['instance_id'] & 0b1000000000000000:
-                        tcont_me = (related_port & 0xffff0000) >> 16
-                        if tcont_me not in self.tcont_me_to_queue_map:
-                            self.log.debug("prior-q-related-port-and-tcont-me",
-                                           related_port=related_port,
-                                           tcont_me=tcont_me)
-                            self.tcont_me_to_queue_map[tcont_me] = list()
+                        # If it references the TCONT ME we have just installed
+                        if tcont_entity_id == (related_port & 0xffff0000) >> 16:
+                            if tcont_entity_id not in self.tcont_me_to_queue_map:
+                                self.log.debug("prior-q-related-port-and-tcont-me",
+                                               related_port=related_port,
+                                               tcont_me=tcont_entity_id)
+                                self.tcont_me_to_queue_map[tcont_entity_id] = list()
+                            # Store the PQ into the list which is referenced by TCONT ME we have provisioned
+                            self.tcont_me_to_queue_map[tcont_entity_id].append(k)
 
-                        self.tcont_me_to_queue_map[tcont_me].append(k)
                     else:
-                        uni_port = (related_port & 0xffff0000) >> 16
-                        if uni_port == self._uni_port.entity_id:
-                            if uni_port not in self.uni_port_to_queue_map:
+                        # This represents the PQ pointing to the UNI Port ME (Downstream PQ)
+                        if self._uni_port.entity_id == (related_port & 0xffff0000) >> 16:
+                            if self._uni_port.entity_id not in self.uni_port_to_queue_map:
                                 self.log.debug("prior-q-related-port-and-uni-port-me",
                                                related_port=related_port,
-                                               uni_port_me=uni_port)
-                                self.uni_port_to_queue_map[uni_port] = list()
-
-                            self.uni_port_to_queue_map[uni_port].append(k)
+                                               uni_port_me=self._uni_port.entity_id)
+                                self.uni_port_to_queue_map[self._uni_port.entity_id] = list()
+                            # Store the PQ into the list which is referenced by UNI Port ME we have provisioned
+                            self.uni_port_to_queue_map[self._uni_port.entity_id].append(k)
 
             self.log.debug("ul-prior-q", ul_prior_q=self.tcont_me_to_queue_map)
             self.log.debug("dl-prior-q", dl_prior_q=self.uni_port_to_queue_map)
