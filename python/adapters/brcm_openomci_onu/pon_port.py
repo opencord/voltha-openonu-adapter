@@ -177,7 +177,8 @@ class PonPort(object):
             return False # already created
 
         self.log.info('add-tcont', tcont=tcont.alloc_id, reflow=reflow)
-        self._tconts[tcont.alloc_id] = tcont
+        if tcont.alloc_id not in self._tconts:
+            self._tconts[tcont.alloc_id] = tcont
         return True
 
     @inlineCallbacks

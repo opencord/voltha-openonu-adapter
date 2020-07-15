@@ -197,6 +197,10 @@ class BrcmTpSetupTask(Task):
             tcont_idents = self._onu_device.query_mib(Tcont.class_id)
             self.log.debug('tcont-idents', tcont_idents=tcont_idents)
 
+            # There can be only one tcont that can be installed per tech-profile download task
+            # Each tech-profile represents a single tcont and associated gemports
+            assert len(self._tconts) == 1
+
             for tcont in self._tconts:
                 self.log.debug('tcont-loop', tcont=tcont)
 
@@ -222,6 +226,7 @@ class BrcmTpSetupTask(Task):
                     self.check_status_and_state(results, 'new-tcont-added')
                 else:
                     self.log.debug('tcont-already-assigned', tcont_entity_id=tcont.entity_id, alloc_id=tcont.alloc_id)
+                    tcont_entity_id = tcont.entity_id
 
             ################################################################################
             # GEMS  (GemPortNetworkCtp and GemInterworkingTp)

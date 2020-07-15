@@ -399,7 +399,7 @@ class BrcmOpenomciOnuHandler(object):
 
         tcont = OnuTCont.create(self, tcont=tcontdict)
 
-        success = self._pon.add_tcont(tcont)
+        success = self._pon.add_tcont(tcont, True)
         if success:
             new_tconts.append(tcont)
             self.log.debug('pon-add-tcont', tcont=tcont)
