@@ -16,6 +16,24 @@
       "revId": "7c1240cbdb752bc44b881c3b678a3f6767574340",
       "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9f992b3f_2c0a0feb",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 402,
+      "author": {
+        "id": 1000127
+      },
+      "writtenOn": "2020-07-16T04:57:59Z",
+      "side": 1,
+      "message": "This is already being done for add_gem_port. See line 443",
+      "parentUuid": "40806d7e_05e51231",
+      "revId": "7c1240cbdb752bc44b881c3b678a3f6767574340",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": true
     }
   ]
 }
