@@ -34,6 +34,24 @@
       "revId": "7c1240cbdb752bc44b881c3b678a3f6767574340",
       "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8d194ff0_e4031c38",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 402,
+      "author": {
+        "id": 1000218
+      },
+      "writtenOn": "2020-07-16T05:04:26Z",
+      "side": 1,
+      "message": "Ah sorry, somehow missed that.",
+      "parentUuid": "9f992b3f_2c0a0feb",
+      "revId": "7c1240cbdb752bc44b881c3b678a3f6767574340",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": true
     }
   ]
 }
