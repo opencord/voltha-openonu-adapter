@@ -683,14 +683,43 @@ class BrcmOpenomciOnuHandler(object):
                 self.log.error("mcast-vlan-not-configured-yet-failing-mcast-service-conf", uni_id=uni_id, tp_id=tp_id,
                                retry=retry_count)
 
+    def _clear_alloc_id_gem_port_from_internal_cache(self, alloc_id=None, gem_port_id=None):
+        tcont = None
+        gem_port = None
+        if alloc_id is not None:
+            self.log.debug("current-cached-tconts", tconts=list(self.pon_port.tconts.values()))
+            for tc in list(self.pon_port.tconts.values()):
+                if tc.alloc_id == alloc_id:
+                    self.log.info("removing-tcont-from-internal-cache",
+                                  alloc_id=alloc_id)
+                    tcont = tc
+                    self.pon_port.remove_tcont(tc.alloc_id, False)
+
+        if gem_port_id is not None:
+            self.log.debug("current-cached-gem-ports", gem_ports=list(self.pon_port.gem_ports.values()))
+            for gp in list(self.pon_port.gem_ports.values()):
+                if gp.gem_id == gem_port_id:
+                    self.log.info("removing-gem-from-internal-cache",
+                                  gem_port_id=gem_port_id, direction=gp.direction)
+                    gem_port = gp
+                    self.pon_port.remove_gem_id(gp.gem_id, gp.direction, False)
+
+        return tcont, gem_port
+
     def delete_tech_profile(self, uni_id, tp_path, alloc_id=None, gem_port_id=None):
         try:
             tp_table_id = self.extract_tp_id_from_path(tp_path)
-            if not uni_id in self._tech_profile_download_done:
+            # Extract the current set of TCONT and GEM Ports from the Handler's pon_port that are
+            # relevant to this task's UNI. It won't change. But, the underlying pon_port may change
+            # due to additional tasks on different UNIs. So, it we cannot use the pon_port affter
+            # this initializer
+            tcont, gem_port = self._clear_alloc_id_gem_port_from_internal_cache(alloc_id, gem_port_id)
+
+            if uni_id not in self._tech_profile_download_done:
                 self.log.warn("tp-key-is-not-present", uni_id=uni_id)
                 return
 
-            if not tp_table_id in self._tech_profile_download_done[uni_id]:
+            if tp_table_id not in self._tech_profile_download_done[uni_id]:
                 self.log.warn("tp-id-is-not-present", uni_id=uni_id, tp_id=tp_table_id)
                 return
 
@@ -702,24 +731,6 @@ class BrcmOpenomciOnuHandler(object):
             if alloc_id is None and gem_port_id is None:
                 self.log.error("alloc-id-and-gem-port-id-are-none", uni_id=uni_id, tp_id=tp_table_id)
                 return
-
-            # Extract the current set of TCONT and GEM Ports from the Handler's pon_port that are
-            # relevant to this task's UNI. It won't change. But, the underlying pon_port may change
-            # due to additional tasks on different UNIs. So, it we cannot use the pon_port affter
-            # this initializer
-            tcont = None
-            self.log.debug("current-cached-tconts", tconts=list(self.pon_port.tconts.values()))
-            for tc in list(self.pon_port.tconts.values()):
-                if tc.alloc_id == alloc_id:
-                    tcont = tc
-                    self.pon_port.remove_tcont(tc.alloc_id, False)
-
-            gem_port = None
-            self.log.debug("current-cached-gem-ports", gem_ports=list(self.pon_port.gem_ports.values()))
-            for gp in list(self.pon_port.gem_ports.values()):
-                if gp.gem_id == gem_port_id:
-                    gem_port = gp
-                    self.pon_port.remove_gem_id(gp.gem_id, gp.direction, False)
 
             @inlineCallbacks
             def success(_results):
