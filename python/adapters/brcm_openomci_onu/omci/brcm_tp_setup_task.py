@@ -211,8 +211,16 @@ class BrcmTpSetupTask(Task):
                         if not isinstance(v, dict):
                             continue
                         alloc_check = v.get('attributes', {}).get('alloc_id', 0)
-                        # Some onu report both to indicate an available tcont
-                        if alloc_check == 0xFF or alloc_check == 0xFFFF:
+                        if alloc_check == tcont.alloc_id:
+                            # If any Tcont entity already refers to the alloc-id we want to use,
+                            # lets choose that Tcont entity.
+                            # This Tcont will be re-added to ONU and that is fine. The ONU reports that
+                            # the entity already exists, which is not an error.
+                            free_entity_id = k
+                            self.log.debug("tcont-entity-already-exists-on-onu-for-this-alloc-id",
+                                           tcont_entity_id=k, alloc_id=tcont.alloc_id)
+                            break
+                        elif alloc_check == 0xFF or alloc_check == 0xFFFF:
                             free_entity_id = k
                             break
 
