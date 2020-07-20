@@ -1682,12 +1682,6 @@ class BrcmOpenomciOnuHandler(object):
         if not self._reconciling:
             yield self.core_proxy.device_reason_update(self.device_id, 'discovery-mibsync-complete')
 
-        if self._dev_info_loaded:
-            self.log.debug('device-info-already-loaded')
-        else:
-            # new onu or adapter was restarted.  fill up our local data
-            yield self._load_device_data(device)
-
         if self._check_mib_downloaded():
             self.log.debug('mib-already-downloaded')
             if not self._reconciling:
@@ -1715,6 +1709,11 @@ class BrcmOpenomciOnuHandler(object):
                                                       connect_status=ConnectStatus.REACHABLE)
             yield self.core_proxy.device_reason_update(self.device_id, 'initial-mib-downloaded')
             self._mib_download_task = None
+            if self._dev_info_loaded:
+                self.log.debug('device-info-already-loaded')
+            else:
+                # new onu or adapter was restarted.  fill up our local data
+                yield self._load_device_data(device)
             yield self.enable_ports()
             yield self.onu_active_event()
             self._start_monitoring()
