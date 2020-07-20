@@ -1350,7 +1350,8 @@ class BrcmOpenomciOnuHandler(object):
             retry = _STARTUP_RETRY_WAIT * (random.randint(1, 5))
             reactor.callLater(retry,
                               self._remove_vlan_filter_task, device, uni_id,
-                              add_tag=False, uni_port=uni_port)
+                              uni_port=uni_port, match_vlan=match_vlan, _set_vlan_vid=_set_vlan_vid,
+                              _set_vlan_pcp=_set_vlan_pcp, tp_id=tp_id)
 
         self.log.info("remove_vlan_filter_task", tp_id=tp_id)
         vlan_remove_task = BrcmVlanFilterTask(self.omci_agent, self, uni_port, _set_vlan_vid,
