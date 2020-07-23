@@ -619,8 +619,12 @@ class BrcmOpenomciOnuHandler(object):
                     reactor.callLater(retry, self.load_and_configure_tech_profile,
                                       uni_id, tp_path)
 
+                if self._pon.get_tcont(alloc_id) is None:
+                    self.log.error("no-valid-tcont-reference-for-tp-id--not-installing-gem", alloc_id=alloc_id, tp_id=tp_id)
+                    return
+
                 self._tp_service_specific_task[uni_id][tp_path] = \
-                    BrcmTpSetupTask(self.omci_agent, self, uni_id, [], new_gems, tp_id)
+                    BrcmTpSetupTask(self.omci_agent, self, uni_id, [self._pon.get_tcont(alloc_id)], new_gems, tp_id)
                 self._deferred = \
                     self._onu_omci_device.task_runner.queue_task(self._tp_service_specific_task[uni_id][tp_path])
                 self._deferred.addCallbacks(success, failure)
