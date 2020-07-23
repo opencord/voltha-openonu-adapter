@@ -181,6 +181,13 @@ class PonPort(object):
             self._tconts[tcont.alloc_id] = tcont
         return True
 
+    def get_tcont(self, alloc_id):
+        try:
+            return self._tconts[alloc_id]
+        except Exception as e:
+            self.log.error("error-fetching-tcont", alloc_id=alloc_id, e=e)
+            return None
+
     @inlineCallbacks
     def remove_tcont(self, alloc_id, remove_from_hw=True):
 
