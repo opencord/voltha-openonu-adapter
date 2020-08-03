@@ -123,6 +123,13 @@ class PonPort(object):
     def gem_ports(self):
         return self._gem_ports
 
+    def get_gem_port(self, gem_port_id, direction="downstream"):
+        try:
+            return self._gem_ports[(gem_port_id, direction)]
+        except Exception as e:
+            self.log.error("error-fetching-gem-port", gem_port_id=gem_port_id, e=e)
+            return None
+
     def get_port(self):
         """
         Get the VOLTHA PORT object for this port

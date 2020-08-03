@@ -38,6 +38,7 @@ from omci.brcm_vlan_filter_task import BrcmVlanFilterTask
 from onu_gem_port import OnuGemPort
 from onu_tcont import OnuTCont
 from pon_port import PonPort
+from tp_state import TpState
 from pyvoltha.adapters.common.frameio.frameio import hexify
 from pyvoltha.adapters.common.kvstore.twisted_etcd_store import TwistedEtcdStore
 from pyvoltha.adapters.extensions.events.adapter_events import AdapterEvents
@@ -126,19 +127,12 @@ class BrcmOpenomciOnuHandler(object):
         self.mac_bridge_service_profile_entity_id = 0x201
         self.gal_enet_profile_entity_id = 0x1
 
-        self._tp_service_specific_task = dict()
-        self._tech_profile_download_done = dict()
-
-        # When the vlan filter is being removed for a given TP ID on a given UNI,
-        # mark that we are expecting a tp delete to happen for this UNI.
-        # Unless the TP delete is complete to not allow new vlan add tasks to this TP ID
-        self._pending_delete_tp = dict()
-
         # Stores information related to queued vlan filter tasks
         # Dictionary with key being uni_id and value being device,uni port ,uni id and vlan id
         self._queued_vlan_filter_task = dict()
 
         self._set_vlan = dict()  # uni_id, tp_id -> set_vlan_id
+        self._tp_state_map_per_uni = dict()  # uni_id -> {dictionary tp_id->TpState}
 
         # Paths from kv store
         ONU_PATH = 'service/voltha/openonu'
@@ -496,18 +490,12 @@ class BrcmOpenomciOnuHandler(object):
     def load_and_configure_tech_profile(self, uni_id, tp_path):
         self.log.debug("loading-tech-profile-configuration", uni_id=uni_id, tp_path=tp_path)
         tp_id = self.extract_tp_id_from_path(tp_path)
-        if uni_id not in self._tp_service_specific_task:
-            self._tp_service_specific_task[uni_id] = dict()
+        if tp_id not in self._tp_state_map_per_uni[uni_id]:
+            self._tp_state_map_per_uni[uni_id][tp_id] = TpState(self, uni_id, tp_path)
 
-        if uni_id not in self._tech_profile_download_done:
-            self._tech_profile_download_done[uni_id] = dict()
-
-        if tp_id not in self._tech_profile_download_done[uni_id]:
-            self._tech_profile_download_done[uni_id][tp_id] = False
-
-        if not self._tech_profile_download_done[uni_id][tp_id]:
+        if not self._tp_state_map_per_uni[uni_id][tp_id].tp_setup_done:
             try:
-                if tp_path in self._tp_service_specific_task[uni_id]:
+                if self._tp_state_map_per_uni[uni_id][tp_id].tp_task_ref is not None:
                     self.log.info("tech-profile-config-already-in-progress",
                                   tp_path=tp_path)
                     returnValue(None)
@@ -522,9 +510,9 @@ class BrcmOpenomciOnuHandler(object):
                 @inlineCallbacks
                 def success(_results):
                     self.log.info("tech-profile-config-done-successfully", uni_id=uni_id, tp_id=tp_id)
-                    if tp_path in self._tp_service_specific_task[uni_id]:
-                        del self._tp_service_specific_task[uni_id][tp_path]
-                    self._tech_profile_download_done[uni_id][tp_id] = True
+                    if tp_id in self._tp_state_map_per_uni[uni_id]:
+                        self._tp_state_map_per_uni[uni_id][tp_id].tp_task_ref = None
+                    self._tp_state_map_per_uni[uni_id][tp_id].tp_setup_done = True
                     # Now execute any vlan filter tasks that were queued for later
                     reactor.callInThread(self._execute_queued_vlan_filter_tasks, uni_id, tp_id)
                     yield self.core_proxy.device_reason_update(self.device_id, 'tech-profile-config-download-success')
@@ -542,9 +530,9 @@ class BrcmOpenomciOnuHandler(object):
                 def failure(_reason):
                     self.log.warn('tech-profile-config-failure-retrying', uni_id=uni_id, tp_id=tp_id,
                                   _reason=_reason)
-                    if tp_path in self._tp_service_specific_task[uni_id]:
-                        del self._tp_service_specific_task[uni_id][tp_path]
-                    retry = _STARTUP_RETRY_WAIT * (random.randint(1, 5))
+                    if tp_id in self._tp_state_map_per_uni[uni_id]:
+                        self._tp_state_map_per_uni[uni_id][tp_id].tp_task_ref = None
+                    retry = random.randint(1, 5)
                     reactor.callLater(retry, self.load_and_configure_tech_profile,
                                       uni_id, tp_path)
                     yield self.core_proxy.device_reason_update(self.device_id,
@@ -556,10 +544,11 @@ class BrcmOpenomciOnuHandler(object):
                 self.log.debug("current-cached-tconts", tconts=list(self.pon_port.tconts.values()))
                 self.log.debug("current-cached-gem-ports", gem_ports=list(self.pon_port.gem_ports.values()))
 
-                self._tp_service_specific_task[uni_id][tp_path] = \
+                self._tp_state_map_per_uni[uni_id][tp_id].tp_task_ref = \
                     BrcmTpSetupTask(self.omci_agent, self, uni_id, tconts, gem_ports, tp_id)
                 self._deferred = \
-                    self._onu_omci_device.task_runner.queue_task(self._tp_service_specific_task[uni_id][tp_path])
+                    self._onu_omci_device.task_runner.queue_task(self._tp_state_map_per_uni[uni_id][tp_id].
+                                                                 tp_task_ref)
                 self._deferred.addCallbacks(success, failure)
 
             except Exception as e:
@@ -567,12 +556,14 @@ class BrcmOpenomciOnuHandler(object):
         else:
             # There is an active tech-profile task ongoing on this UNI port. So, reschedule this task
             # after a short interval
-            if uni_id in self._tp_service_specific_task and len(self._tp_service_specific_task[uni_id]):
-                self.log.debug("active-tp-tasks-in-progress-for-uni--scheduling-this-task-for-later",
-                               uni_id=uni_id, tp_path=tp_path)
-                reactor.callLater(0.2, self.load_and_configure_tech_profile,
-                                  uni_id, tp_path)
-                return
+            for tpid in self._tp_state_map_per_uni[uni_id]:
+                if self._tp_state_map_per_uni[uni_id][tpid].tp_task_ref is not None:
+                    self.log.debug("active-tp-tasks-in-progress-for-uni--scheduling-this-task-for-later",
+                                   uni_id=uni_id, tp_id=tpid)
+                    retry = random.randint(1, 5)
+                    reactor.callLater(retry, self.load_and_configure_tech_profile,
+                                      uni_id, tp_path)
+                    return
 
             self.log.info("tech-profile-config-already-done")
 
@@ -615,7 +606,7 @@ class BrcmOpenomciOnuHandler(object):
                     for gp in new_gems:
                         self.pon_port.remove_gem_id(gp.gem_id, gp.direction, False)
 
-                    retry = _STARTUP_RETRY_WAIT * (random.randint(1, 5))
+                    retry = random.randint(1, 5)
                     reactor.callLater(retry, self.load_and_configure_tech_profile,
                                       uni_id, tp_path)
 
@@ -623,10 +614,11 @@ class BrcmOpenomciOnuHandler(object):
                     self.log.error("no-valid-tcont-reference-for-tp-id--not-installing-gem", alloc_id=alloc_id, tp_id=tp_id)
                     return
 
-                self._tp_service_specific_task[uni_id][tp_path] = \
+                self._tp_state_map_per_uni[uni_id][tp_id].tp_task_ref = \
                     BrcmTpSetupTask(self.omci_agent, self, uni_id, [self._pon.get_tcont(alloc_id)], new_gems, tp_id)
                 self._deferred = \
-                    self._onu_omci_device.task_runner.queue_task(self._tp_service_specific_task[uni_id][tp_path])
+                    self._onu_omci_device.task_runner.queue_task(self._tp_state_map_per_uni[uni_id][tp_id].
+                                                                 tp_task_ref)
                 self._deferred.addCallbacks(success, failure)
 
     @inlineCallbacks
@@ -654,7 +646,7 @@ class BrcmOpenomciOnuHandler(object):
 
                 def failure(_reason):
                     self.log.warn('multicast-failure', _reason=_reason)
-                    retry = _STARTUP_RETRY_WAIT * (random.randint(1, 5))
+                    retry = random.randint(1, 5)
                     reactor.callLater(retry, self.start_multicast_service,
                                       uni_id, tp_path)
 
@@ -710,24 +702,35 @@ class BrcmOpenomciOnuHandler(object):
 
         return tcont, gem_port
 
-    def delete_tech_profile(self, uni_id, tp_path, alloc_id=None, gem_port_id=None):
+    def _tcont_delete_complete(self, uni_id, tp_id):
+        if not self._tp_state_map_per_uni[uni_id][tp_id].is_all_pon_resource_delete_complete():
+            self.log.info("waiting-for-gem-port-delete-to-complete-before-clearing-tp-states")
+            retry = random.randint(1, 5)
+            reactor.callLater(retry, self._tcont_delete_complete, uni_id, tp_id)
+            return
+        self.log.info("tp-delete-complete")
+        # Clear TP states
+        self._tp_state_map_per_uni[uni_id][tp_id].reset_tp_state()
+        del self._tp_state_map_per_uni[uni_id][tp_id]
+
+    def delete_tech_profile(self, uni_id, tp_path, tcont=None, gem_port=None):
+        alloc_id = None
+        gem_port_id = None
         try:
             tp_table_id = self.extract_tp_id_from_path(tp_path)
             # Extract the current set of TCONT and GEM Ports from the Handler's pon_port that are
             # relevant to this task's UNI. It won't change. But, the underlying pon_port may change
             # due to additional tasks on different UNIs. So, it we cannot use the pon_port affter
             # this initializer
-            tcont, gem_port = self._clear_alloc_id_gem_port_from_internal_cache(alloc_id, gem_port_id)
+            alloc_id = tcont.alloc_id if tcont is not None else None
+            gem_port_id = gem_port.gem_id if gem_port is not None else None
+            self._clear_alloc_id_gem_port_from_internal_cache(alloc_id, gem_port_id)
 
-            if uni_id not in self._tech_profile_download_done:
-                self.log.warn("tp-key-is-not-present", uni_id=uni_id)
-                return
-
-            if tp_table_id not in self._tech_profile_download_done[uni_id]:
+            if tp_table_id not in self._tp_state_map_per_uni[uni_id]:
                 self.log.warn("tp-id-is-not-present", uni_id=uni_id, tp_id=tp_table_id)
                 return
 
-            if self._tech_profile_download_done[uni_id][tp_table_id] is not True:
+            if self._tp_state_map_per_uni[uni_id][tp_table_id].tp_setup_done is not True:
                 self.log.error("tp-download-is-not-done-in-order-to-process-tp-delete", uni_id=uni_id,
                                tp_id=tp_table_id)
                 return
@@ -740,18 +743,14 @@ class BrcmOpenomciOnuHandler(object):
             def success(_results):
                 if gem_port_id:
                     self.log.info("gem-port-delete-done-successfully")
+                    self._tp_state_map_per_uni[uni_id][tp_table_id].pon_resource_delete_complete(TpState.GEM_ID,
+                                                                                                 gem_port_id)
                 if alloc_id:
                     self.log.info("tcont-delete-done-successfully")
                     # The deletion of TCONT marks the complete deletion of tech-profile
-                    try:
-                        del self._tech_profile_download_done[uni_id][tp_table_id]
-                        self.log.debug("tp-profile-download-flag-cleared", uni_id=uni_id, tp_id=tp_table_id)
-                        del self._tp_service_specific_task[uni_id][tp_path]
-                        self.log.debug("tp-service-specific-task-cleared", uni_id=uni_id, tp_id=tp_table_id)
-                        del self._pending_delete_tp[uni_id][tp_table_id]
-                        self.log.debug("pending-delete-tp-task-flag-cleared", uni_id=uni_id, tp_id=tp_table_id)
-                    except Exception as ex:
-                        self.log.error("del-tp-state-info", e=ex)
+                    self._tp_state_map_per_uni[uni_id][tp_table_id].pon_resource_delete_complete(TpState.ALLOC_ID,
+                                                                                                 alloc_id)
+                    self._tcont_delete_complete(uni_id, tp_table_id)
 
                 # TODO: There could be multiple TP on the UNI, and also the ONU.
                 # TODO: But the below reason updates for the whole device.
@@ -761,8 +760,10 @@ class BrcmOpenomciOnuHandler(object):
             def failure(_reason):
                 self.log.warn('tech-profile-delete-failure-retrying',
                               _reason=_reason)
-                retry = _STARTUP_RETRY_WAIT * (random.randint(1, 5))
-                reactor.callLater(retry, self.delete_tech_profile, uni_id, tp_path, alloc_id, gem_port_id)
+                retry = random.randint(1, 5)
+                _tcont = self._tp_state_map_per_uni[uni_id][tp_table_id].get_queued_resource_for_delete(TpState.ALLOC_ID, alloc_id)
+                _gem_port = self._tp_state_map_per_uni[uni_id][tp_table_id].get_queued_resource_for_delete(TpState.GEM_ID, gem_port_id)
+                reactor.callLater(retry, self.delete_tech_profile, uni_id, tp_path, _tcont, _gem_port)
                 yield self.core_proxy.device_reason_update(self.device_id,
                                                            'tech-profile-config-delete-failure-retrying')
 
@@ -775,11 +776,12 @@ class BrcmOpenomciOnuHandler(object):
                     self.log.error("gem-port-info-corresponding-to-gem-port-id-not-found", gem_port_id=gem_port_id)
                 return
 
-            self._tp_service_specific_task[uni_id][tp_path] = \
+            self._tp_state_map_per_uni[uni_id][tp_table_id].tp_task_ref = \
                 BrcmTpDeleteTask(self.omci_agent, self, uni_id, tp_table_id,
                                  tcont=tcont, gem_port=gem_port)
             self._deferred = \
-                self._onu_omci_device.task_runner.queue_task(self._tp_service_specific_task[uni_id][tp_path])
+                self._onu_omci_device.task_runner.queue_task(self._tp_state_map_per_uni[uni_id][tp_table_id].
+                                                             tp_task_ref)
             self._deferred.addCallbacks(success, failure)
         except Exception as e:
             self.log.exception("failed-to-delete-tp",
@@ -867,14 +869,10 @@ class BrcmOpenomciOnuHandler(object):
                     # The vlan filter remove should be followed by a TP deleted for that TP ID.
                     # Use this information to re-schedule any vlan filter add tasks for the same TP ID again.
                     # First check if the TP download was done, before we access that TP delete is necessary
-                    if uni_id in self._tech_profile_download_done and tp_id in self._tech_profile_download_done[
-                        uni_id] and \
-                            self._tech_profile_download_done[uni_id][tp_id] is True:
-                        if uni_id not in self._pending_delete_tp:
-                            self._pending_delete_tp[uni_id] = dict()
-                            self._pending_delete_tp[uni_id][tp_id] = True
-                        else:
-                            self._pending_delete_tp[uni_id][tp_id] = True
+                    if tp_id in self._tp_state_map_per_uni[uni_id] and \
+                            self._tp_state_map_per_uni[uni_id][tp_id].tp_setup_done is True:
+                        self._tp_state_map_per_uni[uni_id][tp_id].is_tp_delete_pending = True
+
                     # Deleting flow from ONU.
                     self._remove_vlan_filter_task(device, uni_id, uni_port=uni_port,
                                                   _set_vlan_pcp=_set_vlan_pcp,
@@ -1283,18 +1281,19 @@ class BrcmOpenomciOnuHandler(object):
 
     def _add_vlan_filter_task(self, device, uni_id, uni_port=None, match_vlan=0,
                               _set_vlan_vid=None, _set_vlan_pcp=8, tp_id=0):
-        if uni_id in self._pending_delete_tp and tp_id in self._pending_delete_tp[uni_id] and \
-                self._pending_delete_tp[uni_id][tp_id] is True:
+        if tp_id in self._tp_state_map_per_uni[uni_id] and \
+                self._tp_state_map_per_uni[uni_id][tp_id].is_tp_delete_pending is True:
             self.log.debug("pending-del-tp--scheduling-add-vlan-filter-task-for-later")
-            reactor.callLater(0.2, self._add_vlan_filter_task, device, uni_id, uni_port, match_vlan,
+            retry = random.randint(1, 5)
+            reactor.callLater(retry, self._add_vlan_filter_task, device, uni_id, uni_port, match_vlan,
                               _set_vlan_vid, _set_vlan_pcp, tp_id)
             return
 
         self.log.info('_adding_vlan_filter_task', uni_port=uni_port, uni_id=uni_id, tp_id=tp_id, match_vlan=match_vlan,
                       vlan=_set_vlan_vid, vlan_pcp=_set_vlan_pcp)
         assert uni_port is not None
-        if uni_id in self._tech_profile_download_done and tp_id in self._tech_profile_download_done[uni_id] and \
-                self._tech_profile_download_done[uni_id][tp_id] is True:
+        if tp_id in self._tp_state_map_per_uni[uni_id] and \
+                self._tp_state_map_per_uni[uni_id][tp_id].tp_setup_done is True:
             @inlineCallbacks
             def success(_results):
                 self.log.info('vlan-tagging-success', uni_port=uni_port, vlan=_set_vlan_vid, tp_id=tp_id,
@@ -1304,7 +1303,7 @@ class BrcmOpenomciOnuHandler(object):
             @inlineCallbacks
             def failure(_reason):
                 self.log.warn('vlan-tagging-failure', uni_port=uni_port, vlan=_set_vlan_vid, tp_id=tp_id)
-                retry = _STARTUP_RETRY_WAIT * (random.randint(1, 5))
+                retry = random.randint(1, 5)
                 reactor.callLater(retry,
                                   self._add_vlan_filter_task, device, uni_id, uni_port=uni_port,
                                   match_vlan=match_vlan, _set_vlan_vid=_set_vlan_vid,
@@ -1351,7 +1350,7 @@ class BrcmOpenomciOnuHandler(object):
         def failure(_reason):
             self.log.warn('vlan-untagging-failure', _reason=_reason)
             yield self.core_proxy.device_reason_update(self.device_id, 'omci-flows-deletion-failed-retrying')
-            retry = _STARTUP_RETRY_WAIT * (random.randint(1, 5))
+            retry = random.randint(1, 5)
             reactor.callLater(retry,
                               self._remove_vlan_filter_task, device, uni_id,
                               uni_port=uni_port, match_vlan=match_vlan, _set_vlan_vid=_set_vlan_vid,
@@ -1418,9 +1417,13 @@ class BrcmOpenomciOnuHandler(object):
                 del_gem_msg = InterAdapterDeleteGemPortMessage()
                 request.body.Unpack(del_gem_msg)
                 self.log.debug('inter-adapter-recv-del-gem', gem_del_msg=del_gem_msg)
-
+                tp_id = self.extract_tp_id_from_path(del_gem_msg.tp_path)
+                uni_id = del_gem_msg.uni_id
+                gem_port = self._pon.get_gem_port(del_gem_msg.gem_port_id)
+                self._tp_state_map_per_uni[uni_id][tp_id].queue_pending_delete_pon_resource(TpState.GEM_ID,
+                                                                                            gem_port)
                 self.delete_tech_profile(uni_id=del_gem_msg.uni_id,
-                                         gem_port_id=del_gem_msg.gem_port_id,
+                                         gem_port=gem_port,
                                          tp_path=del_gem_msg.tp_path)
 
             elif request.header.type == InterAdapterMessageType.DELETE_TCONT_REQUEST:
@@ -1430,8 +1433,13 @@ class BrcmOpenomciOnuHandler(object):
 
                 # Removal of the tcont/alloc id mapping represents the removal of the tech profile
                 update_onu_state = self._update_onu_persisted_state(del_tcont_msg.uni_id, tp_path=None)
+                tp_id = self.extract_tp_id_from_path(del_tcont_msg.tp_path)
+                uni_id = del_tcont_msg.uni_id
+                tcont = self._pon.get_tcont(del_tcont_msg.alloc_id)
+                self._tp_state_map_per_uni[uni_id][tp_id].queue_pending_delete_pon_resource(TpState.ALLOC_ID,
+                                                                                            tcont)
                 self.delete_tech_profile(uni_id=del_tcont_msg.uni_id,
-                                         alloc_id=del_tcont_msg.alloc_id,
+                                         tcont=tcont,
                                          tp_path=del_tcont_msg.tp_path)
             else:
                 self.log.error("inter-adapter-unhandled-type", request=request)
@@ -1507,10 +1515,8 @@ class BrcmOpenomciOnuHandler(object):
             self._tp = dict()
 
             # Let TP download happen again
-            for uni_id in self._tp_service_specific_task:
-                self._tp_service_specific_task[uni_id].clear()
-            for uni_id in self._tech_profile_download_done:
-                self._tech_profile_download_done[uni_id].clear()
+            for uni_id in self._tp_state_map_per_uni:
+                self._tp_state_map_per_uni[uni_id].clear()
 
             yield self.disable_ports(lock_ports=False)
             yield self.core_proxy.device_reason_update(self.device_id, "stopping-openomci")
@@ -1815,6 +1821,7 @@ class BrcmOpenomciOnuHandler(object):
             uni_id = 0
             for entity_id, uni_type in uni_entities.items():
                 yield self._add_uni_port(device, entity_id, uni_id, uni_type)
+                self._tp_state_map_per_uni[uni_id] = dict()
                 uni_id += 1
 
             if self._unis:
@@ -1883,14 +1890,13 @@ class BrcmOpenomciOnuHandler(object):
                 tp_id = self.extract_tp_id_from_path(tp_path)
 
                 # rebuild cache dicts so tp updates and deletes dont get KeyErrors
-                if uni_id not in self._tp_service_specific_task:
-                    self._tp_service_specific_task[uni_id] = dict()
+                if uni_id not in self._tp_state_map_per_uni:
+                    self._tp_state_map_per_uni[uni_id] = dict()
 
-                if uni_id not in self._tech_profile_download_done:
-                    self._tech_profile_download_done[uni_id] = dict()
+                if tp_id not in self._tp_state_map_per_uni[uni_id]:
+                    self._tp_state_map_per_uni[uni_id][tp_id] = TpState(self, uni_id, tp_path)
 
-                if tp_id not in self._tech_profile_download_done[uni_id]:
-                    self._tech_profile_download_done[uni_id][tp_id] = True
+                self._tp_state_map_per_uni[uni_id][tp_id].tp_setup_done = True
             else:
                 self.log.debug("no-assigned-tp-instance", uni_id=uni_id)
 
