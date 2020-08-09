@@ -88,6 +88,7 @@ class BrcmOpenomciOnuHandler(object):
         self.device_id = device_id
         self.proxy_address = None
         self._enabled = False
+        self._is_device_active_and_reachable = False
         self.events = None
         self._pm_metrics = None
         self._pm_metrics_started = False
@@ -167,6 +168,14 @@ class BrcmOpenomciOnuHandler(object):
     @property
     def uni_ports(self):
         return list(self._unis.values())
+
+    @property
+    def is_device_active_and_reachable(self):
+        return self._is_device_active_and_reachable
+
+    @is_device_active_and_reachable.setter
+    def is_device_active_and_reachable(self, value):
+        self._is_device_active_and_reachable = value
 
     def uni_port(self, port_no_or_name):
         if isinstance(port_no_or_name, six.string_types):
@@ -1422,9 +1431,16 @@ class BrcmOpenomciOnuHandler(object):
                 gem_port = self._pon.get_gem_port(del_gem_msg.gem_port_id)
                 self._tp_state_map_per_uni[uni_id][tp_id].queue_pending_delete_pon_resource(TpState.GEM_ID,
                                                                                             gem_port)
-                self.delete_tech_profile(uni_id=del_gem_msg.uni_id,
-                                         gem_port=gem_port,
-                                         tp_path=del_gem_msg.tp_path)
+                if self.is_device_active_and_reachable:
+                    self.delete_tech_profile(uni_id=del_gem_msg.uni_id,
+                                             gem_port=gem_port,
+                                             tp_path=del_gem_msg.tp_path)
+                else:
+                    self.log.debug("device-unreachable--clearing-gem-id-from-local-cache")
+                    if tp_id in self._tp_state_map_per_uni[uni_id]:
+                        self._tp_state_map_per_uni[uni_id][tp_id].pon_resource_delete_complete(TpState.GEM_ID,
+                                                                                               gem_port.gem_id)
+                    self._clear_alloc_id_gem_port_from_internal_cache(None, gem_port.gem_id)
 
             elif request.header.type == InterAdapterMessageType.DELETE_TCONT_REQUEST:
                 del_tcont_msg = InterAdapterDeleteTcontMessage()
@@ -1438,9 +1454,18 @@ class BrcmOpenomciOnuHandler(object):
                 tcont = self._pon.get_tcont(del_tcont_msg.alloc_id)
                 self._tp_state_map_per_uni[uni_id][tp_id].queue_pending_delete_pon_resource(TpState.ALLOC_ID,
                                                                                             tcont)
-                self.delete_tech_profile(uni_id=del_tcont_msg.uni_id,
-                                         tcont=tcont,
-                                         tp_path=del_tcont_msg.tp_path)
+                if self.is_device_active_and_reachable:
+                    self.delete_tech_profile(uni_id=del_tcont_msg.uni_id,
+                                             tcont=tcont,
+                                             tp_path=del_tcont_msg.tp_path)
+                else:
+                    self.log.debug("device-unreachable--clearing-tcont-from-local-cache")
+                    if tp_id in self._tp_state_map_per_uni[uni_id]:
+                        self._tp_state_map_per_uni[uni_id][tp_id].pon_resource_delete_complete(TpState.ALLOC_ID,
+                                                                                               tcont.alloc_id)
+                        self._tp_state_map_per_uni[uni_id][tp_id].tp_setup_done = False
+                    self._clear_alloc_id_gem_port_from_internal_cache(tcont.alloc_id, None)
+
             else:
                 self.log.error("inter-adapter-unhandled-type", request=request)
 
@@ -1516,12 +1541,14 @@ class BrcmOpenomciOnuHandler(object):
 
             # Let TP download happen again
             for uni_id in self._tp_state_map_per_uni:
-                self._tp_state_map_per_uni[uni_id].clear()
+                for tp_id in self._tp_state_map_per_uni[uni_id]:
+                    self._tp_state_map_per_uni[uni_id][tp_id].tp_setup_done = False
 
             yield self.disable_ports(lock_ports=False)
             yield self.core_proxy.device_reason_update(self.device_id, "stopping-openomci")
             yield self.core_proxy.device_state_update(self.device_id, oper_status=OperStatus.DISCOVERED,
                                                       connect_status=ConnectStatus.UNREACHABLE)
+            self.is_device_active_and_reachable = False
         else:
             self.log.debug('not-changing-openomci-statemachine')
 
@@ -1532,6 +1559,7 @@ class BrcmOpenomciOnuHandler(object):
             yield self.disable_ports(lock_ports=True, device_disabled=True)
             yield self.core_proxy.device_reason_update(self.device_id, "omci-admin-lock")
             yield self.core_proxy.device_state_update(self.device_id, oper_status=OperStatus.UNKNOWN)
+            self.is_device_active_and_reachable = False
         except Exception as e:
             self.log.exception('exception-in-onu-disable', exception=e)
 
@@ -1542,6 +1570,7 @@ class BrcmOpenomciOnuHandler(object):
             yield self.core_proxy.device_state_update(device.id,
                                                       oper_status=OperStatus.ACTIVE,
                                                       connect_status=ConnectStatus.REACHABLE)
+            self.is_device_active_and_reachable = True
             yield self.core_proxy.device_reason_update(self.device_id, 'onu-reenabled')
             yield self.enable_ports()
         except Exception as e:
@@ -1704,6 +1733,7 @@ class BrcmOpenomciOnuHandler(object):
                 yield self.core_proxy.device_state_update(device.id,
                                                           oper_status=OperStatus.ACTIVE,
                                                           connect_status=ConnectStatus.REACHABLE)
+                self.is_device_active_and_reachable = True
                 yield self.enable_ports()
         else:
             self._download_mib(device)
@@ -1723,6 +1753,7 @@ class BrcmOpenomciOnuHandler(object):
             yield self.core_proxy.device_state_update(device.id,
                                                       oper_status=OperStatus.ACTIVE,
                                                       connect_status=ConnectStatus.REACHABLE)
+            self.is_device_active_and_reachable = True
             yield self.core_proxy.device_reason_update(self.device_id, 'initial-mib-downloaded')
             self._mib_download_task = None
             yield self.enable_ports()

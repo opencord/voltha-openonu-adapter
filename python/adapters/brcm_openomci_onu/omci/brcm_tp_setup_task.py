@@ -18,7 +18,8 @@ import structlog
 from twisted.internet import reactor
 from twisted.internet.defer import inlineCallbacks, TimeoutError, failure
 from pyvoltha.adapters.extensions.omci.omci_me import Ont2G, OmciNullPointer, PriorityQueueFrame, \
-    Ieee8021pMapperServiceProfileFrame, MacBridgePortConfigurationDataFrame
+    Ieee8021pMapperServiceProfileFrame, MacBridgePortConfigurationDataFrame, GemInterworkingTpFrame, \
+    GemPortNetworkCtpFrame
 from pyvoltha.adapters.extensions.omci.tasks.task import Task
 from pyvoltha.adapters.extensions.omci.omci_defs import EntityOperations, ReasonCodes
 from pyvoltha.adapters.extensions.omci.omci_entities import OntG, Tcont, PriorityQueueG, Ieee8021pMapperServiceProfile, \
@@ -194,6 +195,11 @@ class BrcmTpSetupTask(Task):
             if ieee_8021p_mapper_exists is False:
                 self.log.info("setting-up-8021pmapper-ani-mac-bridge-port")
                 yield self._setup__8021p_mapper__ani_mac_bridge_port()
+            else:
+                # If IEEE8021pMapper ME existed already, then we need to re-build the
+                # inter-working-tp-pointers for different gem-entity-ids. Delete the old one
+                self.log.info("delete-and-recreate-8021pmapper-ani-mac-bridge-port")
+                yield self._delete_and_recreate__8021p_mapper__ani_mac_bridge_port()
 
             tcont_idents = self._onu_device.query_mib(Tcont.class_id)
             self.log.debug('tcont-idents', tcont_idents=tcont_idents)
@@ -417,23 +423,6 @@ class BrcmTpSetupTask(Task):
             #
 
             gem_entity_ids = [OmciNullPointer] * 8
-            # If IEEE8021pMapper ME existed already, then we need to re-build the
-            # inter-working-tp-pointers for different gem-entity-ids.
-            if ieee_8021p_mapper_exists:
-                self.log.debug("rebuilding-interworking-tp-pointers")
-                for k, v in ieee_8021p_mapper.items():
-                    if not isinstance(v, dict):
-                        continue
-                    # Check the entity-id of the instance matches what we expect
-                    # for this Uni/TechProfileId
-                    if k == (self._ieee_mapper_service_profile_entity_id +
-                             self._uni_port.mac_bridge_port_num + self._tp_table_id):
-                        for i in range(len(gem_entity_ids)):
-                            gem_entity_ids[i] = v.get('attributes', {}). \
-                                get('interwork_tp_pointer_for_p_bit_priority_' + str(i), OmciNullPointer)
-                        self.log.debug("interworking-tp-pointers-rebuilt-after-query-from-onu",
-                                       i_w_tp_ptr=gem_entity_ids)
-
             for gem_port in self._gem_ports:
                 self.log.debug("tp-gem-port", entity_id=gem_port.entity_id, uni_id=gem_port.uni_id)
 
@@ -538,3 +527,79 @@ class BrcmTpSetupTask(Task):
         except Exception as e:
             self.log.exception('omci-setup-8021p-ani-port-setup', e=e)
             raise
+
+    @inlineCallbacks
+    def _delete_and_recreate__8021p_mapper__ani_mac_bridge_port(self):
+
+        omci_cc = self._onu_device.omci_cc
+
+        try:
+
+            # First clean up the Gem Ports references by the old 8021pMapper
+            ieee_8021p_mapper = self._onu_device.query_mib(Ieee8021pMapperServiceProfile.class_id)
+            for k, v in ieee_8021p_mapper.items():
+                if not isinstance(v, dict):
+                    continue
+                # Check the entity-id of the instance matches what we expect
+                # for this Uni/TechProfileId
+                if k == (self._ieee_mapper_service_profile_entity_id +
+                         self._uni_port.mac_bridge_port_num + self._tp_table_id):
+                    for i in range(8):
+                        gem_entity_id = v.get('attributes', {}). \
+                            get('interwork_tp_pointer_for_p_bit_priority_' + str(i), OmciNullPointer)
+                        if gem_entity_id is not OmciNullPointer:
+                            self.log.debug('remove-from-hardware', gem_id=gem_entity_id)
+                            try:
+                                msg = GemInterworkingTpFrame(gem_entity_id)
+                                frame = msg.delete()
+                                self.log.debug('openomci-msg', omci_msg=msg)
+                                results = yield omci_cc.send(frame)
+                                self.check_status_and_state(results, 'delete-gem-port-network-ctp')
+                            except Exception as e:
+                                self.log.exception('interworking-delete', e=e)
+                                raise
+
+                            try:
+                                msg = GemPortNetworkCtpFrame(gem_entity_id)
+                                frame = msg.delete()
+                                self.log.debug('openomci-msg', omci_msg=msg)
+                                results = yield omci_cc.send(frame)
+                                self.check_status_and_state(results, 'delete-gem-interworking-tp')
+                            except Exception as e:
+                                self.log.exception('gemport-delete', e=e)
+                                raise
+                    break
+
+            # Then delete 8021pMapper ME
+            msg = Ieee8021pMapperServiceProfileFrame(
+                self._ieee_mapper_service_profile_entity_id +
+                self._uni_port.mac_bridge_port_num +
+                self._tp_table_id
+            )
+            frame = msg.delete()
+            self.log.debug('openomci-msg', omci_msg=msg)
+            results = yield omci_cc.send(frame)
+            self.check_status_and_state(results, 'delete-8021p-mapper-service-profile')
+
+            # Then delete ANI Mac Bridge port
+            msg = MacBridgePortConfigurationDataFrame(
+                self._mac_bridge_port_ani_entity_id + self._uni_port.entity_id + self._tp_table_id  # Entity ID
+            )
+            frame = msg.delete()
+            self.log.debug('openomci-msg', omci_msg=msg)
+            results = yield omci_cc.send(frame)
+            self.check_status_and_state(results, 'delete-mac-bridge-port-configuration-data')
+
+            # TODO: We need not delete the TCONT as TCONTs are pre-created. We should possibly
+            # unset the TCONTs alloc-id from a valid value to 0xffff.
+            # But this was not causing issues in my test. A separate Jira is necessary for this.
+            yield self._setup__8021p_mapper__ani_mac_bridge_port()
+
+        except TimeoutError as e:
+            self.log.warn('rx-timeout-8021p-ani-port-delete', e=e)
+            raise
+
+        except Exception as e:
+            self.log.exception('omci-setup-8021p-ani-port-delete', e=e)
+            raise
+
