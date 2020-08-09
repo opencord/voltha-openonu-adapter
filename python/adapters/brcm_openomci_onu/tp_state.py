@@ -62,6 +62,10 @@ class TpState:
     def is_tp_delete_pending(self, is_tp_delete_pending):
         self._is_tp_delete_pending = is_tp_delete_pending
 
+    @property
+    def pending_delete_pon_res_map(self):
+        return self._pending_delete_pon_res_map
+
     def queue_pending_delete_pon_resource(self, res_type, res):
         if res_type not in self._pending_delete_pon_res_map:
             if res_type == TpState.ALLOC_ID:
@@ -75,7 +79,7 @@ class TpState:
                 self.log.error("unknown-res-type", res_type=res_type)
         else:
             if res_type == TpState.ALLOC_ID:
-                self.log.warn("alloc-id-already-pending-for-deletion", alloc_id=res)
+                self.log.warn("alloc-id-already-pending-for-deletion", alloc_id=res.alloc_id)
             elif res_type == TpState.GEM_ID:
                 # Make sure that we are not adding duplicate gem-port-id to the list
                 for v in self._pending_delete_pon_res_map[TpState.GEM_ID]:
