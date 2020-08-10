@@ -26,3 +26,4 @@ cat BRCM-BVM4K00BRA0915-0083-5023_003GWOV36-VEIP-v1.json | ETCDCTL_API=3 etcdctl
 cat BBSM-12345123451234512345-00000000000001-v1.json | ETCDCTL_API=3 etcdctl --endpoints=$ETCD_IP:2379 put service/voltha/omci_mibs/templates/BBSM/12345123451234512345/00000000000001
 cat BRCM_ISKTL-G108_10-7.0.1b8-0.6-v1.json | ETCDCTL_API=3 etcdctl --endpoints=$ETCD_IP:2379 put service/voltha/omci_mibs/templates/BRCM/G108_10/7.0.1b8-0.6
 cat BRCM_ALPHA-BVM4K00BRA0915-0083-5023_020O02414-v1.json | ETCDCTL_API=3 etcdctl --endpoints=$ETCD_IP:2379 put service/voltha/omci_mibs/templates/BRCM/BVM4K00BRA0915-0083/5023_020O02414
+cat SCOM-Glasfaser-Modem_090140.1.0.304.json | ETCDCTL_API=3 etcdctl --endpoints=$ETCD_IP:2379 put service/voltha/omci_mibs/templates/SCOM/Glasfaser-Modem/090140.1.0.304
