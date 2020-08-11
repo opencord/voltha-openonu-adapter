@@ -21,8 +21,8 @@ logging:
             format: '%(message)s'
         default:
             # yamllint disable-line rule:line-length
-            format: '%(asctime)s.%(msecs)03d %(levelname)-8s %(threadName)s %(module)s.%(funcName)s %(message)s'
-            datefmt: '%Y%m%dT%H%M%S'
+            format: '{"level":"%(levelname)s","ts":"%(asctime)s.%(msecs)03dZ","caller":"%(filename)s:%(lineno)d","function":"%(funcName)s","pkg":"%(module)s",%(message)s}'
+            datefmt: '%Y-%m-%dT%H:%M:%S'
 
     handlers:
         console:
