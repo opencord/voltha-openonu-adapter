@@ -1,2 +1,2 @@
-voltha-protos==3.4.0
-pyvoltha==2.5.1
+voltha-protos==3.4.2
+pyvoltha==2.5.3
