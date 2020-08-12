@@ -607,10 +607,14 @@ class BrcmOpenomciOnuHandler(object):
 
                 def success(_results):
                     self.log.info("new-gem-ports-successfully-installed", result=_results)
+                    if tp_id in self._tp_state_map_per_uni[uni_id]:
+                        self._tp_state_map_per_uni[uni_id][tp_id].tp_task_ref = None
 
                 def failure(_reason):
                     self.log.warn('new-gem-port-install-failed--retrying',
                                   _reason=_reason)
+                    if tp_id in self._tp_state_map_per_uni[uni_id]:
+                        self._tp_state_map_per_uni[uni_id][tp_id].tp_task_ref = None
                     # Remove gem ports from cache. We will re-add them during the retry
                     for gp in new_gems:
                         self.pon_port.remove_gem_id(gp.gem_id, gp.direction, False)
