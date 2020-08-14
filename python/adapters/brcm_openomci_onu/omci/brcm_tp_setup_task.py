@@ -171,6 +171,15 @@ class BrcmTpSetupTask(Task):
         is_related_ports_configurable = False
         tcont_entity_id = 0
 
+        # We will setup mcast gem port and associated configuration as part of BrcmMcastTask
+        # In this OMCI task we work only on bidirectional gem ports
+        bidirectional_gem_ports = self._get_bidirectional_gem_list()
+        # If we are not setting up any bidirectional gem port, immediately return success
+        if len(bidirectional_gem_ports) == 0:
+            self.log.info("no-bidirectional-gem-list-found")
+            self.deferred.callback("tech-profile-download-success")
+            return
+
         try:
             ################################################################################
             # TCONTS
@@ -323,61 +332,54 @@ class BrcmTpSetupTask(Task):
             self.log.debug("ul-prior-q", ul_prior_q=self.tcont_me_to_queue_map)
             self.log.debug("dl-prior-q", dl_prior_q=self.uni_port_to_queue_map)
 
-            for gem_port in self._gem_ports:
+            for gem_port in bidirectional_gem_ports:
                 # TODO: Traffic descriptor will be available after meter bands are available
                 tcont = gem_port.tcont
                 if tcont is None:
                     self.log.error('unknown-tcont-reference', gem_id=gem_port.gem_id)
                     continue
 
-                if gem_port.direction == "upstream" or \
-                        gem_port.direction == "bi-directional":
+                # Sort the priority queue list in order of priority.
+                # 0 is highest priority and 0x0fff is lowest.
+                self.tcont_me_to_queue_map[tcont.entity_id].sort()
+                self.uni_port_to_queue_map[self._uni_port.entity_id].sort()
+                # Get the priority queue by indexing the priority value of the gemport.
+                # The self.tcont_me_to_queue_map and self.uni_port_to_queue_map
+                # have priority queue entities ordered in descending order
+                # of priority
 
-                    # Sort the priority queue list in order of priority.
-                    # 0 is highest priority and 0x0fff is lowest.
-                    self.tcont_me_to_queue_map[tcont.entity_id].sort()
-                    self.uni_port_to_queue_map[self._uni_port.entity_id].sort()
-                    # Get the priority queue by indexing the priority value of the gemport.
-                    # The self.tcont_me_to_queue_map and self.uni_port_to_queue_map
-                    # have priority queue entities ordered in descending order
-                    # of priority
+                ul_prior_q_entity_id = \
+                    self.tcont_me_to_queue_map[tcont.entity_id][gem_port.priority_q]
+                dl_prior_q_entity_id = \
+                    self.uni_port_to_queue_map[self._uni_port.entity_id][gem_port.priority_q]
 
-                    ul_prior_q_entity_id = \
-                        self.tcont_me_to_queue_map[tcont.entity_id][gem_port.priority_q]
-                    dl_prior_q_entity_id = \
-                        self.uni_port_to_queue_map[self._uni_port.entity_id][gem_port.priority_q]
+                pq_attributes = dict()
+                pq_attributes["pq_entity_id"] = ul_prior_q_entity_id
+                pq_attributes["weight"] = gem_port.weight
+                pq_attributes["scheduling_policy"] = gem_port.scheduling_policy
+                pq_attributes["priority_q"] = gem_port.priority_q
+                gem_pq_associativity[gem_port.entity_id] = pq_attributes
 
-                    pq_attributes = dict()
-                    pq_attributes["pq_entity_id"] = ul_prior_q_entity_id
-                    pq_attributes["weight"] = gem_port.weight
-                    pq_attributes["scheduling_policy"] = gem_port.scheduling_policy
-                    pq_attributes["priority_q"] = gem_port.priority_q
-                    gem_pq_associativity[gem_port.entity_id] = pq_attributes
+                assert ul_prior_q_entity_id is not None and \
+                       dl_prior_q_entity_id is not None
 
-                    assert ul_prior_q_entity_id is not None and \
-                           dl_prior_q_entity_id is not None
+                existing = self._onu_device.query_mib(GemPortNetworkCtp.class_id, gem_port.entity_id)
+                self.log.debug('looking-for-gemport-before-create', existing=existing,
+                               class_id=GemPortNetworkCtp.class_id,
+                               entity_id=gem_port.entity_id)
+                if existing:
+                    results = yield gem_port.remove_from_hardware(omci_cc)
+                    self.check_status_and_state(results, 'remove-existing-gem-port')
 
-                    existing = self._onu_device.query_mib(GemPortNetworkCtp.class_id, gem_port.entity_id)
-                    self.log.debug('looking-for-gemport-before-create', existing=existing,
-                                   class_id=GemPortNetworkCtp.class_id,
-                                   entity_id=gem_port.entity_id)
-                    if existing:
-                        results = yield gem_port.remove_from_hardware(omci_cc)
-                        self.check_status_and_state(results, 'remove-existing-gem-port')
+                results = yield gem_port.add_to_hardware(omci_cc,
+                                                         tcont.entity_id,
+                                                         self._ieee_mapper_service_profile_entity_id +
+                                                         self._uni_port.mac_bridge_port_num +
+                                                         self._tp_table_id,
+                                                         self._gal_enet_profile_entity_id,
+                                                         ul_prior_q_entity_id, dl_prior_q_entity_id)
+                self.check_status_and_state(results, 'assign-gem-port')
 
-                    results = yield gem_port.add_to_hardware(omci_cc,
-                                                             tcont.entity_id,
-                                                             self._ieee_mapper_service_profile_entity_id +
-                                                             self._uni_port.mac_bridge_port_num +
-                                                             self._tp_table_id,
-                                                             self._gal_enet_profile_entity_id,
-                                                             ul_prior_q_entity_id, dl_prior_q_entity_id)
-                    self.check_status_and_state(results, 'assign-gem-port')
-                elif gem_port.direction == "downstream":
-                    # Downstream is inverse of upstream
-                    # TODO: could also be a case of multicast. Not supported for now
-                    self.log.debug("skipping-downstream-gem", gem_port=gem_port)
-                    pass
 
             ################################################################################
             # Update the PriorityQeue Attributes for the PQ Associated with Gemport
@@ -423,18 +425,12 @@ class BrcmTpSetupTask(Task):
             #
 
             gem_entity_ids = [OmciNullPointer] * 8
-            for gem_port in self._gem_ports:
+            for gem_port in bidirectional_gem_ports:
                 self.log.debug("tp-gem-port", entity_id=gem_port.entity_id, uni_id=gem_port.uni_id)
 
-                if gem_port.direction == "upstream" or \
-                        gem_port.direction == "bi-directional":
-                    for i, p in enumerate(reversed(gem_port.pbit_map)):
-                        if p == '1':
-                            gem_entity_ids[i] = gem_port.entity_id
-                elif gem_port.direction == "downstream":
-                    # Downstream gem port p-bit mapper is inverse of upstream
-                    # TODO: Could also be a case of multicast. Not supported for now
-                    pass
+                for i, p in enumerate(reversed(gem_port.pbit_map)):
+                    if p == '1':
+                        gem_entity_ids[i] = gem_port.entity_id
 
             msg = Ieee8021pMapperServiceProfileFrame(
                 (self._ieee_mapper_service_profile_entity_id +
@@ -528,13 +524,25 @@ class BrcmTpSetupTask(Task):
             self.log.exception('omci-setup-8021p-ani-port-setup', e=e)
             raise
 
+    def _get_bidirectional_gem_list(self):
+        gem_ports = list()
+        for gem in self._gem_ports:
+            # The assumption here is anything which is not multicast gem is a bidirectional gem
+            # We also filter in gem_port with direction "upstream" as "upstream" gem_port
+            # characteristics are good enough to setup the bi-directional gem_ports.
+            # Note that this may be an issue if gem_port characteristics are not symmetric
+            # in both directions, but we have not encountered such a situation so far.
+            if not gem.mcast and gem.direction == "upstream":
+                gem_ports.append(gem)
+        self.log.debug("bidirectional ports", gem_ports=gem_ports)
+        return gem_ports
+
     @inlineCallbacks
     def _delete_and_recreate__8021p_mapper__ani_mac_bridge_port(self):
 
         omci_cc = self._onu_device.omci_cc
 
         try:
-
             # First clean up the Gem Ports references by the old 8021pMapper
             ieee_8021p_mapper = self._onu_device.query_mib(Ieee8021pMapperServiceProfile.class_id)
             for k, v in ieee_8021p_mapper.items():
