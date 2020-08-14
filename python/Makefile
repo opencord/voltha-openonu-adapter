@@ -40,7 +40,7 @@ DOCKER_LABEL_VCS_URL       ?= $(shell git remote get-url $(shell git remote))
 DOCKER_LABEL_VCS_REF       = $(shell git rev-parse HEAD)
 DOCKER_LABEL_BUILD_DATE    ?= $(shell date -u "+%Y-%m-%dT%H:%M:%SZ")
 DOCKER_LABEL_COMMIT_DATE   = $(shell git show -s --format=%cd --date=iso-strict HEAD)
-PYTHON_CI_LINT     = docker run --rm --user $$(id -u):$$(id -g) -v ${CURDIR}:/app $(shell test -t 0 && echo "-it") voltha/voltha-ci-tools:${VOLTHA_TOOLS_VERSION}-python-ci bandit -r /app/adapters
+PYTHON_TOX     = docker run --rm --user $$(id -u):$$(id -g) -w /app -v ${CURDIR}:/app $(shell test -t 0 && echo "-it") python-bandit
 
 .PHONY: venv docker-build local-protos local-pyvoltha
 
@@ -55,6 +55,7 @@ help:
 	@echo "venv              : Build local Python virtualenv"
 	@echo "clean             : Remove files created by the build and tests"
 	@echo "distclean         : Remove venv directory"
+	@echo "sca               : Starts sca checks"
 	@echo
 
 
@@ -129,7 +130,7 @@ sca:
 	@rm -rf ./sca-report
 	@mkdir -p ./sca-report
 	@echo "Running static code analysis..."
-	@${PYTHON_CI_LINT} run --deadline=6m --out-format junit-xml ./... | tee ./sca-report/sca-report.xml
+	@$(PYTHON_TOX) tox --result-json /app/sca-report/sca-report.json
 	@echo ""
 	@echo "Static code analysis OK"
 # end file
