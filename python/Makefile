@@ -20,6 +20,8 @@ SHELL = bash -e -o pipefail
 # Variables
 VERSION                  ?= $(shell cat ../VERSION)
 
+# tool containers
+
 DOCKER_LABEL_VCS_DIRTY     = false
 ifneq ($(shell git ls-files --others --modified --exclude-standard 2>/dev/null | wc -l | sed -e 's/ //g'),0)
     DOCKER_LABEL_VCS_DIRTY = true
@@ -38,6 +40,10 @@ DOCKER_LABEL_VCS_REF       = $(shell git rev-parse HEAD)
 DOCKER_LABEL_BUILD_DATE    ?= $(shell date -u "+%Y-%m-%dT%H:%M:%SZ")
 DOCKER_LABEL_COMMIT_DATE   = $(shell git show -s --format=%cd --date=iso-strict HEAD)
 
+## Python tox tests
+VOLTHA_TOOLS_VERSION ?= 2.0.0
+PYTHON_TOX     = docker run --rm --user $$(id -u):$$(id -g) -w /app -v ${CURDIR}:/app $(shell test -t 0 && echo "-it") voltha/voltha-ci-tools:${VOLTHA_TOOLS_VERSION}-python-lint
+
 .PHONY: venv docker-build local-protos local-pyvoltha
 
 # This should to be the first and default target in this Makefile
@@ -51,6 +57,7 @@ help:
 	@echo "venv              : Build local Python virtualenv"
 	@echo "clean             : Remove files created by the build and tests"
 	@echo "distclean         : Remove venv directory"
+	@echo "sca               : Starts sca checks"
 	@echo
 
 
@@ -121,4 +128,11 @@ clean:
 distclean: clean
 	rm -rf ${VENVDIR}
 
+sca:
+	@rm -rf ./sca-report
+	@mkdir -p ./sca-report
+	@echo "Running static code analysis..."
+	@$(PYTHON_TOX) tox --result-json /app/sca-report/sca-report.json
+	@echo ""
+	@echo "Static code analysis OK"
 # end file
