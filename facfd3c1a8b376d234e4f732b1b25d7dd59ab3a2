@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9efc4163_269e0032",
+        "filename": "VERSION",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000127
+      },
+      "writtenOn": "2020-08-14T01:03:12Z",
+      "side": 1,
+      "message": "The version should be 2.5.0.\nThe convention we follow is to switch from x.y.z-dev to x.y.z .\nOr you could continue to retain the 2.5.0-dev version.",
+      "revId": "facfd3c1a8b376d234e4f732b1b25d7dd59ab3a2",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": true
+    }
+  ]
+}
