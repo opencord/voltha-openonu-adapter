@@ -132,6 +132,8 @@ class BrcmOpenomciOnuHandler(object):
         # Dictionary with key being uni_id and value being device,uni port ,uni id and vlan id
         self._queued_vlan_filter_task = dict()
 
+        self._multicast_task = None
+
         self._set_vlan = dict()  # uni_id, tp_id -> set_vlan_id
         self._tp_state_map_per_uni = dict()  # uni_id -> {dictionary tp_id->TpState}
 
@@ -635,6 +637,14 @@ class BrcmOpenomciOnuHandler(object):
                     self.log.info("new-gem-ports-successfully-installed", result=_results)
                     if tp_id in self._tp_state_map_per_uni[uni_id]:
                         self._tp_state_map_per_uni[uni_id][tp_id].tp_task_ref = None
+                    # Execute mcast task
+                    for gem in downstream_gems:
+                        self.log.debug("checking-multicast-service-for-gem ", gem=gem)
+                        if gem.mcast:
+                            self.log.info("found-multicast-service-for-gem ", gem=gem, uni_id=uni_id, tp_id=tp_id)
+                            reactor.callInThread(self.start_multicast_service, uni_id, tp_path)
+                            self.log.debug("started_multicast_service-successfully", gem=gem)
+                            break
 
                 def failure(_reason):
                     self.log.warn('new-gem-port-install-failed--retrying',
@@ -699,13 +709,14 @@ class BrcmOpenomciOnuHandler(object):
                         static_access_control_list_table = downstream_gem_port_attribute_list[i][
                             'static_access_control_list'].split("-")
                         multicast_gem_id = downstream_gem_port_attribute_list[i]['multicast_gem_id']
+                        self._multicast_task = BrcmMcastTask(self.omci_agent, self, self.device_id, uni_id, tp_id,
+                                                             self._set_vlan[uni_id][tp_id],
+                                                             dynamic_access_control_list_table,
+                                                             static_access_control_list_table, multicast_gem_id)
+                        self._deferred = self._onu_omci_device.task_runner.queue_task(self._multicast_task)
+                        self._deferred.addCallbacks(success, failure)
                         break
 
-                self._multicast_task = BrcmMcastTask(self.omci_agent, self, self.device_id, uni_id, tp_id,
-                                                     self._set_vlan[uni_id][tp_id], dynamic_access_control_list_table,
-                                                     static_access_control_list_table, multicast_gem_id)
-                self._deferred = self._onu_omci_device.task_runner.queue_task(self._multicast_task)
-                self._deferred.addCallbacks(success, failure)
             except Exception as e:
                 self.log.exception("error-loading-multicast", e=e)
         else:
