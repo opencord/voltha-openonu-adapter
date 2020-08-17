@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-# set default shell
+# set default shell to bash
 SHELL = bash -e -o pipefail
 
 # Variables
