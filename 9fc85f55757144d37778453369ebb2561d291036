@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "81fc3a05_1318e7fb",
+        "filename": "python/tox.ini",
+        "patchSetId": 9
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1000127
+      },
+      "writtenOn": "2020-08-17T18:49:00Z",
+      "side": 1,
+      "message": "Should we pin this to python3.6.\nThat is the python version we use for openonu-adapter.",
+      "range": {
+        "startLine": 24,
+        "startChar": 13,
+        "endLine": 24,
+        "endChar": 20
+      },
+      "revId": "9fc85f55757144d37778453369ebb2561d291036",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": true
+    }
+  ]
+}
