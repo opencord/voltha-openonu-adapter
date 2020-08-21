@@ -42,6 +42,48 @@
     },
     {
       "key": {
+        "uuid": "d4cf664d_a4d5b974",
+        "filename": "python/Makefile",
+        "patchSetId": 9
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1000569
+      },
+      "writtenOn": "2020-08-21T20:25:24Z",
+      "side": 1,
+      "message": "resolved",
+      "parentUuid": "59287be3_eba5cef4",
+      "range": {
+        "startLine": 43,
+        "startChar": 10,
+        "endLine": 43,
+        "endChar": 15
+      },
+      "revId": "9fc85f55757144d37778453369ebb2561d291036",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "53655294_602778a7",
+        "filename": "python/Makefile",
+        "patchSetId": 9
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1000569
+      },
+      "writtenOn": "2020-08-21T20:25:24Z",
+      "side": 1,
+      "message": "It\u0027s set here https://gerrit.opencord.org/c/voltha-docker-tools/+/20135/7/docker/python-ci.Dockerfile#20, removed -w",
+      "parentUuid": "d1543fd6_37e3a58c",
+      "revId": "9fc85f55757144d37778453369ebb2561d291036",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1fa336fb_e6ed0959",
         "filename": "python/Makefile",
         "patchSetId": 9
@@ -79,6 +121,30 @@
       "revId": "9fc85f55757144d37778453369ebb2561d291036",
       "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e47a7e20_de705c8c",
+        "filename": "python/tox.ini",
+        "patchSetId": 9
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1000569
+      },
+      "writtenOn": "2020-08-21T20:25:24Z",
+      "side": 1,
+      "message": "\u003e Should we pin this to python3.6.\n\u003e That is the python version we use for openonu-adapter.\n\nUnfortunately this fails:\nallowlist_externals \u003d bandit/app $ tox\nbandit create: /app/.tox/bandit\nERROR: InterpreterNotFound: python3.6\n___________________________________________________________________________________ summary ___________________________________________________________________________________\nERROR:  bandit: InterpreterNotFound: python3.6",
+      "parentUuid": "81fc3a05_1318e7fb",
+      "range": {
+        "startLine": 24,
+        "startChar": 13,
+        "endLine": 24,
+        "endChar": 20
+      },
+      "revId": "9fc85f55757144d37778453369ebb2561d291036",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
     }
   ]
 }
