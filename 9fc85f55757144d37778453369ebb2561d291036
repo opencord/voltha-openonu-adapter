@@ -2,6 +2,63 @@
   "comments": [
     {
       "key": {
+        "uuid": "d1543fd6_37e3a58c",
+        "filename": "python/Makefile",
+        "patchSetId": 9
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1000107
+      },
+      "writtenOn": "2020-08-21T19:08:18Z",
+      "side": 1,
+      "message": "Should set workdir (`-w`) in the Dockerfile using a WORKDIR statement, to avoid setting it in each repo that uses it.",
+      "revId": "9fc85f55757144d37778453369ebb2561d291036",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "59287be3_eba5cef4",
+        "filename": "python/Makefile",
+        "patchSetId": 9
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1000107
+      },
+      "writtenOn": "2020-08-21T19:08:18Z",
+      "side": 1,
+      "message": "Just need one space here.",
+      "range": {
+        "startLine": 43,
+        "startChar": 10,
+        "endLine": 43,
+        "endChar": 15
+      },
+      "revId": "9fc85f55757144d37778453369ebb2561d291036",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1fa336fb_e6ed0959",
+        "filename": "python/Makefile",
+        "patchSetId": 9
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1000107
+      },
+      "writtenOn": "2020-08-21T19:08:18Z",
+      "side": 1,
+      "message": "Consider using var name \"TOX\" instead of PYTHON_TOX, and moving the \"tox\" command to the end of the current PYTHON_TOX var def line like:\n\n`...:${VOLTHA_TOOLS_VERSION}-python-lint tox`\n\nThus making this line more readable (and more similar to other uses of containerized tools) as simply:\n\n${TOX} --result-json ...\n\nAlso, separately: Since the container\u0027s WORKDIR is already set to /app, we can assume that the current directory in the container \u003d\u003d this current directory.\nThus can use `./sca-report/sca-report.json` instead of `/app/sca-report/sca-report.json`, which is more in line with other usages, and hopefully more readable.",
+      "revId": "9fc85f55757144d37778453369ebb2561d291036",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "81fc3a05_1318e7fb",
         "filename": "python/tox.ini",
         "patchSetId": 9
