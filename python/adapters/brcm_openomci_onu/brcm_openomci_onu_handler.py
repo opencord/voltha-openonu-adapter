@@ -96,6 +96,7 @@ class BrcmOpenomciOnuHandler(object):
         self._test_request_started = False
         self._tp = dict()  # tp_id -> technology profile definition in KV Store.
         self._reconciling = False
+        self.olt_serial_number = ""
 
         # Persisted onu configuration needed in case of reconciliation.
         self._onu_persisted_state = {
@@ -2005,6 +2006,7 @@ class BrcmOpenomciOnuHandler(object):
             # TODO: this is expensive for just getting the olt serial number.  replace with direct api call
             parent_device = yield self.core_proxy.get_device(self.parent_id)
             olt_serial_number = parent_device.serial_number
+            self.olt_serial_number = olt_serial_number
             raised_ts = arrow.utcnow().timestamp
 
             intf_id = self._onu_persisted_state.get('intf_id')
@@ -2068,8 +2070,7 @@ class BrcmOpenomciOnuHandler(object):
         self.log.debug('onu-deleted-event')
         try:
             device = yield self.core_proxy.get_device(self.device_id)
-            parent_device = yield self.core_proxy.get_device(self.parent_id)
-            olt_serial_number = parent_device.serial_number
+            olt_serial_number = self.olt_serial_number
             raised_ts = arrow.utcnow().timestamp
             intf_id = self._onu_persisted_state.get('intf_id')
             onu_id = self._onu_persisted_state.get('onu_id')
