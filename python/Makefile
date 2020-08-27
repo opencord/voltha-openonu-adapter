@@ -64,7 +64,7 @@ help:
 build: docker-build
 
 # only test is that the docker container builds
-test: docker-build
+test: sca docker-build
 
 local-protos:
 	mkdir -p local_imports
@@ -127,10 +127,11 @@ distclean: clean
 	rm -rf ${VENVDIR}
 
 sca:
-	@rm -rf ./sca-report
-	@mkdir -p ./sca-report
-	@echo "Running static code analysis..."
-	@$(TOX) --result-json ./sca-report/sca-report.json
+	rm -rf ./sca-report
+	mkdir -p ./sca-report
+	echo "Running static code analysis..."
+	$(TOX) --result-json ./sca-report/sca-report.json
+	cat ./sca-report/sca-report.json
 	@echo ""
-	@echo "Static code analysis OK"
 # end file
+
