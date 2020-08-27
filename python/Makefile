@@ -134,3 +134,4 @@ sca:
 	@echo ""
 	@echo "Static code analysis OK"
 # end file
+
