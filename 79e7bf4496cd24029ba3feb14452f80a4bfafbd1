@@ -16,6 +16,24 @@
       "revId": "79e7bf4496cd24029ba3feb14452f80a4bfafbd1",
       "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "07ee8585_a9619a24",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1000635
+      },
+      "writtenOn": "2020-08-27T13:39:12Z",
+      "side": 1,
+      "message": "Addressed",
+      "parentUuid": "72b10b3c_8ab51152",
+      "revId": "79e7bf4496cd24029ba3feb14452f80a4bfafbd1",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": true
     }
   ]
 }
