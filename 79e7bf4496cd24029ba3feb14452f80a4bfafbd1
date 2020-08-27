@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "72b10b3c_8ab51152",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1000097
+      },
+      "writtenOn": "2020-08-27T08:40:10Z",
+      "side": 1,
+      "message": "Initialize this to \u0027\u0027 (empty string and not to bool)",
+      "revId": "79e7bf4496cd24029ba3feb14452f80a4bfafbd1",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": true
+    }
+  ]
+}
