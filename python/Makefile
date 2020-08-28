@@ -63,8 +63,8 @@ help:
 
 build: docker-build
 
-# only test is that the docker container builds
-test: docker-build
+# only test is that the docker container builds and sca checks are green
+test: sca docker-build
 
 local-protos:
 	mkdir -p local_imports
