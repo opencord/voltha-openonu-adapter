@@ -64,7 +64,7 @@ help:
 build: docker-build
 
 # only test is that the docker container builds
-test: docker-build
+test: sca docker-build
 
 local-protos:
 	mkdir -p local_imports
