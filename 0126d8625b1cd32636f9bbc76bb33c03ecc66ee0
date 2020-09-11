@@ -1,0 +1,7 @@
+Code-Review+2: Saurav Das <saurav.das@opennetworking.org>
+Verified+1: Jenkins Technical User <do-not-reply@opennetworking.org>
+Submitted-by: Matteo Scandolo <teo@opennetworking.org>
+Submitted-at: Fri, 11 Sep 2020 22:50:08 +0000
+Reviewed-on: https://gerrit.opencord.org/c/voltha-openonu-adapter/+/20461
+Project: voltha-openonu-adapter
+Branch: refs/heads/master
