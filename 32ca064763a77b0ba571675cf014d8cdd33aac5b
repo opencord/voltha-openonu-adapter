@@ -42,6 +42,24 @@
     },
     {
       "key": {
+        "uuid": "6edf49c9_a40fee68",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 5
+      },
+      "lineNbr": 2160,
+      "author": {
+        "id": 1000127
+      },
+      "writtenOn": "2020-11-24T19:33:32Z",
+      "side": 1,
+      "message": "I meant \"uni status\"",
+      "parentUuid": "78d65476_c629a12b",
+      "revId": "32ca064763a77b0ba571675cf014d8cdd33aac5b",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "7bc5912e_57ab8483",
         "filename": "python/adapters/brcm_openomci_onu/omci/brcm_uni_status.py",
         "patchSetId": 5
