@@ -23,7 +23,7 @@ This adapter does NOT support XPON
 from __future__ import absolute_import
 import structlog
 from twisted.internet import reactor
-from twisted.internet.defer import inlineCallbacks
+from twisted.internet.defer import inlineCallbacks, returnValue
 
 from zope.interface import implementer
 
@@ -305,3 +305,19 @@ class BrcmOpenomciOnuAdapter(object):
         handler = self.devices_handlers[device.id]
         result = handler.start_omci_test_action(device, uuid)
         return result
+
+    @inlineCallbacks
+    def single_get_value_request(self, request):
+        """
+        :param request: A request to get a specific attribute of a device, of type SingleGetValueRequest
+        :return:
+        """
+        self.log.info('single_get_value_request', request=request)
+        handler = self.devices_handlers[request.targetId]
+        get_value_req = request.request
+        if get_value_req.HasField("uniInfo"):
+            result = yield handler.get_uni_status(get_value_req)
+            self.log.debug('single_get_value_result', res=result)
+            returnValue(result)
+
+        return None
