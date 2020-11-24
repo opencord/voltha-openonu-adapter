@@ -34,6 +34,7 @@ from omci.brcm_mib_download_task import BrcmMibDownloadTask
 from omci.brcm_tp_delete_task import BrcmTpDeleteTask
 from omci.brcm_tp_setup_task import BrcmTpSetupTask
 from omci.brcm_uni_lock_task import BrcmUniLockTask
+from omci.brcm_uni_status import BrcmUniStatusTask
 from omci.brcm_vlan_filter_task import BrcmVlanFilterTask
 from onu_gem_port import OnuGemPort
 from onu_tcont import OnuTCont
@@ -55,7 +56,7 @@ from pyvoltha.adapters.extensions.omci.tasks.omci_test_request import OmciTestRe
 from pyvoltha.common.tech_profile.tech_profile import TechProfile
 from pyvoltha.common.utils.registry import registry
 from twisted.internet import reactor
-from twisted.internet.defer import inlineCallbacks, returnValue
+from twisted.internet.defer import inlineCallbacks, returnValue, DeferredQueue
 from uni_port import RESERVED_TRANSPARENT_VLAN
 from uni_port import UniPort, UniType
 from voltha_protos.common_pb2 import OperStatus, ConnectStatus, AdminState
@@ -66,6 +67,7 @@ from voltha_protos.inter_container_pb2 import InterAdapterMessageType, \
 from voltha_protos.openflow_13_pb2 import OFPXMC_OPENFLOW_BASIC
 from voltha_protos.openolt_pb2 import OnuIndication
 from voltha_protos.voltha_pb2 import TestResponse
+from voltha_protos.extensions_pb2 import SingleGetValueResponse, GetValueResponse
 
 OP = EntityOperations
 RC = ReasonCodes
@@ -97,6 +99,8 @@ class BrcmOpenomciOnuHandler(object):
         self._tp = dict()  # tp_id -> technology profile definition in KV Store.
         self._reconciling = False
         self.olt_serial_number = ""
+        self.uni_status_response_queue = DeferredQueue()
+        self._results = SingleGetValueResponse()
 
         # Persisted onu configuration needed in case of reconciliation.
         self._onu_persisted_state = {
@@ -2069,7 +2073,6 @@ class BrcmOpenomciOnuHandler(object):
     def onu_deleted_event(self):
         self.log.debug('onu-deleted-event')
         try:
-            device = yield self.core_proxy.get_device(self.device_id)
             olt_serial_number = self.olt_serial_number
             raised_ts = arrow.utcnow().timestamp
             intf_id = self._onu_persisted_state.get('intf_id')
@@ -2137,3 +2140,29 @@ class BrcmOpenomciOnuHandler(object):
                                        **kwargs_omci_test_action)
         test_request.perform_test_omci()
         return (TestResponse(result=TestResponse.SUCCESS))
+
+    @inlineCallbacks
+    def get_uni_status(self, request):
+        """
+        :param request:
+        :return:
+        """
+        for uni in self.uni_ports:
+           self.log.debug('uni-id-and-uni-index',uni_id = uni.uni_id, uni_idx=request.uniInfo.uniIndex)
+           if uni.uni_id == request.uniInfo.uniIndex:
+               task = BrcmUniStatusTask(self.omci_agent, self.device_id, request, uni.entity_id, self.uni_status_response_queue)
+               self._deferred = self._onu_omci_device.task_runner.queue_task(task)
+               try:
+                   self._results = yield self.uni_status_response_queue.get()
+                   self.log.debug('uni-status-response',res=self._results)
+               except Exception as e:
+                   self.log.exception("failed-dequeueing-received-message", e=e)
+                   self._results.response.status = GetValueResponse.ERROR
+                   self._results.response.errReason = GetValueResponse.UNSUPPORTED
+               finally:
+                   task.stop()
+                   returnValue(self._results)
+        self.log.error('uni-not-found', uni_idx=request.uniInfo.uniIndex)
+        self._results.response.status = GetValueResponse.ERROR
+        self._results.response.errReason = GetValueResponse.UNSUPPORTED
+        returnValue(self._results)
