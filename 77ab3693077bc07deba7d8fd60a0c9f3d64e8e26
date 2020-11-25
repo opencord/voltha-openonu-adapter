@@ -1,0 +1,159 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9301a328_1dbd9033",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 7
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1000127
+      },
+      "writtenOn": "2020-11-25T19:05:09Z",
+      "side": 1,
+      "message": "uni_status_response_queue",
+      "range": {
+        "startLine": 102,
+        "startChar": 13,
+        "endLine": 102,
+        "endChar": 31
+      },
+      "revId": "77ab3693077bc07deba7d8fd60a0c9f3d64e8e26",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "07841111_c2fd1581",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 7
+      },
+      "lineNbr": 2151,
+      "author": {
+        "id": 1000127
+      },
+      "writtenOn": "2020-11-25T19:05:09Z",
+      "side": 1,
+      "message": "uni-id-and-index",
+      "range": {
+        "startLine": 2151,
+        "startChar": 27,
+        "endLine": 2151,
+        "endChar": 45
+      },
+      "revId": "77ab3693077bc07deba7d8fd60a0c9f3d64e8e26",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2a298b92_dce71292",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 7
+      },
+      "lineNbr": 2157,
+      "author": {
+        "id": 1000127
+      },
+      "writtenOn": "2020-11-25T19:05:09Z",
+      "side": 1,
+      "message": "uni-status-response",
+      "range": {
+        "startLine": 2157,
+        "startChar": 35,
+        "endLine": 2157,
+        "endChar": 51
+      },
+      "revId": "77ab3693077bc07deba7d8fd60a0c9f3d64e8e26",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "aa2e4850_04d3a4fa",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 7
+      },
+      "lineNbr": 2162,
+      "author": {
+        "id": 1000127
+      },
+      "writtenOn": "2020-11-25T19:05:09Z",
+      "side": 1,
+      "message": "Should this be removed as there returnValue in \"finally\" section. We also stop the task in \"finally\" section.",
+      "revId": "77ab3693077bc07deba7d8fd60a0c9f3d64e8e26",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0f241240_f7870ec0",
+        "filename": "python/adapters/brcm_openomci_onu/brcm_openomci_onu_handler.py",
+        "patchSetId": 7
+      },
+      "lineNbr": 2166,
+      "author": {
+        "id": 1000127
+      },
+      "writtenOn": "2020-11-25T19:05:09Z",
+      "side": 1,
+      "message": "could-not-find-uni OR uni-not-found",
+      "range": {
+        "startLine": 2166,
+        "startChar": 24,
+        "endLine": 2166,
+        "endChar": 46
+      },
+      "revId": "77ab3693077bc07deba7d8fd60a0c9f3d64e8e26",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ef3612a3_3078c755",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_uni_status.py",
+        "patchSetId": 7
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1000127
+      },
+      "writtenOn": "2020-11-25T19:05:09Z",
+      "side": 1,
+      "message": "logging at many places still conformant to the existing practices.\n\nget-uni-status-object-initialized",
+      "range": {
+        "startLine": 65,
+        "startChar": 23,
+        "endLine": 65,
+        "endChar": 54
+      },
+      "revId": "77ab3693077bc07deba7d8fd60a0c9f3d64e8e26",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "653c3318_c0984c47",
+        "filename": "python/adapters/brcm_openomci_onu/omci/brcm_uni_status.py",
+        "patchSetId": 7
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1000127
+      },
+      "writtenOn": "2020-11-25T19:05:09Z",
+      "side": 1,
+      "message": "same here",
+      "range": {
+        "startLine": 93,
+        "startChar": 23,
+        "endLine": 93,
+        "endChar": 51
+      },
+      "revId": "77ab3693077bc07deba7d8fd60a0c9f3d64e8e26",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": true
+    }
+  ]
+}
