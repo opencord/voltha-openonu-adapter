@@ -1431,8 +1431,11 @@ class BrcmOpenomciOnuHandler(object):
         try:
 
             update_onu_state = False
-
-            if request.header.type == InterAdapterMessageType.OMCI_REQUEST:
+            # Note: VOLTHA v2.6 and ealier OLTs would send an OMCI_REQUEST instead of an
+            #       OMCI_RESPONSE.  Both have identical formats outside of type.  So accept
+            #       both.
+            if request.header.type in (InterAdapterMessageType.OMCI_RESPONSE,
+                                       InterAdapterMessageType.OMCI_REQUEST:
                 omci_msg = InterAdapterOmciMessage()
                 request.body.Unpack(omci_msg)
                 self.log.debug('inter-adapter-recv-omci', omci_msg=hexify(omci_msg.message))
