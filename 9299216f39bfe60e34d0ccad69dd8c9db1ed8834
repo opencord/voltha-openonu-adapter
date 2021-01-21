@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9268d0ca_e89339c5",
+        "filename": "VERSION",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000116
+      },
+      "writtenOn": "2021-01-21T08:02:40Z",
+      "side": 1,
+      "message": "I\u0027d say release the 2.7.0",
+      "revId": "9299216f39bfe60e34d0ccad69dd8c9db1ed8834",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": true
+    }
+  ]
+}
