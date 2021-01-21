@@ -16,6 +16,24 @@
       "revId": "9299216f39bfe60e34d0ccad69dd8c9db1ed8834",
       "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "70c831c1_66627aac",
+        "filename": "VERSION",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000617
+      },
+      "writtenOn": "2021-01-21T14:46:46Z",
+      "side": 1,
+      "message": "I will update to 2.7.0.",
+      "parentUuid": "9268d0ca_e89339c5",
+      "revId": "9299216f39bfe60e34d0ccad69dd8c9db1ed8834",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": true
     }
   ]
 }
