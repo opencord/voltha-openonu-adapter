@@ -1435,7 +1435,7 @@ class BrcmOpenomciOnuHandler(object):
             #       OMCI_RESPONSE.  Both have identical formats outside of type.  So accept
             #       both.
             if request.header.type in (InterAdapterMessageType.OMCI_RESPONSE,
-                                       InterAdapterMessageType.OMCI_REQUEST:
+                                       InterAdapterMessageType.OMCI_REQUEST):
                 omci_msg = InterAdapterOmciMessage()
                 request.body.Unpack(omci_msg)
                 self.log.debug('inter-adapter-recv-omci', omci_msg=hexify(omci_msg.message))
